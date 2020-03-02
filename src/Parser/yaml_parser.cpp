@@ -44,16 +44,12 @@ namespace parser {
 		for (const auto& child : node["leaves"]) {
 			auto mode = child["mode"].as<size_t>();
 			auto& leaf = tree.GetLeaf(mode);
-			PhysPar par;
 			auto r0 = child["r0"].as<double>();
-			par.setR0(r0);
 			auto wfr0 = child["wfr0"].as<double>();
-			par.setWFR0(wfr0);
 			auto omega = child["omega"].as<double>();
-			par.setOmega(wfr0);
 			auto wfomega = child["wfomega"].as<double>();
-			par.setWFOmega(wfr0);
-			leaf.SetPar(par);
+			auto& grid = leaf.PrimitiveGrid();
+			grid.Initialize(omega, r0, wfr0, wfomega);
 		}
 	}
 
@@ -73,17 +69,14 @@ namespace parser {
 			auto dim_leaves = node["dimension_leaves"].as<size_t>();
 			auto dim_nodes = node["dimension_nodes"].as<size_t>();
 			return TreeFactory::BalancedTree(num_leaves, dim_leaves, dim_nodes);
+		} else if (type == "manual") {
+			return create_tree(node);
 		} else {
 			cerr << "No valid tree type." << endl;
-			cerr << "Choices: (balenced, unbalenced, manual)" << endl;
+			cerr << "Choices: (balanced, manual)" << endl;
 			exit(1);
 		}
 		return Tree();
-	}
-
-	Tree read_tree(const string& filename) {
-		YAML::Node yaml = YAML::LoadFile(filename);
-		return read_tree(yaml);
 	}
 
 	shared_ptr<Hamiltonian> read_hamiltonian(const YAML::Node& node, const Tree& tree) {

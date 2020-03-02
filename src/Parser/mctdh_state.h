@@ -18,6 +18,18 @@ struct mctdh_state {
 
 	mt19937 rng_;
 
+	void print(ostream& os = cout) const {
+		os << "Tree: " << endl;
+		tree_.print(os);
+		os << "Hamiltonian:" << endl;
+		hamiltonian_->print(os);
+		os << "Wavefunctions:" << endl;
+		for (const auto& pair : wavefunctions_) {
+			os << pair.first << endl;
+			pair.second.print(tree_, os);
+		}
+	}
+
 };
 
 
