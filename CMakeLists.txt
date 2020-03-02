@@ -19,32 +19,21 @@ add_library(Yaml INTERFACE IMPORTED)
 
 find_package(Eigen3 REQUIRED)
 include_directories("${EIGEN3_INCLUDE_DIR}")
-include_directories("QDlib/include")
 
+include_directories("QDlib/include")
+link_directories("${CMAKE_CURRENT_SOURCE_DIR}/QDlib/cmake-build-debug")
+
+# build Hamiltonians
 add_subdirectory("Hamiltonians")
 
-# Library
+# build mctdh_lib
+add_subdirectory("src")
+
+# build mctdh executable
 add_executable(mctdh src/main.cpp)
 target_compile_features(mctdh PRIVATE cxx_std_14)
-target_include_directories(mctdh
-        PUBLIC
-        ${CMAKE_CURRENT_SOURCE_DIR}
-        ${CMAKE_CURRENT_SOURCE_DIR}/src
-        ${CMAKE_CURRENT_SOURCE_DIR}/QDlib/include
-        )
-target_link_directories(mctdh
-        PUBLIC
-        ${CMAKE_CURRENT_SOURCE_DIR}/QDlib/cmake-build-debug
-        )
-add_subdirectory("src")
-target_link_libraries(mctdh
-        QDlib
-        Hamiltonians
-        yaml-cpp)
+target_include_directories(mctdh PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src)
+target_link_libraries(mctdh mctdh_lib)
 
-# Executable
-#add_executable(mctdh src/main.cpp)
-#target_include_directories(mctdh PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src)
-#target_link_libraries(mctdh mctdh_lib)
-
-#add_subdirectory("tests")
+# build unit tests
+add_subdirectory("tests")

@@ -5,7 +5,7 @@ int main(int argc, char* argv[])
 {
 
 	cout << "=================================================\n";
-	cout << "==== mctdh++ ";
+	cout << "=====     mctdh++     ===========================\n";
 	cout << "=================================================\n";
 
 	if (argc != 2){
@@ -23,11 +23,6 @@ int main(int argc, char* argv[])
 	}
 
 	mctdh_state state = parser::run(filename);
-
-/*
-	MCTDH mctdh;
-
-	mctdh.Calculate(job);*/
 
 	return 0;
 }

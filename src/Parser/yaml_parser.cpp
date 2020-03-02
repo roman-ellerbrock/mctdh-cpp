@@ -8,6 +8,63 @@
 #include "Hamiltonians.h"
 
 namespace parser {
+	Leaf create_leaf(const YAML::Node& yaml_node) {
+		auto dim = yaml_node["dim"].as<size_t>();
+		auto mode = yaml_node["mode"].as<size_t>();
+		auto type = yaml_node["leaftype"].as<size_t>();
+		PhysPar par;
+		return Leaf(dim, mode, type, 0, par);
+	}
+
+	Node create_node(const YAML::Node& yaml_node) {
+		Node node;
+		auto dim = yaml_node["dim"].as<size_t>();
+		vector<size_t> dims;
+		for (const auto& child : yaml_node["children"]) {
+			auto type = child["type"].as<string>();
+			dims.push_back(child["dim"].as<size_t>());
+			if (type == "leaf") {
+				Leaf leaf = create_leaf(child);
+				node = Node(leaf, dim);
+			} else if (type == "node") {
+				node.push_back(create_node(child));
+			} else {
+				cerr << "Invalid node type." << endl;
+				cerr << "Choices: (leaf, node)" << endl;
+				exit(1);
+			}
+		}
+
+		dims.push_back(dim);
+		node.shape() = TensorShape(dims);
+		return node;
+	}
+
+	void read_leaf_parameters(Tree& tree, const YAML::Node& node) {
+		for (const auto& child : node["leaves"]) {
+			auto mode = child["mode"].as<size_t>();
+			auto& leaf = tree.GetLeaf(mode);
+			PhysPar par;
+			auto r0 = child["r0"].as<double>();
+			par.setR0(r0);
+			auto wfr0 = child["wfr0"].as<double>();
+			par.setWFR0(wfr0);
+			auto omega = child["omega"].as<double>();
+			par.setOmega(wfr0);
+			auto wfomega = child["wfomega"].as<double>();
+			par.setWFOmega(wfr0);
+			leaf.SetPar(par);
+		}
+	}
+
+	Tree create_tree(const YAML::Node& node) {
+		Tree tree;
+		Node root = create_node(node["tree"]);
+		tree.SetRoot(root);
+		tree.Update();
+		read_leaf_parameters(tree, node);
+		return tree;
+	}
 
 	Tree read_tree(const YAML::Node& node) {
 		auto type = node["type"].as<string>();
@@ -22,6 +79,11 @@ namespace parser {
 			exit(1);
 		}
 		return Tree();
+	}
+
+	Tree read_tree(const string& filename) {
+		YAML::Node yaml = YAML::LoadFile(filename);
+		return read_tree(yaml);
 	}
 
 	shared_ptr<Hamiltonian> read_hamiltonian(const YAML::Node& node, const Tree& tree) {

@@ -3,14 +3,14 @@ include_directories(${UTPP_INCLUDE_DIRS})
 
 set(mctdh_tests
         test_hrep.cpp
+        tests.cpp
         )
 
-add_executable(test_mctdh ${mctdh_tests})
-target_link_libraries(test_mctdh mctdh_lib)
-target_link_libraries(test_mctdh UnitTest++)
-target_compile_features(test_mctdh PRIVATE cxx_std_14)
+add_executable(tests ${mctdh_tests})
+target_link_libraries(tests mctdh_lib UnitTest++)
+target_compile_features(tests PRIVATE cxx_std_14)
 
 # run unit tests as post build step
-add_custom_command(TARGET test_mctdh
-        POST_BUILD COMMAND test_mctdh
+add_custom_command(TARGET test
+        POST_BUILD COMMAND tests
         COMMENT "Running unit tests")
