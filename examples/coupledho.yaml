@@ -5,7 +5,7 @@ run:
   - job: tree
     type: manual
     tree:
-      dim: 1
+      dim: 5
       children:
         - type: node
           dim: 4
@@ -44,24 +44,27 @@ run:
     leaves:
       - mode: 0
         r0: 0.
-        omega: 1.
+        omega: 0.018
         wfr0: 0
-        wfomega: 1.
+        wfomega: 0.018
+
       - mode: 1
         r0: 0.
-        omega: 1.
+        omega: 0.018
         wfr0: 0
-        wfomega: 1.
+        wfomega: 0.018
+
       - mode: 2
         r0: 0.
-        omega: 1.
+        omega: 0.018
         wfr0: 0
-        wfomega: 1.
+        wfomega: 0.018
+
       - mode: 3
         r0: 0.
-        omega: 1.
+        omega: 0.018
         wfr0: 0
-        wfomega: 1.
+        wfomega: 0.018
 
   - job: hamiltonian
     name: coupled_ho

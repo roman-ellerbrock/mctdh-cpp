@@ -35,9 +35,9 @@ SUITE (HamiltonianRepresentation) {
 			auto mat = mattree[state.tree_.TopNode()];
 			double value = abs(mat(0, 0));
 			if (n % 2) {
-					CHECK_CLOSE(0.5, value, 1e-7);
+					CHECK_CLOSE(0.5/0.018, value, 1e-7);
 			} else {
-					CHECK_CLOSE(0.25, value, 1e-7);
+					CHECK_CLOSE(0.25*0.018, value, 1e-7);
 			}
 		}
 	}
@@ -45,12 +45,33 @@ SUITE (HamiltonianRepresentation) {
 	TEST (Derivative) {
 		string yaml_filename("../examples/coupledho.yaml");
 		auto state = parser::run(yaml_filename);
+		const auto& H = *state.hamiltonian_;
+		const auto& Psi = state.wavefunctions_["Psi"];
+		const auto& tree = state.tree_;
 
-		Wavefunction dPsi(state.tree_);
-		HamiltonianRepresentation hRep(*state.hamiltonian_, state.tree_);
+		Wavefunction dPsi(tree);
+		HamiltonianRepresentation hRep(H, tree);
 		double time = 0.;
 
-		Derivative(dPsi, hRep, time, state.wavefunctions_["Psi"], *state.hamiltonian_, state.tree_);
-		dPsi.print(state.tree_);
+		Derivative(dPsi, hRep, time, Psi, H, tree);
+	}
+
+	TEST (Expectation) {
+		string yaml_filename("../examples/coupledho.yaml");
+		auto state = parser::run(yaml_filename);
+		const auto& H = *state.hamiltonian_;
+		const auto& Psi = state.wavefunctions_["Psi"];
+		const auto& tree = state.tree_;
+
+		HamiltonianRepresentation hRep(H, tree);
+		hRep.build(H, Psi, tree);
+
+		auto Hval = Expectation(hRep, Psi, H, tree);
+		cout << "Energie:\n";
+		Hval *= 219475.;
+		Hval.print();
+		auto spec = Diagonalize(Hval);
+		spec.second.print();
+
 	}
 }

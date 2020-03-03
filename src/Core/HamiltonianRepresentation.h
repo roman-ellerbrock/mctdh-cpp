@@ -9,13 +9,15 @@
 #include "TreeClasses/SparseMatrixTreeFunctions.h"
 #include "TreeClasses/MatrixTreeFunctions.h"
 #include "TreeClasses/SpectralDecompositionTree.h"
+#include "Util/QMConstants.h"
 
 typedef SparseMatrixTrees<complex<double>> sMatrixTreeVector;
 
 class HamiltonianRepresentation {
 public:
-	HamiltonianRepresentation(const Hamiltonian& H, Tree& tree): rho_(tree),
-	rho_decomposition_(tree), rho_inverse_(tree){
+	HamiltonianRepresentation(const Hamiltonian& H, const Tree& tree)
+		: rho_(tree),
+		  rho_decomposition_(tree), rho_inverse_(tree) {
 		for (const auto& M : H) {
 			hMats_.emplace_back(SparseMatrixTreecd(M, tree));
 			hContractions_.emplace_back(SparseMatrixTreecd(M, tree));
@@ -25,11 +27,8 @@ public:
 	~HamiltonianRepresentation() = default;
 
 	void build(const Hamiltonian& H, const Wavefunction& Psi, const Tree& tree) {
-		using namespace SparseMatrixTreeFunctions;
-		using namespace MatrixTreeFunctions;
-
 		/// Calculate density matrix tree
-		Contraction(rho_, Psi, tree, true);
+		MatrixTreeFunctions::Contraction(rho_, Psi, tree, true);
 
 		/// Density matrix tree decomposition
 		rho_decomposition_.Calculate(rho_, tree);
@@ -38,14 +37,14 @@ public:
 		rho_inverse_ = rho_decomposition_.Invert(tree);
 
 		/// Calculate h-matrix trees
-		Represent(hMats_, H, Psi, Psi, tree);
+		SparseMatrixTreeFunctions::Represent(hMats_, H, Psi, Psi, tree);
 
 		/// Calculate h-matrix tree contractions
-		Contraction(hContractions_, hMats_, Psi, Psi, tree);
+		SparseMatrixTreeFunctions::Contraction(hContractions_, hMats_, Psi, Psi, tree);
 	}
 
-	void print(const Tree& tree, ostream& os = cout){
-		os << "Rho:"<<endl;
+	void print(const Tree& tree, ostream& os = cout) {
+		os << "Rho:" << endl;
 		rho_.print(tree, os);
 		os << "Matrix representations:" << endl;
 		for (const auto& mat : hMats_) {
@@ -62,34 +61,21 @@ public:
 	MatrixTreecd rho_inverse_;
 	sMatrixTreeVector hMats_;
 	sMatrixTreeVector hContractions_;
-
 };
 
-void LayerDerivative(Tensorcd& dPhi, double time, const Tensorcd& Phi,
-	const Hamiltonian& H, const HamiltonianRepresentation& hRep,
-	const Node& node) {
-	using namespace SparseMatrixTreeFunctions;
+Tensorcd Apply(const Hamiltonian& H, const Tensorcd& Phi,
+	const HamiltonianRepresentation& hRep,
+	const Node& node, double time = 0.) {
 
-	dPhi.Zero();
-	// For each part in the hamiltonian
+	Tensorcd dPhi(Phi.shape());
 	for (size_t l = 0; l < H.size(); l++) {
-		// Gather information on what is active at this node.
-		// That is the MPO and the CDVR-Matrices acting on this node
-		const MLOcd& M = H[l];
-		// d is the number of CDVR children at this node
-		// Apply the hmatrices for this part
 		const auto& hmat = hRep.hMats_[l];
-		// Proceed only if H-matrices or CDVR acts on this node
 		if (!hmat.Active(node)) { continue; }
 
-		// Get the factor of the part
-		const complex<double> coeff = H.Coeff(l);
-		// Copy the Acoeffs and multyply with the coefficient
-		Tensorcd Psi(Phi, coeff);
-		Psi = SparseMatrixTreeFunctions::Apply(hmat, Psi, M, node);
+		Tensorcd Psi(Phi, H.Coeff(l));
+		Psi = SparseMatrixTreeFunctions::Apply(hmat, Psi, H[l], node);
 
-		// Hole-Matrix
-		// Multiply with H-Hole-matrix at this layer_
+		// Multiply with hole-matrix
 		const auto& hhole = hRep.hContractions_[l];
 		if (!node.isToplayer() && hhole.Active(node)) {
 			multStateAB(dPhi, hhole[node], Psi, false);
@@ -97,25 +83,46 @@ void LayerDerivative(Tensorcd& dPhi, double time, const Tensorcd& Phi,
 			dPhi += Psi;
 		}
 	}
+	return dPhi;
+}
 
-	// Now the part in the EOM that only has to be done once:
+Matrixcd Expectation(const HamiltonianRepresentation& hRep,
+	const Wavefunction& Psi, const Hamiltonian& H, const Tree& tree,
+	double time = 0.) {
+
+	const Node& top = tree.TopNode();
+	auto dPhi = Apply(H, Psi[top], hRep, top, time);
+	return Psi[top].DotProduct(dPhi);
+}
+
+void LayerDerivative(Tensorcd& dPhi, double time, const Tensorcd& Phi,
+	const Hamiltonian& H, const HamiltonianRepresentation& hRep,
+	const Node& node, complex<double> propagation_phase = 1.) {
+
+	// Apply Hamiltonian
+	dPhi = Apply(H, Phi, hRep, node, time);
+
 	// Inverse Densitymatrix and (1-P) projector for SPF-type EOM
 	if (!node.isToplayer()) {
+		// (1-P) projector
 		dPhi = ProjectOut(dPhi, Phi);
 
 		// Multiply with inverse single-particle density matrix
 		const auto& rhoinv = hRep.rho_inverse_[node];
 		dPhi = multStateAB(rhoinv, dPhi);
 	}
+
+	dPhi *= propagation_phase * QM::im;
 }
 
 void Derivative(Wavefunction& dPsi, HamiltonianRepresentation& hRep,
 	double time, const Wavefunction& Psi, const Hamiltonian& H,
-	const Tree& tree) {
+	const Tree& tree, complex<double> propagation_phase = 1.) {
 	hRep.build(H, Psi, tree);
 	for (const Node& node : tree) {
 		LayerDerivative(dPsi[node], time, Psi[node], H, hRep, node);
 	}
 }
+
 
 #endif //HAMILTONIANREPRESENTATION_H
