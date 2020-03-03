@@ -5,6 +5,8 @@ target_compile_features(mctdh_lib PRIVATE cxx_std_14)
 target_sources(mctdh_lib
         PUBLIC
         Core/Hamiltonian.h
+        Core/HamiltonianRepresentation.cpp
+        Core/HamiltonianRepresentation.h
         Core/Wavefunction.h
         Parser/yaml_parser.cpp
         Parser/yaml_parser.h

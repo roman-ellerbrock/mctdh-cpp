@@ -29,7 +29,10 @@ SUITE (HamiltonianRepresentation) {
 		string yaml_filename("../examples/coupledho.yaml");
 		auto state = parser::run(yaml_filename);
 		HamiltonianRepresentation hrep(*state.hamiltonian_, state.tree_);
-		hrep.build(*state.hamiltonian_, state.wavefunctions_["Psi"], state.tree_);
+		const Hamiltonian& H = *state.hamiltonian_;
+		const Wavefunction& Psi = state.wavefunctions_["Psi"];
+		const Tree& tree = state.tree_;
+		hrep.build(H, Psi, tree);
 		for (size_t n = 0; n < 8; ++n) {
 			const auto& mattree = hrep.hMats_[n];
 			auto mat = mattree[state.tree_.TopNode()];
@@ -39,6 +42,19 @@ SUITE (HamiltonianRepresentation) {
 			} else {
 					CHECK_CLOSE(0.25*0.018, value, 1e-7);
 			}
+		}
+		for (size_t n = 8; n < 12; ++n) {
+			const auto& mattree = hrep.hMats_[n];
+			mattree.print();
+			auto MPsi = H[n].Apply(Psi, tree);
+			auto hmat= MatrixTreeFunctions::DotProduct(Psi, MPsi, tree);
+			for (const Node& node : tree) {
+				if (!mattree.Active(node)) { continue; }
+				node.info();
+				mattree[node].print();
+				hmat[node].print();
+			}
+			getchar();
 		}
 	}
 
@@ -72,6 +88,5 @@ SUITE (HamiltonianRepresentation) {
 		Hval.print();
 		auto spec = Diagonalize(Hval);
 		spec.second.print();
-
 	}
 }

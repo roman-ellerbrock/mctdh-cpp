@@ -3,6 +3,7 @@ include_directories(${UTPP_INCLUDE_DIRS})
 
 set(mctdh_tests
         test_hrep.cpp
+        test_Integrator.cpp
         tests.cpp
         )
 
