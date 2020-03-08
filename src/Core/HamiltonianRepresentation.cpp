@@ -50,6 +50,8 @@ void LayerDerivative(Tensorcd& dPhi, double time, const Tensorcd& Phi,
 		const auto& rhoinv = hRep.rho_inverse_[node];
 		dPhi = multStateAB(rhoinv, dPhi);
 	}
+
+	dPhi *= -propagation_phase * QM::im;
 }
 
 void Derivative(Wavefunction& dPsi, HamiltonianRepresentation& hRep,
@@ -59,6 +61,5 @@ void Derivative(Wavefunction& dPsi, HamiltonianRepresentation& hRep,
 	for (const Node& node : tree) {
 		LayerDerivative(dPsi[node], time, Psi[node], H, hRep, node);
 	}
-	dPsi *= -propagation_phase * QM::im;
 }
 

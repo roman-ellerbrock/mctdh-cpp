@@ -181,7 +181,10 @@ void CMFIntegrator::CMFstep(Wavefunction& Psi, double time, double timeend, doub
 		Tensorcd& Phi = Psi[node];
 		double layertime = time;
 		layer_bs.Integrate(Phi, layertime, timeend, dt_bs_[node.Address()], accuracy_leaf, ddt, Delta, I);
+		node.info();
+		Phi.print();
 	}
+	getchar();
 	Orthogonal(Psi, tree);
 }
 
