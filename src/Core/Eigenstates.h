@@ -51,12 +51,15 @@ void Status(const Vectord& eigenvalues, const Vectord& propergatorev,
 
 void Eigenstates(Wavefunction& Psi, const Hamiltonian& H, const Tree& tree) {
 	double t = 0.;
-	double t_end = 2000.;
+	double t_end = 20000.;
 	double out = 20.;
-	double dt = 0.1;
+	double dt = 1.;
 	size_t num_iterations = (t_end - t) / out;
 
 	IntegratorInterface I(H, tree, -QM::im);
+	auto energies = Eigenstate(Psi, H, tree);
+	Status(energies, energies, cout);
+	TreeIO::Output(Psi, tree);
 
 	for (size_t iter = 0; iter < num_iterations; ++iter) {
 		// Integrate in imaginary time
@@ -67,12 +70,11 @@ void Eigenstates(Wavefunction& Psi, const Hamiltonian& H, const Tree& tree) {
 		Orthonormal(Psi, tree);
 
 		// Transform Psi to eigenbasis and get energies
-		auto energies = Eigenstate(Psi, H, tree);
+		energies = Eigenstate(Psi, H, tree);
 
 		// I/O
 		Status(energies, propagator_energies, cout);
 		TreeIO::Output(Psi, tree);
-
 	}
 }
 

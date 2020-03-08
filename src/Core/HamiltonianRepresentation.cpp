@@ -5,7 +5,7 @@
 
 Tensorcd Apply(const Hamiltonian& H, const Tensorcd& Phi,
 	const HamiltonianRepresentation& hRep,
-	const Node& node, double time) {
+	const Node& node) {
 
 	Tensorcd dPhi(Phi.shape());
 	for (size_t l = 0; l < H.size(); l++) {
@@ -27,11 +27,10 @@ Tensorcd Apply(const Hamiltonian& H, const Tensorcd& Phi,
 }
 
 Matrixcd Expectation(const HamiltonianRepresentation& hRep,
-	const Wavefunction& Psi, const Hamiltonian& H, const Tree& tree,
-	double time) {
+	const Wavefunction& Psi, const Hamiltonian& H, const Tree& tree) {
 
 	const Node& top = tree.TopNode();
-	auto dPhi = Apply(H, Psi[top], hRep, top, time);
+	auto dPhi = Apply(H, Psi[top], hRep, top);
 	return Psi[top].DotProduct(dPhi);
 }
 
@@ -40,7 +39,7 @@ void LayerDerivative(Tensorcd& dPhi, double time, const Tensorcd& Phi,
 	const Node& node, complex<double> propagation_phase) {
 
 	// Apply Hamiltonian
-	dPhi = Apply(H, Phi, hRep, node, time);
+	dPhi = Apply(H, Phi, hRep, node);
 
 	// Inverse Densitymatrix and (1-P) projector for SPF-type EOM
 	if (!node.isToplayer()) {

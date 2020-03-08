@@ -9,7 +9,8 @@
 #include "Core/Wavefunction.h"
 
 struct mctdh_state {
-	mctdh_state():rng_(time(nullptr)) {}
+	mctdh_state():rng_(0) {}
+//	mctdh_state():rng_(time(nullptr)) {}
 	~mctdh_state() = default;
 
 	Tree tree_;

@@ -64,12 +64,10 @@ public:
 };
 
 Tensorcd Apply(const Hamiltonian& H, const Tensorcd& Phi,
-	const HamiltonianRepresentation& hRep,
-	const Node& node, double time = 0.);
+	const HamiltonianRepresentation& hRep, const Node& node);
 
 Matrixcd Expectation(const HamiltonianRepresentation& hRep,
-	const Wavefunction& Psi, const Hamiltonian& H, const Tree& tree,
-	double time = 0.);
+	const Wavefunction& Psi, const Hamiltonian& H, const Tree& tree);
 
 void LayerDerivative(Tensorcd& dPhi, double time, const Tensorcd& Phi,
 	const Hamiltonian& H, const HamiltonianRepresentation& hRep,

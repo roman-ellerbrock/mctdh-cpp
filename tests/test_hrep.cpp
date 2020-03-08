@@ -25,7 +25,7 @@ SUITE (HamiltonianRepresentation) {
 		Tree tree = parser::create_tree(config);
 	}
 
-	TEST (ReadJobs) {
+	TEST (BuildHmats) {
 		string yaml_filename("../examples/coupledho.yaml");
 		auto state = parser::run(yaml_filename);
 		HamiltonianRepresentation hrep(*state.hamiltonian_, state.tree_);
@@ -35,7 +35,18 @@ SUITE (HamiltonianRepresentation) {
 		hrep.build(H, Psi, tree);
 		for (size_t n = 0; n < 8; ++n) {
 			const auto& mattree = hrep.hMats_[n];
+
+			auto MPsi = H[n].Apply(Psi, tree);
+			auto hmat= MatrixTreeFunctions::DotProduct(Psi, MPsi, tree);
+			for (const Node& node : tree) {
+				if (!mattree.Active(node)) { continue; }
+				auto residual = Residual(mattree[node], hmat[node]);
+					CHECK_CLOSE(0., residual, 1e-7);
+			}
+
+			// Check separately
 			auto mat = mattree[state.tree_.TopNode()];
+
 			double value = abs(mat(0, 0));
 			if (n % 2) {
 					CHECK_CLOSE(0.5/0.018, value, 1e-7);
@@ -45,16 +56,47 @@ SUITE (HamiltonianRepresentation) {
 		}
 		for (size_t n = 8; n < 12; ++n) {
 			const auto& mattree = hrep.hMats_[n];
-			mattree.print();
 			auto MPsi = H[n].Apply(Psi, tree);
 			auto hmat= MatrixTreeFunctions::DotProduct(Psi, MPsi, tree);
 			for (const Node& node : tree) {
 				if (!mattree.Active(node)) { continue; }
-				node.info();
-				mattree[node].print();
-				hmat[node].print();
+				auto residual = Residual(mattree[node], hmat[node]);
+					CHECK_CLOSE(0., residual, 1e-7);
 			}
-			getchar();
+		}
+	}
+
+	TEST (BuildHContractions) {
+		string yaml_filename("../examples/coupledho.yaml");
+		auto state = parser::run(yaml_filename);
+		HamiltonianRepresentation hrep(*state.hamiltonian_, state.tree_);
+		const Hamiltonian& H = *state.hamiltonian_;
+		const Wavefunction& Psi = state.wavefunctions_["Psi"];
+		const Tree& tree = state.tree_;
+		hrep.build(H, Psi, tree);
+
+		for (size_t n = 0; n < 8; ++n) {
+			const auto& sparse_hcon = hrep.hContractions_[n];
+			auto MPsi = H[n].Apply(Psi, tree);
+			auto hmat = MatrixTreeFunctions::DotProduct(Psi, MPsi, tree);
+			auto hcon = MatrixTreeFunctions::Contraction(Psi, MPsi, hmat, tree);
+			for (const Node& node : tree) {
+				if (!sparse_hcon.Active(node)) { continue; }
+				auto residual = Residual(sparse_hcon[node], hcon[node]);
+					CHECK_CLOSE(0., residual, 1e-7);
+			}
+		}
+		for (size_t n = 8; n < 12; ++n) {
+			const auto& sparsehcon = hrep.hContractions_[n];
+			auto MPsi = H[n].Apply(Psi, tree);
+
+			auto hmat = MatrixTreeFunctions::DotProduct(Psi, MPsi, tree);
+			auto hcon = MatrixTreeFunctions::Contraction(Psi, MPsi, hmat, tree);
+			for (const Node& node : tree) {
+				if (!sparsehcon.Active(node)) { continue; }
+				auto residual = Residual(sparsehcon[node], hcon[node]);
+				CHECK_CLOSE(0., residual, 1e-7);
+			}
 		}
 	}
 
@@ -83,10 +125,8 @@ SUITE (HamiltonianRepresentation) {
 		hRep.build(H, Psi, tree);
 
 		auto Hval = Expectation(hRep, Psi, H, tree);
-		cout << "Energie:\n";
 		Hval *= 219475.;
-		Hval.print();
 		auto spec = Diagonalize(Hval);
-		spec.second.print();
+		CHECK_CLOSE(8000., spec.second(0), 5.);
 	}
 }

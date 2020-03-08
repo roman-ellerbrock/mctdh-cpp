@@ -7,6 +7,7 @@
 #include "Util/RungeKutta4.h"
 #include "TreeClasses/TreeIO.h"
 #include "Core/Eigenstates.h"
+#include "Core/CMFIntegrator.h"
 
 SUITE (IntegratorInterface) {
 
@@ -79,5 +80,21 @@ SUITE (IntegratorInterface) {
 
 //		Eigenstates(Psi, H, tree);
 	}
+
+	TEST(CMF_Integrator) {
+		string yaml_filename("../examples/coupledho.yaml");
+		auto state = parser::run(yaml_filename);
+		auto& Psi = state.wavefunctions_["Psi"];
+		const auto& H = *state.hamiltonian_;
+		const auto& tree = state.tree_;
+
+		IntegratorVariables ivar(0., 1., 0.1, 1., 1e-4,
+			1e-6, Psi, H, tree, "out.mctdh", "in.mctdh", true);
+		complex<double> phase(1., 0.);
+		CMFIntegrator cmf(H, tree, phase);
+		cmf.Integrate(ivar, cout);
+	}
+
+
 }
 
