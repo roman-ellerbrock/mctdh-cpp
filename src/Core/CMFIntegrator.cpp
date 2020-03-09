@@ -181,10 +181,7 @@ void CMFIntegrator::CMFstep(Wavefunction& Psi, double time, double timeend, doub
 		Tensorcd& Phi = Psi[node];
 		double layertime = time;
 		layer_bs.Integrate(Phi, layertime, timeend, dt_bs_[node.Address()], accuracy_leaf, ddt, Delta, I);
-		node.info();
-		Phi.print();
 	}
-	getchar();
 	Orthogonal(Psi, tree);
 }
 
@@ -218,11 +215,19 @@ void CMFIntegrator::Output(double time, const Wavefunction& Psi,
 	// Output for CMF Integrator
 	cout << "Time: " << time << " a.u. /" << time / 41.362 << " fs\n";
 
+	cout << "Energies:\n";
+	auto h_matrix = Expectation(matrices_, Psi, H, tree);
+	auto S = MatrixTreeFunctions::DotProduct(Psi, Psi, tree);
+	auto s_top = S[tree.TopNode()];
+	for (size_t i = 0; i < h_matrix.Dim1(); ++i) {
+		double e = real(h_matrix(i, i) / s_top(i, i));
+		cout << i << ":\t" << e * QM::cm << " 1/cm\t" << e * QM::cm << endl;
+	}
+
 	// Calculate Autocorrelation function
 	auto autocorrelation = MatrixTreeFunctions::DotProduct(Psistart, Psi, tree);
 	cout << "<Psi_0(0)|Psi_0(t)>=" << autocorrelation[tree.TopNode()](0, 0) << endl;
 
 	// Calculate Datout
 	TreeIO::Output(Psi, tree, os);
-
 }

@@ -7,6 +7,7 @@
 #include "Core/HamiltonianRepresentation.h"
 #include "Core/IntegratorInterface.h"
 #include "TreeClasses/TreeIO.h"
+#include "Core/CMFIntegrator.h"
 
 Vectord propagatorEnergies(const Wavefunction& Psi, const Tree& tree, double out) {
 	auto S = MatrixTreeFunctions::DotProduct(Psi, Psi, tree);
@@ -55,15 +56,18 @@ void Eigenstates(Wavefunction& Psi, const Hamiltonian& H, const Tree& tree) {
 	double out = 20.;
 	double dt = 1.;
 	size_t num_iterations = (t_end - t) / out;
+	IntegratorVariables ivar(t, out, dt, out + 1e-6, 1e-4, 1e-6, Psi, H, tree, "out.dat", "in.dat", false);
 
-	IntegratorInterface I(H, tree, -QM::im);
+//	IntegratorInterface I(H, tree, -QM::im);
+	CMFIntegrator cmf(H, tree, -QM::im);
 	auto energies = Eigenstate(Psi, H, tree);
 	Status(energies, energies, cout);
 	TreeIO::Output(Psi, tree);
 
 	for (size_t iter = 0; iter < num_iterations; ++iter) {
 		// Integrate in imaginary time
-		RungeKutta4::Integrate<IntegratorInterface, Wavefunction, double>(t, out, dt, Psi, I);
+//		RungeKutta4::Integrate<IntegratorInterface, Wavefunction, double>(t, out, dt, Psi, I);
+		cmf.Integrate(ivar);
 
 		auto propagator_energies = propagatorEnergies(Psi, tree, out);
 

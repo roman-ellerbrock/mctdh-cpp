@@ -8,7 +8,7 @@ run:
       dim: 5
       children:
         - type: node
-          dim: 6
+          dim: 8
           children:
             - type: node
               dim: 4
@@ -25,7 +25,7 @@ run:
                   leaftype: 0
                   mode: 1
         - type: node
-          dim: 6
+          dim: 8
           children:
             - type: node
               dim: 4
