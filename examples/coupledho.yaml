@@ -8,7 +8,7 @@ run:
       dim: 5
       children:
         - type: node
-          dim: 8
+          dim: 6
           children:
             - type: node
               dim: 4
@@ -25,7 +25,7 @@ run:
                   leaftype: 0
                   mode: 1
         - type: node
-          dim: 8
+          dim: 6
           children:
             - type: node
               dim: 4
@@ -72,7 +72,4 @@ run:
   - job: wavefunction
     name: Psi
     type: create
-
-
-
 

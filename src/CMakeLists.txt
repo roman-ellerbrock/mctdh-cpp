@@ -12,6 +12,13 @@ target_sources(mctdh_lib
         Core/HamiltonianRepresentation.cpp
         Core/HamiltonianRepresentation.h
         Core/Wavefunction.h
+
+        DVR/TreeGrids.h
+        DVR/TDDVR.cpp
+        DVR/TDDVR.h
+        DVR/XMatrixTrees.cpp
+        DVR/XMatrixTrees.h
+
         Parser/yaml_parser.cpp
         Parser/yaml_parser.h
         )

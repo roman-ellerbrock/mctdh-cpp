@@ -78,7 +78,7 @@ SUITE (IntegratorInterface) {
 		const auto& H = *state.hamiltonian_;
 		const auto& tree = state.tree_;
 
-		Eigenstates(Psi, H, tree);
+//		Eigenstates(Psi, H, tree);
 	}
 
 	TEST(CMF_Integrator) {
@@ -92,7 +92,7 @@ SUITE (IntegratorInterface) {
 			1e-6, Psi, H, tree, "out.mctdh", "in.mctdh", true);
 		complex<double> phase(0., -1.);
 		CMFIntegrator cmf(H, tree, phase);
-		cmf.Integrate(ivar, cout);
+//		cmf.Integrate(ivar, cout);
 	}
 
 

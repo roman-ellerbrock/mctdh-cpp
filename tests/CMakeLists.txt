@@ -2,6 +2,7 @@ find_package(UnitTest++ REQUIRED)
 include_directories(${UTPP_INCLUDE_DIRS})
 
 set(mctdh_tests
+        test_TDDVR.cpp
         test_hrep.cpp
         test_Integrator.cpp
         tests.cpp
