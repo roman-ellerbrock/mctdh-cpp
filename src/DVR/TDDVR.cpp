@@ -27,6 +27,32 @@ void setGrids(TreeGrids& gridtrees, vector<Vectord> grids, const Node& node) {
 	}
 }
 
+void setHoleGrids(TreeGrids& hole_grids, const vector<Vectord>& grids,
+	const vector<SparseMatrixTreecd>& xrefs, const Node& node) {
+	size_t n = 0;
+	for (size_t k = 0; k < xrefs.size(); ++k) {
+		const auto& xref = xrefs[k];
+		if (!xrefs[k].Active(node)) {
+			VectorTreed& hole_grid = hole_grids[k];
+			hole_grid[node] = grids[n];
+			n++;
+		}
+	}
+}
+
+vector<Matrixcd> getXholes(const vector<SparseMatrixTreecd>& xholes,
+	const vector<SparseMatrixTreecd>& x_refs, const Node& node) {
+	assert(x_refs.size() == xholes.size());
+	vector<Matrixcd> xs;
+	for (size_t k = 0; k < xholes.size(); ++k) {
+		const auto& xhole = xholes[k];
+		if (!x_refs[k].Active(node)) {
+			xs.push_back(xhole[node]);
+		}
+	}
+	return xs;
+}
+
 Matrixcd Regularize(Matrixcd w) {
 	double norm = abs(w.Trace());
 	w = (1. / norm) * w;
@@ -40,7 +66,8 @@ Matrixcd Regularize(Matrixcd w) {
 	return w;
 }
 
-void LayerGrid(TreeGrids& grids, MatrixTreecd& trafo, const vector<SparseMatrixTreecd>& Xs, const MatrixTreecd& rho, const Node& node) {
+void LayerGrid(TreeGrids& grids, MatrixTreecd& trafo, const vector<SparseMatrixTreecd>& Xs,
+	const MatrixTreecd& rho, const Node& node) {
 	assert(grids.size() == Xs.size());
 	auto xs = getXs(Xs, node);
 	auto w = rho[node];
@@ -49,6 +76,20 @@ void LayerGrid(TreeGrids& grids, MatrixTreecd& trafo, const vector<SparseMatrixT
 	auto diags = WeightedSimultaneousDiagonalization::Calculate(xs, w, 1e-12);
 
 	setGrids(grids, diags.second, node);
+	trafo[node] = diags.first;
+}
+
+void LayerHoleGrid(TreeGrids& grids, MatrixTreecd& trafo,
+	const vector<SparseMatrixTreecd>& xholes, const vector<SparseMatrixTreecd>& x_refs, const Node& node) {
+
+	size_t dim = node.shape().totalDimension();
+	auto xs = getXholes(xholes, x_refs, node);
+	auto w = IdentityMatrix<complex<double>>(dim);
+	w = Regularize(w);
+
+	auto diags = WeightedSimultaneousDiagonalization::Calculate(xs, w, 1e-12);
+
+	setHoleGrids(grids, diags.second, x_refs, node);
 	trafo[node] = diags.first;
 }
 
@@ -62,23 +103,11 @@ void TDDVR::Calculate(const Wavefunction& Psi, const Tree& tree) {
 	/// Build standard grid
 	for (const Node& node : tree) {
 		LayerGrid(grids_, trafo_, Xs_.xmats_, rho_, node);
-
-		size_t dim = trafo_[node].Dim1();
-		node.info();
-		for(size_t i = 0; i < dim; ++i) {
-			for (const VectorTreed& grid : grids_) {
-				if (grid.Active(node)) {
-					const Vectord& g = grid[node];
-					cout << g(i) << "\t";
-				}
-			}
-			cout << endl;
-		}
 	}
 
 	/// Build hole grid
 	for (const Node& node : tree) {
-//		LayerHoleGrid();
+		LayerHoleGrid(hole_grids_, hole_trafo_, Xs_.xholes_.contractions_, Xs_.xmats_, node);
 	}
 }
 

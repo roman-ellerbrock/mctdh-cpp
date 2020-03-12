@@ -27,6 +27,8 @@ public:
 
 class TreeGrids: public vector<VectorTreed> {
 public:
+	TreeGrids() = default;
+
 	explicit TreeGrids(const Tree& tree) {
 		LeafFuncd x = &LeafInterface::applyX;
 
