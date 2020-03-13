@@ -32,7 +32,7 @@ SUITE (TDDVR) {
 			X_ops.push_back(MLOcd(&LeafInterface::applyX, leaf.Mode()), 1.);
 		}
 		MatrixTreescd Xs(X_ops, tree);
-		SparseMatrixTreeFunctions::Represent(Xs, X_ops, Psi, Psi, tree);
+		TreeFunctions::Represent(Xs, X_ops, Psi, Psi, tree);
 			CHECK_EQUAL(4, Xs.matrices_.size());
 			CHECK_EQUAL(4, Xs.contractions_.size());
 	}
@@ -57,8 +57,8 @@ SUITE (TDDVR) {
 
 		TDDVR tddvr(tree);
 		tddvr.Calculate(Psi, tree);
+		tddvr.print(tree);
 	}
-
 }
 
 

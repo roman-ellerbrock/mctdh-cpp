@@ -13,7 +13,7 @@ SOPcd Xsop(const Tree& tree);
 class XMatrixTrees {
 public:
 	explicit XMatrixTrees(const Tree& tree)
-		: xops_holes_(Xsop(tree)), xholes_(Xsop(tree), tree) {
+		: xops_(Xsop(tree)) {
 		LeafFuncd x = &LeafInterface::applyX;
 
 		for (size_t l = 0; l < tree.nLeaves(); ++l) {
@@ -22,18 +22,19 @@ public:
 			MLOcd M(x, mode);
 
 			xmats_.emplace_back(SparseMatrixTreecd(M, tree));
-			xops_mats_.push_back(M, 1.);
+			xholes_.emplace_back(SparseMatrixTreecd(M, tree, true, true));
 		}
+
 	}
 
 	~XMatrixTrees() = default;
 
 	void Update(const Wavefunction& Psi, const Tree& tree) {
-		using namespace SparseMatrixTreeFunctions;
-		assert(xops_mats_.size() == xmats_.size());
-		assert(xops_holes_.size() == xholes_.size());
-		Represent(xmats_, xops_mats_, Psi, Psi, tree);
-		Represent(xholes_, xops_holes_, Psi, Psi, tree);
+		using namespace TreeFunctions;
+		assert(xops_.size() == xmats_.size());
+		assert(xops_.size() == xholes_.size());
+		Represent(xmats_, xops_, Psi, Psi, tree);
+		Contraction(xholes_, xmats_, Psi, Psi, tree);
 	}
 
 	void print() const {
@@ -42,22 +43,21 @@ public:
 			x.print();
 		}
 
-		xholes_.print();
+		for (const auto& xhole : xholes_) {
+			xhole.print();
+		}
 	}
 
 	size_t size() const {
-		size_t n = xops_mats_.size();
-		assert(n == xops_holes_.size());
+		size_t n = xops_.size();
 		assert(n == xmats_.size());
 		assert(n == xholes_.size());
 		return n;
 	}
 
-	SOPcd xops_mats_;
-	vector<SparseMatrixTreecd> xmats_;
-
-	SOPcd xops_holes_;
-	MatrixTreescd xholes_;
+	SOPcd xops_;
+	SparseMatrixTreescd xmats_;
+	SparseMatrixTreescd xholes_;
 };
 
 #endif //XMATRIXTREES_H

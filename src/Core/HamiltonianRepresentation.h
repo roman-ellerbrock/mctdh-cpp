@@ -11,8 +11,6 @@
 #include "TreeClasses/SpectralDecompositionTree.h"
 #include "Util/QMConstants.h"
 
-typedef SparseMatrixTrees<complex<double>> sMatrixTreeVector;
-
 class HamiltonianRepresentation {
 public:
 	HamiltonianRepresentation(const Hamiltonian& H, const Tree& tree)
@@ -28,7 +26,7 @@ public:
 
 	void build(const Hamiltonian& H, const Wavefunction& Psi, const Tree& tree) {
 		/// Calculate density matrix tree
-		MatrixTreeFunctions::Contraction(rho_, Psi, tree, true);
+		TreeFunctions::Contraction(rho_, Psi, tree, true);
 
 		/// Density matrix tree decomposition
 		rho_decomposition_.Calculate(rho_, tree);
@@ -37,10 +35,10 @@ public:
 		rho_inverse_ = rho_decomposition_.Invert(tree);
 
 		/// Calculate h-matrix trees
-		SparseMatrixTreeFunctions::Represent(hMats_, H, Psi, Psi, tree);
+		TreeFunctions::Represent(hMats_, H, Psi, Psi, tree);
 
 		/// Calculate h-matrix tree contractions
-		SparseMatrixTreeFunctions::Contraction(hContractions_, hMats_, Psi, Psi, tree);
+		TreeFunctions::Contraction(hContractions_, hMats_, Psi, Psi, tree);
 	}
 
 	void print(const Tree& tree, ostream& os = cout) {
@@ -59,8 +57,8 @@ public:
 	MatrixTreecd rho_;
 	SpectralDecompositionTreecd rho_decomposition_;
 	MatrixTreecd rho_inverse_;
-	sMatrixTreeVector hMats_;
-	sMatrixTreeVector hContractions_;
+	SparseMatrixTreescd hMats_;
+	SparseMatrixTreescd hContractions_;
 };
 
 Tensorcd Apply(const Hamiltonian& H, const Tensorcd& Phi,

@@ -11,11 +11,8 @@
 
 class TDDVR {
 public:
-	explicit TDDVR(const Tree& tree) : Xs_(tree), rho_(tree), trafo_(tree), hole_trafo_(tree), grids_(tree){
-		auto xs = Xsop(tree);
-		for (const auto& x : xs) {
-			hole_grids_.emplace_back(VectorTreed(x, tree));
-		}
+	explicit TDDVR(const Tree& tree) : Xs_(tree), rho_(tree), trafo_(tree), hole_trafo_(tree),
+	grids_(tree), hole_grids_(tree, true){
 	}
 	~TDDVR() = default;
 

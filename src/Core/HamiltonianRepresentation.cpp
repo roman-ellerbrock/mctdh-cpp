@@ -13,7 +13,7 @@ Tensorcd Apply(const Hamiltonian& H, const Tensorcd& Phi,
 		if (!hmat.Active(node)) { continue; }
 
 		Tensorcd Psi(Phi, H.Coeff(l));
-		Psi = SparseMatrixTreeFunctions::Apply(hmat, Psi, H[l], node);
+		Psi = TreeFunctions::Apply(hmat, Psi, H[l], node);
 
 		// Multiply with hole-matrix
 		const auto& hhole = hRep.hContractions_[l];

@@ -10,7 +10,7 @@
 #include "Core/CMFIntegrator.h"
 
 Vectord propagatorEnergies(const Wavefunction& Psi, const Tree& tree, double out) {
-	auto S = MatrixTreeFunctions::DotProduct(Psi, Psi, tree);
+	auto S = TreeFunctions::DotProduct(Psi, Psi, tree);
 	const Node& top = tree.TopNode();
 	auto propagator_ev = Diagonalize(S[top]).second;
 	// E_i=-log(Ev_i)/(2*dt)
