@@ -37,20 +37,15 @@ void fillXdvr(Vectord& X, vector<size_t> idx, const TreeGrids& grids, const Tree
 	}
 
 	fillX(X, idx.back(), holegrids, node);
-	cout << "filled:\n";
-	for (auto i : idx) {
-		cout << i << "\t";
-	}
-	cout << endl;
-	X.print();
 }
 
-void fillXcorrection(Vectord& X, size_t idx, const TreeGrids& grids, const TreeGrids& holegrids,
+void fillXcorrection(Vectord& X, vector<size_t> idx, const TreeGrids& grids, const TreeGrids& holegrids,
 	const Node& node) {
 	assert(grids.size() == holegrids.size());
 	assert(X.Dim() == grids.size());
-	fillX(X, idx, grids, node);
-	fillX(X, idx, holegrids, node);
+	assert(idx.size() == 2);
+	fillX(X, idx.front(), grids, node);
+	fillX(X, idx.back(), holegrids, node);
 }
 
 void UpdateDVRLocal(Tensorcd& dvr, const TreeGrids& grids, const TreeGrids& holegrids,
@@ -65,7 +60,6 @@ void UpdateDVRLocal(Tensorcd& dvr, const TreeGrids& grids, const TreeGrids& hole
 		assert(grid.Active(node) != holegrid.Active(node));
 	}
 
-	node.info();
 	Vectord X(grids.size());
 	for (size_t I = 0; I < shape.totalDimension(); ++I) {
 		auto idxs = indexMapping(I, shape);
@@ -83,12 +77,34 @@ void UpdateDVR(TensorTreecd& dvr, const TreeGrids& grids, const TreeGrids& holeg
 	}
 }
 
+void UpdateCDVRLocal(Matrixd& cdvr, const TreeGrids& grids, const TreeGrids& holegrids,
+	const Potential& V, const Node& node, size_t part) {
+	const TensorShape& shape = node.shape();
+	size_t ngrid = shape.lastDimension();
+	Vectord X(grids.size());
+	TensorShape gridshape({ngrid, ngrid});
+	for (size_t I = 0; I < gridshape.totalDimension(); ++I) {
+		auto idxs = indexMapping(I, gridshape);
+		fillXcorrection(X, idxs, grids, holegrids, node);
+		cdvr(idxs.front(), idxs.back()) = V.Evaluate(X, part);
+	}
+}
+
+void UpdateCDVR(MatrixTreed& cdvr, const TreeGrids& grids, const TreeGrids& holegrids,
+	const Potential& V, const Tree& tree, size_t part) {
+
+	for (const Node& node : tree) {
+		if (!node.isToplayer()) {
+			UpdateCDVRLocal(cdvr[node], grids, holegrids, V, node, part);
+		}
+	}
+}
+
 void CDVR::Update(const Wavefunction& Psi, const Potential& V, const Tree& tree, size_t part) {
 	tddvr_.Update(Psi, tree);
 
-	tddvr_.grids_.print(tree);
-	tddvr_.hole_grids_.print(tree);
-
 	UpdateDVR(dvr_, tddvr_.grids_, tddvr_.hole_grids_, V, tree, part);
+
+	UpdateCDVR(cdvr_, tddvr_.grids_, tddvr_.hole_grids_, V, tree, part);
 }
 

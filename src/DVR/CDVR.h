@@ -18,7 +18,7 @@ public:
 
 private:
 	TensorTreecd dvr_;
-	TensorTreecd cdvr_;
+	MatrixTreed cdvr_;
 };
 
 #endif //CDVR_H

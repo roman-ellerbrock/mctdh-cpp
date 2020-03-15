@@ -5,8 +5,11 @@
 #include "Parser/yaml_parser.h"
 #include "TreeClasses/SOPMatrixTrees.h"
 #include "TreeClasses/SparseMatrixTreeFunctions.h"
+#include "TreeClasses/MatrixTreeFunctions.h"
 #include "DVR/XMatrixTrees.h"
 #include "DVR/TDDVR.h"
+#include "TreeClasses/SpectralDecompositionTree.h"
+#include "Util/QMConstants.h"
 
 SUITE (TDDVR) {
 	class Parser {
@@ -56,8 +59,8 @@ SUITE (TDDVR) {
 		const auto& tree = state.tree_;
 
 		TDDVR tddvr(Psi, tree);
-		tddvr.print(tree);
 	}
+
 }
 
 
