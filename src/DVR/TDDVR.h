@@ -11,12 +11,19 @@
 
 class TDDVR {
 public:
-	explicit TDDVR(const Tree& tree) : Xs_(tree), rho_(tree), trafo_(tree), hole_trafo_(tree),
-	grids_(tree), hole_grids_(tree, true){
+	TDDVR(const Wavefunction& Psi, const Tree& tree)
+		: TDDVR(tree) {
+		Update(Psi, tree);
 	}
+
+	explicit TDDVR(const Tree& tree)
+		: Xs_(tree), rho_(tree), trafo_(tree), hole_trafo_(tree),
+		  grids_(tree), hole_grids_(tree, true) {
+	}
+
 	~TDDVR() = default;
 
-	void Calculate(const Wavefunction& Psi, const Tree& tree);
+	void Update(const Wavefunction& Psi, const Tree& tree);
 
 	void print(const Tree& tree) const {
 		cout << "TDDVR: " << endl;
@@ -25,7 +32,7 @@ public:
 			size_t dim = trafo_[node].Dim1();
 			node.info();
 			for (size_t i = 0; i < dim; ++i) {
-				for (const VectorTreed& grid : grids_) {
+				for (const SparseVectorTreed& grid : grids_) {
 					if (grid.Active(node)) {
 						const Vectord& g = grid[node];
 						cout << g(i) << "\t";
@@ -39,7 +46,7 @@ public:
 			size_t dim = trafo_[node].Dim1();
 			node.info();
 			for (size_t i = 0; i < dim; ++i) {
-				for (const VectorTreed& grid : hole_grids_) {
+				for (const SparseVectorTreed& grid : hole_grids_) {
 					if (grid.Active(node)) {
 						const Vectord& g = grid[node];
 						cout << g(i) << "\t";
@@ -58,7 +65,6 @@ public:
 private:
 	XMatrixTrees Xs_;
 	MatrixTreecd rho_;
-
 };
 
 

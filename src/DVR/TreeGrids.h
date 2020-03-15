@@ -6,18 +6,16 @@
 #define TREEGRIDS_H
 #include "TreeClasses/SparseMatrixTreeFunctions.h"
 
-//typedef SparseNodeAttribute<Vectord> TreeGrid;
-
-class VectorTreed: public SparseNodeAttribute<Vectord> {
+class SparseVectorTreed: public SparseNodeAttribute<Vectord> {
 public:
-	VectorTreed(const MLOcd& M, const Tree& tree, bool tail = true, bool inverse_tree = false)
+	SparseVectorTreed(const MLOcd& M, const Tree& tree, bool tail = true, bool inverse_tree = false)
 		: SparseNodeAttribute<Vectord>(M.targetLeaves(), tree, tail, inverse_tree) {
-		VectorTreed::Initialize(tree);
+		SparseVectorTreed::Initialize(tree);
 	}
 
-	VectorTreed(const SparseTree& stree, const Tree& tree)
+	SparseVectorTreed(const SparseTree& stree, const Tree& tree)
 		: SparseNodeAttribute<Vectord>(stree, tree) {
-		VectorTreed::Initialize(tree);
+		SparseVectorTreed::Initialize(tree);
 	}
 
 	void Initialize(const Tree& tree) override {
@@ -28,9 +26,10 @@ public:
 			attributes_.emplace_back(Vectord(shape.lastDimension()));
 		}
 	}
+
 };
 
-class TreeGrids: public vector<VectorTreed> {
+class TreeGrids: public vector<SparseVectorTreed> {
 public:
 	TreeGrids() = default;
 
@@ -41,7 +40,18 @@ public:
 			const Leaf& leaf = tree.GetLeaf(l);
 			size_t mode = leaf.Mode();
 			MLOcd M(x, mode);
-			emplace_back(VectorTreed(M, tree, true, inverse_tree));
+			emplace_back(SparseVectorTreed(M, tree, true, inverse_tree));
+		}
+	}
+
+	void print(const Tree& tree) const {
+		for (const Node& node : tree) {
+			node.info();
+			for (const auto& grid : *this) {
+				if (grid.Active(node)) {
+					grid[node].print();
+				}
+			}
 		}
 	}
 };

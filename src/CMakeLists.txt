@@ -16,6 +16,8 @@ target_sources(mctdh_lib
         DVR/TreeGrids.h
         DVR/TDDVR.cpp
         DVR/TDDVR.h
+        DVR/CDVR.cpp
+        DVR/CDVR.h
         DVR/XMatrixTrees.cpp
         DVR/XMatrixTrees.h
 

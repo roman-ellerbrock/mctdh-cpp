@@ -58,7 +58,20 @@ void LayerGrid(TreeGrids& grids, Matrixcd& trafo, const vector<SparseMatrixTreec
 	trafo = diags.first;
 }
 
-void TDDVR::Calculate(const Wavefunction& Psi, const Tree& tree) {
+void UpdateGrids(TreeGrids& grids, MatrixTreecd& trafo, const vector<SparseMatrixTreecd>& Xs,
+	const MatrixTreecd* rho_ptr, const Tree& tree) {
+	for (const Node& node : tree) {
+		if (!node.isToplayer()) {
+			if (rho_ptr == nullptr) {
+				LayerGrid(grids, trafo[node], Xs, nullptr, node);
+	 		} else {
+				LayerGrid(grids, trafo[node], Xs, &rho_ptr->operator[](node), node);
+			}
+		}
+	}
+}
+
+void TDDVR::Update(const Wavefunction& Psi, const Tree& tree) {
 	/// Calculate density matrix
 	TreeFunctions::Contraction(rho_, Psi, tree, true);
 
@@ -66,17 +79,9 @@ void TDDVR::Calculate(const Wavefunction& Psi, const Tree& tree) {
 	Xs_.Update(Psi, tree);
 
 	/// Build standard grid
-	for (const Node& node : tree) {
-		if (!node.isToplayer()) {
-			LayerGrid(grids_, trafo_[node], Xs_.xmats_, &rho_[node], node);
-		}
-	}
+	UpdateGrids(grids_, trafo_, Xs_.mats_, &rho_, tree);
 
 	/// Build hole grid
-	for (const Node& node : tree) {
-		if (!node.isToplayer()) {
-			LayerGrid(hole_grids_, hole_trafo_[node], Xs_.xholes_, nullptr, node);
-		}
-	}
+	UpdateGrids(hole_grids_, hole_trafo_, Xs_.holes_, nullptr, tree);
 }
 

@@ -45,8 +45,8 @@ SUITE (TDDVR) {
 
 		XMatrixTrees Xs(tree);
 		Xs.Update(Psi, tree);
-			CHECK_EQUAL(4, Xs.xholes_.size());
-			CHECK_EQUAL(4, Xs.xmats_.size());
+			CHECK_EQUAL(4, Xs.holes_.size());
+			CHECK_EQUAL(4, Xs.mats_.size());
 	}
 
 	TEST(TDDVR) {
@@ -55,8 +55,7 @@ SUITE (TDDVR) {
 		auto Psi = state.wavefunctions_["Psi"];
 		const auto& tree = state.tree_;
 
-		TDDVR tddvr(tree);
-		tddvr.Calculate(Psi, tree);
+		TDDVR tddvr(Psi, tree);
 		tddvr.print(tree);
 	}
 }
