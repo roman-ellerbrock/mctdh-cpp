@@ -95,6 +95,5 @@ SUITE (IntegratorInterface) {
 //		cmf.Integrate(ivar, cout);
 	}
 
-
 }
 

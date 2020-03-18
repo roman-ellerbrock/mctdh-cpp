@@ -6,6 +6,7 @@
 #define CDVR_H
 #include "DVR/TDDVR.h"
 #include "DVR/Potential.h"
+#include "DVR/CDVRNodeTensor.h"
 
 class CDVR {
 public:
