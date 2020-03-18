@@ -7,6 +7,7 @@
 #include "DVR/TDDVR.h"
 #include "DVR/Potential.h"
 #include "DVR/CDVRNodeTensor.h"
+#include "DVR/CDVREdgeTensor.h"
 
 class CDVR {
 public:
@@ -20,6 +21,9 @@ public:
 private:
 	TensorTreecd dvr_;
 	MatrixTreed cdvr_;
+
+	CDVRNodeTensor node_tensor_;
+	CDVREdgeTensor edge_tensor_;
 };
 
 #endif //CDVR_H

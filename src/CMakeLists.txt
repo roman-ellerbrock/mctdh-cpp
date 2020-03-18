@@ -22,6 +22,8 @@ target_sources(mctdh_lib
         DVR/CDVREdgeTensor.cpp
         DVR/CDVRNodeTensor.h
         DVR/CDVRNodeTensor.cpp
+        DVR/cdvr_functions.h
+        DVR/cdvr_functions.cpp
         DVR/XMatrixTrees.cpp
         DVR/XMatrixTrees.h
 
