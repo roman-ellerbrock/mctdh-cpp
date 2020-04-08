@@ -6,13 +6,13 @@
 #define CDVR_FUNCTIONS_H
 #include "Core/Wavefunction.h"
 #include "TreeClasses/MatrixTree.h"
-#include "DVR/CDVREdgeTensor.h"
-#include "DVR/CDVRNodeTensor.h"
+#include "DVR/DeltaVTree.h"
 
 namespace cdvr_functions {
 
-	void Update(CDVREdgeTensor& edge_tensor, const Wavefunction& Psi, const TensorTreecd& dvr,
+	void Update(DeltaVTree& deltaVTree, const Wavefunction& Psi, const TensorTreecd& dvr,
 		const MatrixTreed& edge_dvr, const Tree& tree);
+
 }
 
 #endif //CDVR_FUNCTIONS_H

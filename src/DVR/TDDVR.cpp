@@ -85,3 +85,30 @@ void TDDVR::Update(const Wavefunction& Psi, const Tree& tree) {
 	UpdateGrids(hole_grids_, hole_trafo_, Xs_.holes_, nullptr, tree);
 }
 
+void TDDVR::GridTransformationLocal(Tensorcd& Phi, const Node& node, bool inverse) {
+
+	/// Transform underlying A-coefficient
+	for (size_t k = 0; k < node.nChildren(); ++k) {
+		const Node& child = node.child(k);
+		if (!inverse) {
+			Phi = MatrixTensor(trafo_[child], Phi, k);
+		} else {
+			Phi = multATB(trafo_[child], Phi, k);
+		}
+	}
+
+	/// Transform state
+	if (!inverse) {
+		Phi = multStateArTB(hole_trafo_[node], Phi);
+	} else {
+		auto m = hole_trafo_[node].Transpose();
+		Phi = multStateArTB(m, Phi);
+	}
+}
+
+void TDDVR::GridTransformation(Wavefunction& Psi, const Tree& tree, bool inverse) {
+	for (const Node& node : tree) {
+		GridTransformationLocal(Psi[node], node, inverse);
+	}
+}
+

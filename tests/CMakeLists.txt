@@ -3,6 +3,7 @@ include_directories(${UTPP_INCLUDE_DIRS})
 
 set(mctdh_tests
         test_CDVR.cpp
+        test_ExplicitEdgeWavefunction.cpp
         test_TDDVR.cpp
         test_hrep.cpp
         test_Integrator.cpp
@@ -10,10 +11,10 @@ set(mctdh_tests
         )
 
 add_executable(tests ${mctdh_tests})
-target_link_libraries(tests mctdh_lib UnitTest++)
-target_compile_features(tests PRIVATE cxx_std_14)
+target_link_libraries(tests mctdh_lib UnitTest++ QuTree::QuTree)
 
 # run unit tests as post build step
-add_custom_command(TARGET test
+add_custom_command(TARGET tests
         POST_BUILD COMMAND tests
+        WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/examples
         COMMENT "Running unit tests")

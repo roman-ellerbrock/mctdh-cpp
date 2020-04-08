@@ -14,7 +14,7 @@ run:
               dim: 4
               children:
                 - type: leaf
-                  dim: 6
+                  dim: 7
                   leaftype: 0
                   mode: 0
             - type: node

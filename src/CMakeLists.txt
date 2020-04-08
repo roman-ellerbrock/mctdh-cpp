@@ -2,8 +2,7 @@
 add_library(mctdh_lib SHARED)
 target_compile_features(mctdh_lib PRIVATE cxx_std_14)
 
-target_sources(mctdh_lib
-        PUBLIC
+target_sources(mctdh_lib PUBLIC
         Core/CMFIntegrator.h
         Core/CMFIntegrator.cpp
         Core/LayerInterface.h
@@ -13,15 +12,15 @@ target_sources(mctdh_lib
         Core/HamiltonianRepresentation.h
         Core/Wavefunction.h
 
+        DVR/ExplicitEdgeWavefunction.cpp
+        DVR/ExplicitEdgeWavefunction.h
         DVR/TreeGrids.h
         DVR/TDDVR.cpp
         DVR/TDDVR.h
         DVR/CDVR.cpp
         DVR/CDVR.h
-        DVR/CDVREdgeTensor.h
-        DVR/CDVREdgeTensor.cpp
-        DVR/CDVRNodeTensor.h
-        DVR/CDVRNodeTensor.cpp
+        DVR/DeltaVTree.h
+        DVR/DeltaVTree.cpp
         DVR/cdvr_functions.h
         DVR/cdvr_functions.cpp
         DVR/XMatrixTrees.cpp
@@ -31,14 +30,12 @@ target_sources(mctdh_lib
         Parser/yaml_parser.h
         )
 
-
-target_include_directories(mctdh_lib
-        PUBLIC
+target_include_directories(mctdh_lib PUBLIC
         ${CMAKE_CURRENT_SOURCE_DIR}
         )
 
 
 target_link_libraries(mctdh_lib
-        QDlib
         Hamiltonians
-        yaml-cpp)
+        yaml-cpp
+        QuTree::QuTree)

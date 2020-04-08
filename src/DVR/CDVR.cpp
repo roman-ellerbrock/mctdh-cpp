@@ -5,7 +5,7 @@
 #include "CDVR.h"
 
 CDVR::CDVR(const Wavefunction& Psi, const Potential& V, const Tree& tree, size_t part)
-	: tddvr_(Psi, tree), dvr_(tree), cdvr_(tree) {
+	: tddvr_(Psi, tree), dvr_(tree), cdvr_(tree), deltaV_(tree) {
 	Update(Psi, V, tree, part);
 }
 
@@ -101,10 +101,14 @@ void UpdateCDVR(MatrixTreed& cdvr, const TreeGrids& grids, const TreeGrids& hole
 }
 
 void CDVR::Update(const Wavefunction& Psi, const Potential& V, const Tree& tree, size_t part) {
+
 	tddvr_.Update(Psi, tree);
 
 	UpdateDVR(dvr_, tddvr_.grids_, tddvr_.hole_grids_, V, tree, part);
 
 	UpdateCDVR(cdvr_, tddvr_.grids_, tddvr_.hole_grids_, V, tree, part);
+
+	cdvr_functions::Update(deltaV_, Psi, dvr_, cdvr_, tree);
+
 }
 

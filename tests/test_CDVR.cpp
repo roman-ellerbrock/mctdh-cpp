@@ -9,7 +9,7 @@
 
 SUITE(CDVR) {
 	TEST(coupledHO) {
-		string yaml_filename("../examples/coupledho.yaml");
+		string yaml_filename("../examples/ho_sl.yaml");
 		auto state = parser::run(yaml_filename);
 		auto Psi = state.wavefunctions_["Psi"];
 		const auto& tree = state.tree_;

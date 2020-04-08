@@ -1,0 +1,69 @@
+
+
+
+run:
+  - job: tree
+    type: manual
+    tree:
+      dim: 5
+      children:
+        - type: node
+          dim: 4
+          children:
+            - type: leaf
+              dim: 7
+              leaftype: 0
+              mode: 0
+        - type: node
+          dim: 4
+          children:
+            - type: leaf
+              dim: 6
+              leaftype: 0
+              mode: 1
+        - type: node
+          dim: 4
+          children:
+            - type: leaf
+              dim: 6
+              leaftype: 0
+              mode: 2
+        - type: node
+          dim: 4
+          children:
+            - type: leaf
+              dim: 6
+              leaftype: 0
+              mode: 3
+    leaves:
+      - mode: 0
+        r0: 0.
+        omega: 0.018
+        wfr0: 0
+        wfomega: 0.018
+
+      - mode: 1
+        r0: 0.
+        omega: 0.018
+        wfr0: 0
+        wfomega: 0.018
+
+      - mode: 2
+        r0: 0.
+        omega: 0.018
+        wfr0: 0
+        wfomega: 0.018
+
+      - mode: 3
+        r0: 0.
+        omega: 0.018
+        wfr0: 0
+        wfomega: 0.018
+
+  - job: hamiltonian
+    name: coupled_ho
+
+  - job: wavefunction
+    name: Psi
+    type: create
+

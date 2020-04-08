@@ -23,6 +23,10 @@ public:
 
 	~TDDVR() = default;
 
+	void GridTransformation(Wavefunction& Psi, const Tree& tree, bool inverse = false);
+
+	void GridTransformationLocal(Tensorcd& Phi, const Node& node, bool inverse = false);
+
 	void Update(const Wavefunction& Psi, const Tree& tree);
 
 	void print(const Tree& tree) const {
