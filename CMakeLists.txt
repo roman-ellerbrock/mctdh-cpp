@@ -9,6 +9,7 @@ enable_language(C)
 enable_language(CXX)
 cmake_policy(SET "CMP0076" NEW)
 cmake_policy(SET "CMP0040" NEW)
+cmake_policy(SET "CMP0042" NEW)
 
 # For debugging CMake
 #set(CMAKE_VERBOSE_MAKEFILE ON)

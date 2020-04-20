@@ -8,6 +8,7 @@
 #include "Core/Wavefunction.h"
 #include "DVR/XMatrixTrees.h"
 #include "TreeClasses/MatrixTree.h"
+#include "DVR/ExplicitEdgeWavefunction.h"
 
 class TDDVR {
 public:
@@ -23,9 +24,7 @@ public:
 
 	~TDDVR() = default;
 
-	void GridTransformation(Wavefunction& Psi, const Tree& tree, bool inverse = false);
-
-	void GridTransformationLocal(Tensorcd& Phi, const Node& node, bool inverse = false);
+	void GridTransformation(ExplicitEdgeWavefunction& Psi, const Tree& tree, bool inverse = false);
 
 	void Update(const Wavefunction& Psi, const Tree& tree);
 
@@ -69,6 +68,15 @@ public:
 private:
 	XMatrixTrees Xs_;
 	MatrixTreecd rho_;
+
+	void NodeTransformation(Tensorcd& Phi, const Node& node, bool inverse);
+	void NodeTransformation(Wavefunction& Psi, const Tree& tree, bool inverse);
+	void EdgeTransformation(Matrixcd& B, const Edge& edge, bool inverse);
+	void EdgeTransformation(MatrixTreecd& Psi, const Tree& tree, bool inverse);
+
+	void GridTransformation(Wavefunction& Psi, const Tree& tree, bool inverse = false);
+
+	void GridTransformationLocal(Tensorcd& Phi, const Node& node, bool inverse = false);
 };
 
 

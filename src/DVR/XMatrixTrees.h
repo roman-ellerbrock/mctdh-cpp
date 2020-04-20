@@ -7,6 +7,8 @@
 #include "Core/Wavefunction.h"
 #include "TreeClasses/SparseMatrixTreeFunctions.h"
 #include "TreeClasses/SOPMatrixTrees.h"
+#include "TreeClasses/MatrixTreeFunctions.h"
+#include "TreeClasses/SpectralDecompositionTree.h"
 
 SOPcd Xsop(const Tree& tree);
 
@@ -35,6 +37,26 @@ public:
 		assert(xops_.size() == holes_.size());
 		Represent(mats_, xops_, Psi, Psi, tree);
 		Contraction(holes_, mats_, Psi, Psi, tree);
+		UnweightContractions(holes_, Psi, tree);
+	}
+
+	void UnweightContractions(vector<SparseMatrixTreecd>& holes,
+		const Wavefunction& Psi, const Tree& tree) const {
+		auto rho = TreeFunctions::Contraction(Psi, tree, true);
+		auto rho_sqrt = sqrt(rho, tree);
+		auto isqrt_rho = inverse(rho_sqrt, tree, 1e-6);
+
+		for (auto& xhole : holes) {
+			const auto& stree = xhole.Active();
+			for (const Node *node_ptr : stree) {
+				const Node& node = *node_ptr;
+				if (!node.isToplayer()) {
+					const auto& isq_rho = isqrt_rho[node];
+					auto& x = xhole[node];
+					x = isq_rho * xhole[node] * isq_rho;
+				}
+			}
+		}
 	}
 
 	void print() const {

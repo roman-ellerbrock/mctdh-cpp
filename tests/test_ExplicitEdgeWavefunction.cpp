@@ -6,13 +6,63 @@
 #include "DVR/ExplicitEdgeWavefunction.h"
 #include "Parser/yaml_parser.h"
 
-SUITE(ExplicitEdgeWavefunction) {
-	TEST(Init) {
+SUITE (ExplicitEdgeWavefunction) {
+	double eps = 1e-7;
 
+	TEST (Init) {
 		string yaml_filename("../examples/ho_sl.yaml");
 		auto state = parser::run(yaml_filename);
 		auto Psi = state.wavefunctions_["Psi"];
 		const auto& tree = state.tree_;
-		ExplicitEdgeWavefunction Chi(Psi, tree);
+		/// Transform to canonical representation
+
+		ExplicitEdgeWavefunction Chi(Psi, tree, true);
+
+		/// Check bottom-up
+		{
+			const TensorTreecd& Atilde = Chi.nodes();
+			auto rho = TreeFunctions::Contraction(Psi, tree, true);
+			for (const Node& node : tree) {
+				if (!node.isToplayer()) {
+					auto x = Contraction(Atilde[node], Atilde[node], node.nChildren());
+					auto r = Residual(x, rho[node]);
+						CHECK_CLOSE(0., r, eps);
+				}
+			}
+
+			/// Check top-down
+			for (const Node& node : tree) {
+				if (!node.isBottomlayer()) {
+					for (size_t k = 0; k < node.nChildren(); ++k) {
+						const Node& child = node.child(k);
+						auto x = Contraction(Atilde[node], Atilde[node], k);
+						auto r = Residual(x, rho[child]);
+							CHECK_CLOSE(0., r, eps);
+					}
+				}
+			}
+		}
+
+		/// Check Bottom-Up normalized
+		{
+			auto bottomup = Chi.BottomUpNormalized(tree);
+			for (const Node& node : tree) {
+				auto x = Contraction(bottomup[node], bottomup[node], node.nChildren());
+				auto r = Residual(x, IdentityMatrixcd(x.Dim1()));
+					CHECK_CLOSE(0., r, eps);
+			}
+		}
+
+		/// Check Top-Down normalized
+		{
+			auto topdown = Chi.TopDownNormalized(tree);
+			for (const Edge& e : tree.Edges()) {
+				const Node& node = e.down();
+				auto x = Contraction(topdown[node], topdown[node], node.childIdx());
+				auto r = Residual(x, IdentityMatrixcd(x.Dim1()));
+					CHECK_CLOSE(0., r, eps);
+			}
+		}
 	}
 }
+

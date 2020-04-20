@@ -59,6 +59,13 @@ SUITE (TDDVR) {
 		const auto& tree = state.tree_;
 
 		TDDVR tddvr(Psi, tree);
+		ExplicitEdgeWavefunction Chi(Psi, tree, true);
+		tddvr.GridTransformation(Chi, tree, false);
+		auto Xi = Chi.BottomUpNormalized(tree);
+		XMatrixTrees Xs(tree);
+		Xs.Update(Xi, tree);
+		Xs.print();
+//		tddvr.print(tree);
 	}
 
 }

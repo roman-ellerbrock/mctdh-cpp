@@ -82,7 +82,7 @@ void TDDVR::Update(const Wavefunction& Psi, const Tree& tree) {
 	UpdateGrids(grids_, trafo_, Xs_.mats_, &rho_, tree);
 
 	/// Build hole grid
-	UpdateGrids(hole_grids_, hole_trafo_, Xs_.holes_, nullptr, tree);
+	UpdateGrids(hole_grids_, hole_trafo_, Xs_.holes_, &rho_, tree);
 }
 
 void TDDVR::GridTransformationLocal(Tensorcd& Phi, const Node& node, bool inverse) {
@@ -101,7 +101,7 @@ void TDDVR::GridTransformationLocal(Tensorcd& Phi, const Node& node, bool invers
 	if (!inverse) {
 		Phi = multStateArTB(hole_trafo_[node], Phi);
 	} else {
-		auto m = hole_trafo_[node].Transpose();
+		auto m = hole_trafo_[node].Adjoint();
 		Phi = multStateArTB(m, Phi);
 	}
 }
@@ -111,4 +111,62 @@ void TDDVR::GridTransformation(Wavefunction& Psi, const Tree& tree, bool inverse
 		GridTransformationLocal(Psi[node], node, inverse);
 	}
 }
+
+void TDDVR::NodeTransformation(Tensorcd& Phi, const Node& node, bool inverse) {
+
+	/// Transform underlying A-coefficient
+	if (!node.isBottomlayer()) {
+		for (size_t k = 0; k < node.nChildren(); ++k) {
+			const Node& child = node.child(k);
+			if (!inverse) {
+				Phi = MatrixTensor(trafo_[child], Phi, k);
+			} else {
+				Phi = multATB(trafo_[child], Phi, k);
+			}
+		}
+	}
+
+	/// Transform state
+	if (!node.isToplayer()) {
+		if (!inverse) {
+			Phi = MatrixTensor(hole_trafo_[node], Phi, node.nChildren());
+		} else {
+			Phi = multATB(trafo_[node], Phi, node.nChildren());
+		}
+	}
+
+}
+
+void TDDVR::EdgeTransformation(Matrixcd& B, const Edge& edge, bool inverse) {
+	Matrixcd U_up = hole_trafo_[edge].Transpose();
+	const Matrixcd& U_down = trafo_[edge];
+	if (!inverse) {
+		B = multATB(U_down, B);
+		B = multATB(U_up, B);
+	} else {
+		B = U_down * B;
+		B = U_up * B;
+	}
+}
+
+void TDDVR::NodeTransformation(Wavefunction& Psi, const Tree& tree, bool inverse) {
+	for (const Node& node : tree) {
+		NodeTransformation(Psi[node], node, inverse);
+	}
+}
+
+void TDDVR::EdgeTransformation(MatrixTreecd& Bs, const Tree& tree, bool inverse) {
+	for (const Edge& edge : tree.Edges()) {
+		EdgeTransformation(Bs[edge], edge, inverse);
+	}
+}
+
+void TDDVR::GridTransformation(ExplicitEdgeWavefunction& Psi, const Tree& tree, bool inverse) {
+	NodeTransformation(Psi.first, tree, inverse);
+	EdgeTransformation(Psi.second, tree, inverse);
+}
+
+
+
+
 

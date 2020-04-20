@@ -5,55 +5,54 @@
 #include "ExplicitEdgeWavefunction.h"
 #include "TreeClasses/SpectralDecompositionTree.h"
 
-ExplicitEdgeWavefunction::ExplicitEdgeWavefunction(const Wavefunction& Psi, const Tree& tree) {
+ExplicitEdgeWavefunction::ExplicitEdgeWavefunction(const Wavefunction& Psi, const Tree& tree, bool orthogonal) {
+	/// Note: Requires orthogonal wavefunction representation (typically given)
+	assert(orthogonal);
 	Wavefunction& nodes_ = first;
 	MatrixTreecd& edges_ = second;
 	nodes_ = Psi;
 
-	/// Transform to canonical representation
-	CanonicalTransformation(nodes_, tree, true);
+	/// Get edge matrices (B's)
+	MatrixTreecd rho = TreeFunctions::Contraction(nodes_, tree, true);
+	edges_ = sqrt(rho, tree);
+	for (auto& e : edges_) { e = e.Transpose(); }
 
-	/// Get edge matrices
-	MatrixTreecd rho_tmp = TreeFunctions::Contraction(nodes_, tree, true);
-	SpectralDecompositionTreecd rho_x(rho_tmp, tree);
-	auto sqrt_rho_x = Sqrt(rho_x);
-
-	edges_ = to_matrixtree(sqrt_rho_x, tree);
-
-	/// counter-rotate nodes
-	MatrixTreecd inv_sqrt_rho = sqrt_rho_x.Invert(tree);
-	for (const Node& node : tree) {
-		if (!node.isToplayer()) {
-			const Node& parent = node.parent();
-			size_t childidx = node.childIdx();
-			nodes_[parent] = MatrixTensor(inv_sqrt_rho[node], nodes_[parent], childidx);
-		}
+	/// Build node representation (A^\tilde's)
+	for (const Edge& e : tree.Edges()) {
+		const Node& node = e.down();
+		const Matrixcd& B = edges_[e];
+		Tensorcd& A = nodes_[node];
+		/// Basically like multiplying with sqrt(rho)'s
+		A = TensorMatrix(A, B, node.nChildren());
 	}
 
-	/// Check contractions
-	cout << "nodes:\n";
-	for (const Node& node : tree) {
-		if (!node.isBottomlayer()) {
-			node.info();
-			const auto& phi = nodes_[node];
-			size_t d = node.nChildren();
-			for (size_t i = 0; i < d; ++i) {
-				auto xphi(phi);
-				for (size_t k = 0; k < d; ++k) {
-					const Node& child = node.child(k);
-					if (k != i) {
-						xphi = MatrixTensor(edges_[child], xphi, k);
-					}
-				}
-				if (!node.isToplayer()) {
-					const Node& parent = node.parent();
-					xphi = MatrixTensor(edges_[parent], xphi, d);
-				}
-				cout << "contraction " << i << endl;
-				auto rho = Contraction(xphi, xphi, i);
-				rho.print();
-			}
-		}
+	B_inv_ = inverse(edges(), tree);
+}
+
+TensorTreecd ExplicitEdgeWavefunction::TopDownNormalized(const Tree& tree) const {
+	/// Contraction-normalized representation
+	/// Build A^{(p\circ k) p}
+	/// Note: Tensors get moved one layer down!
+	TensorTreecd Psi(nodes());
+	for (const Edge& e : tree.Edges()) {
+		const Node& node = e.down();
+		const Node& parent = node.parent();
+		Psi[node] = TensorMatrix(Psi[parent], B_inv_[e], node.childIdx());
 	}
 
+	return Psi;
+}
+
+TensorTreecd ExplicitEdgeWavefunction::BottomUpNormalized(const Tree& tree) const {
+	/// Dot-Product normalized reperesentation
+	/// Build A^{p\circ k (p)}
+	/// This is the conventional wavefunction representation.
+	TensorTreecd Psi(nodes());
+
+	for (const Edge& e : tree.Edges()) {
+		const Node& node = e.down();
+		Psi[node] = TensorMatrix(Psi[node], B_inv_[e], node.nChildren());
+	}
+
+	return Psi;
 }
