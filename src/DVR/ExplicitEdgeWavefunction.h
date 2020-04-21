@@ -11,7 +11,7 @@ class ExplicitEdgeWavefunction : public pair<Wavefunction, MatrixTreecd> {
 public:
 	ExplicitEdgeWavefunction(const Wavefunction& Psi, const Tree& tree, bool orthogonal);
 	/**
-	 * \brief All-normalized wavefunction representation with A\tilde's and B's.
+	 * \brief All-normalized wavefunction representation with A\tilde's and B_inv's.
 	 */
 
 	const TensorTreecd& nodes()const { return first; }
@@ -24,9 +24,12 @@ public:
 
 	TensorTreecd BottomUpNormalized(const Tree& tree) const;
 
-private:
-	MatrixTreecd B_inv_;
 };
+
+
+bool IsWorking_bottomup(const ExplicitEdgeWavefunction& Psi, const Tree& tree, double eps);
+bool IsWorking_topdown(const ExplicitEdgeWavefunction& Psi, const Tree& tree, double eps);
+bool IsWorking(const ExplicitEdgeWavefunction& Psi, const Tree& tree, double eps = 1e-7);
 
 
 #endif //EXPLICITEDGEWAVEFUNCTION_H

@@ -12,6 +12,8 @@
 #include "Util/QMConstants.h"
 
 SUITE (TDDVR) {
+	double eps = 1e-7;
+
 	class Parser {
 	public:
 		Parser() {
@@ -19,11 +21,12 @@ SUITE (TDDVR) {
 			state_ = parser::run(yaml_filename);
 			Psi_ = state_.wavefunctions_["Psi"];
 		}
+
 		mctdh_state state_;
 		Wavefunction Psi_;
 	};
 
-	TEST(XMat) {
+	TEST (XMat) {
 		string yaml_filename("../examples/coupledho.yaml");
 		auto state = parser::run(yaml_filename);
 		auto Psi = state.wavefunctions_["Psi"];
@@ -40,7 +43,7 @@ SUITE (TDDVR) {
 			CHECK_EQUAL(4, Xs.contractions_.size());
 	}
 
-	TEST(Xs) {
+	TEST (Xs) {
 		string yaml_filename("../examples/coupledho.yaml");
 		auto state = parser::run(yaml_filename);
 		auto Psi = state.wavefunctions_["Psi"];
@@ -52,7 +55,7 @@ SUITE (TDDVR) {
 			CHECK_EQUAL(4, Xs.mats_.size());
 	}
 
-	TEST(TDDVR) {
+	TEST (TDDVR) {
 		string yaml_filename("../examples/coupledho.yaml");
 		auto state = parser::run(yaml_filename);
 		auto Psi = state.wavefunctions_["Psi"];
@@ -61,13 +64,24 @@ SUITE (TDDVR) {
 		TDDVR tddvr(Psi, tree);
 		ExplicitEdgeWavefunction Chi(Psi, tree, true);
 		tddvr.GridTransformation(Chi, tree, false);
+			CHECK_EQUAL(true, IsWorking(Chi, tree, eps));
 		auto Xi = Chi.BottomUpNormalized(tree);
 		XMatrixTrees Xs(tree);
 		Xs.Update(Xi, tree);
 		Xs.print();
 //		tddvr.print(tree);
-	}
 
+/**
+ * Grid transformation tests:
+ * 1.) bottom-up normalization works
+ * 2.) top-down normalization works
+ * 3.) back and forth-transformation work
+ * 4.) x-bottomlayer diagonal
+ * 5.) x-upper layers more or less diagonal
+ * 6.) x-hole more or less diagonal
+ *
+ */
+	}
 }
 
 

@@ -43,26 +43,7 @@ SUITE (ExplicitEdgeWavefunction) {
 			}
 		}
 
-		/// Check Bottom-Up normalized
-		{
-			auto bottomup = Chi.BottomUpNormalized(tree);
-			for (const Node& node : tree) {
-				auto x = Contraction(bottomup[node], bottomup[node], node.nChildren());
-				auto r = Residual(x, IdentityMatrixcd(x.Dim1()));
-					CHECK_CLOSE(0., r, eps);
-			}
-		}
-
-		/// Check Top-Down normalized
-		{
-			auto topdown = Chi.TopDownNormalized(tree);
-			for (const Edge& e : tree.Edges()) {
-				const Node& node = e.down();
-				auto x = Contraction(topdown[node], topdown[node], node.childIdx());
-				auto r = Residual(x, IdentityMatrixcd(x.Dim1()));
-					CHECK_CLOSE(0., r, eps);
-			}
-		}
+			CHECK_EQUAL(true, IsWorking(Chi, tree, eps));
 	}
 }
 

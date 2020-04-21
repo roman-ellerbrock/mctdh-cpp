@@ -14,19 +14,17 @@ ExplicitEdgeWavefunction::ExplicitEdgeWavefunction(const Wavefunction& Psi, cons
 
 	/// Get edge matrices (B's)
 	MatrixTreecd rho = TreeFunctions::Contraction(nodes_, tree, true);
-	edges_ = sqrt(rho, tree);
-	for (auto& e : edges_) { e = e.Transpose(); }
+	auto B = sqrt(rho, tree);
 
 	/// Build node representation (A^\tilde's)
 	for (const Edge& e : tree.Edges()) {
 		const Node& node = e.down();
-		const Matrixcd& B = edges_[e];
 		Tensorcd& A = nodes_[node];
 		/// Basically like multiplying with sqrt(rho)'s
-		A = TensorMatrix(A, B, node.nChildren());
+		A = MatrixTensor(B[e], A, node.nChildren());
 	}
 
-	B_inv_ = inverse(edges(), tree);
+	edges_= inverse(B, tree);
 }
 
 TensorTreecd ExplicitEdgeWavefunction::TopDownNormalized(const Tree& tree) const {
@@ -37,7 +35,7 @@ TensorTreecd ExplicitEdgeWavefunction::TopDownNormalized(const Tree& tree) const
 	for (const Edge& e : tree.Edges()) {
 		const Node& node = e.down();
 		const Node& parent = node.parent();
-		Psi[node] = TensorMatrix(Psi[parent], B_inv_[e], node.childIdx());
+		Psi[node] = MatrixTensor(edges()[e].Transpose(), Psi[parent], node.childIdx());
 	}
 
 	return Psi;
@@ -51,8 +49,33 @@ TensorTreecd ExplicitEdgeWavefunction::BottomUpNormalized(const Tree& tree) cons
 
 	for (const Edge& e : tree.Edges()) {
 		const Node& node = e.down();
-		Psi[node] = TensorMatrix(Psi[node], B_inv_[e], node.nChildren());
+		Psi[node] = MatrixTensor(edges()[e], Psi[node], node.nChildren());
 	}
 
 	return Psi;
+}
+
+bool IsWorking_bottomup(const ExplicitEdgeWavefunction& Psi, const Tree& tree, double eps) {
+	auto bottomup = Psi.BottomUpNormalized(tree);
+	for (const Node& node : tree) {
+		auto x = Contraction(bottomup[node], bottomup[node], node.nChildren());
+		auto r = Residual(x, IdentityMatrixcd(x.Dim1()));
+		if (r > eps) { cerr << "bottom-up normalization failed.\n"; return false; }
+	}
+	return true;
+}
+
+bool IsWorking_topdown(const ExplicitEdgeWavefunction& Psi, const Tree& tree, double eps) {
+	auto topdown = Psi.TopDownNormalized(tree);
+	for (const Edge& e : tree.Edges()) {
+		const Node& node = e.down();
+		auto x = Contraction(topdown[node], topdown[node], node.childIdx());
+		auto r = Residual(x, IdentityMatrixcd(x.Dim1()));
+		if (r > eps) { cerr << "top-down normalization failed.\n"; return false; }
+	}
+	return true;
+}
+
+bool IsWorking(const ExplicitEdgeWavefunction& Psi, const Tree& tree, double eps) {
+	return (IsWorking_bottomup(Psi, tree, eps) && IsWorking_topdown(Psi, tree, eps));
 }

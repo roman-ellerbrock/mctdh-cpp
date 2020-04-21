@@ -71,8 +71,9 @@ private:
 
 	void NodeTransformation(Tensorcd& Phi, const Node& node, bool inverse);
 	void NodeTransformation(Wavefunction& Psi, const Tree& tree, bool inverse);
-	void EdgeTransformation(Matrixcd& B, const Edge& edge, bool inverse);
-	void EdgeTransformation(MatrixTreecd& Psi, const Tree& tree, bool inverse);
+
+	void EdgeTransformation(Matrixcd& B_inv, const Edge& edge, bool inverse);
+	void EdgeTransformation(MatrixTreecd& B_inv, const Tree& tree, bool inverse);
 
 	void GridTransformation(Wavefunction& Psi, const Tree& tree, bool inverse = false);
 

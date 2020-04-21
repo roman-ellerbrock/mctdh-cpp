@@ -65,6 +65,7 @@ public:
 			x.print();
 		}
 
+		cout << "X holes:\n";
 		for (const auto& xhole : holes_) {
 			xhole.print();
 		}

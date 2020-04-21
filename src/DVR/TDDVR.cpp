@@ -131,21 +131,19 @@ void TDDVR::NodeTransformation(Tensorcd& Phi, const Node& node, bool inverse) {
 		if (!inverse) {
 			Phi = MatrixTensor(hole_trafo_[node], Phi, node.nChildren());
 		} else {
-			Phi = multATB(trafo_[node], Phi, node.nChildren());
+			Phi = multATB(hole_trafo_[node], Phi, node.nChildren());
 		}
 	}
 
 }
 
-void TDDVR::EdgeTransformation(Matrixcd& B, const Edge& edge, bool inverse) {
-	Matrixcd U_up = hole_trafo_[edge].Transpose();
-	const Matrixcd& U_down = trafo_[edge];
+void TDDVR::EdgeTransformation(Matrixcd& B_inv, const Edge& edge, bool inverse) {
 	if (!inverse) {
-		B = multATB(U_down, B);
-		B = multATB(U_up, B);
+		B_inv = trafo_[edge].Transpose().Adjoint() * B_inv;
+		B_inv = B_inv * hole_trafo_[edge].Adjoint();
 	} else {
-		B = U_down * B;
-		B = U_up * B;
+		B_inv = trafo_[edge] * B_inv;
+		B_inv = B_inv * hole_trafo_[edge];
 	}
 }
 
@@ -155,15 +153,15 @@ void TDDVR::NodeTransformation(Wavefunction& Psi, const Tree& tree, bool inverse
 	}
 }
 
-void TDDVR::EdgeTransformation(MatrixTreecd& Bs, const Tree& tree, bool inverse) {
+void TDDVR::EdgeTransformation(MatrixTreecd& B_inv, const Tree& tree, bool inverse) {
 	for (const Edge& edge : tree.Edges()) {
-		EdgeTransformation(Bs[edge], edge, inverse);
+		EdgeTransformation(B_inv[edge], edge, inverse);
 	}
 }
 
 void TDDVR::GridTransformation(ExplicitEdgeWavefunction& Psi, const Tree& tree, bool inverse) {
-	NodeTransformation(Psi.first, tree, inverse);
-	EdgeTransformation(Psi.second, tree, inverse);
+	NodeTransformation(Psi.nodes(), tree, inverse);
+	EdgeTransformation(Psi.edges(), tree, inverse);
 }
 
 
