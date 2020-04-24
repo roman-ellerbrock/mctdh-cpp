@@ -6,9 +6,9 @@
 
 namespace cdvr_functions {
 
-	void CalculateLocal(Tensorcd& deltaV, const Tensorcd& Phi,
-		const Tensorcd& V_dvr, const Matrixd& V_edge,
-		const Node& node) {
+	void CalculateLocal(Tensorcd& deltaV, const Tensorcd& Cup,
+		const Tensorcd& Cdown, const Tensorcd& V_dvr,
+		const Matrixd& V_edge, const Node& node) {
 
 		const TensorShape& shape = V_dvr.shape();
 
@@ -40,7 +40,7 @@ namespace cdvr_functions {
 
 	}
 
-	void Update(DeltaVTree& deltaVs, const Wavefunction& Psi,
+	void Update(DeltaVTree& deltaVs, const ExplicitEdgeWavefunction& Chi,
 		const TensorTreecd& V_dvr, const MatrixTreed& V_edge_dvr,
 		const Tree& tree) {
 

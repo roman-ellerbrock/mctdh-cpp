@@ -20,12 +20,6 @@ find_package(yaml-cpp REQUIRED)
 include_directories(${YAML_CPP_INCLUDE_DIR})
 add_library(Yaml INTERFACE IMPORTED)
 
-#find_package(Eigen3 REQUIRED)
-#include_directories("${EIGEN3_INCLUDE_DIR}")
-
-#include_directories("QDlib/include")
-#link_directories("${CMAKE_CURRENT_SOURCE_DIR}/QDlib/cmake-build-debug")
-
 # build Hamiltonians
 add_subdirectory("Hamiltonians")
 

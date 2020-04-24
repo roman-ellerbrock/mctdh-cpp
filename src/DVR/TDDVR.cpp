@@ -142,7 +142,7 @@ void TDDVR::EdgeTransformation(Matrixcd& B_inv, const Edge& edge, bool inverse) 
 		B_inv = trafo_[edge].Transpose().Adjoint() * B_inv;
 		B_inv = B_inv * hole_trafo_[edge].Adjoint();
 	} else {
-		B_inv = trafo_[edge] * B_inv;
+		B_inv = trafo_[edge].Transpose() * B_inv;
 		B_inv = B_inv * hole_trafo_[edge];
 	}
 }
