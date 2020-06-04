@@ -68,7 +68,7 @@ SUITE (TDDVR) {
 		auto Xi = Chi.BottomUpNormalized(tree);
 		XMatrixTrees Xs(tree);
 		Xs.Update(Xi, tree);
-		Xs.print();
+//		Xs.print();
 //		tddvr.print(tree);
 
 /**

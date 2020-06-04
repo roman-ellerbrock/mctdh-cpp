@@ -24,7 +24,7 @@ namespace cdvr_functions {
 					size_t J = indexMapping(idxs, deltaV.shape());
 
 					for (size_t I = 0; I < shape.lastBefore(); ++I) {
-						deltaV(J) += conj(Phi(I, m)) * V_dvr(I, j) * Phi(I, l);
+		//				deltaV(J) += conj(Phi(I, m)) * V_dvr(I, j) * Phi(I, l);
 					}
 
 				}
@@ -46,7 +46,7 @@ namespace cdvr_functions {
 
 		for (const Node& node : tree) {
 			if (!node.isToplayer()) {
-				CalculateLocal(deltaVs[node], Psi[node], V_dvr[node], V_edge_dvr[node], node);
+	//			CalculateLocal(deltaVs[node], Psi[node], V_dvr[node], V_edge_dvr[node], node);
 			}
 		}
 	}

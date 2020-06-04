@@ -19,8 +19,8 @@ public:
 	TDDVR tddvr_;
 
 private:
-	TensorTreecd dvr_;
-	MatrixTreed cdvr_;
+	TensorTreecd nodedvr_;
+	MatrixTreed edgedvr_;
 
 	DeltaVTree deltaV_;
 };
