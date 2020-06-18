@@ -10,9 +10,18 @@ void DeltaVTree::Initialize(const Tree& tree) {
 		if (!node.isToplayer()) {
 			const TensorShape& shape = node.shape();
 			size_t dim = shape.lastDimension();
-			TensorShape new_shape({dim, dim, dim});
+			TensorShape new_shape({dim, dim, dim, dim});
 			attributes_.emplace_back(new_shape);
 		}
 	}
 }
 
+void DeltaVTree::print(const Tree& tree) {
+	for (const Node& node : tree) {
+		if (!node.isToplayer()) {
+			const auto& deltaV = operator[](node);
+			node.info();
+			deltaV.print();
+		}
+	}
+}

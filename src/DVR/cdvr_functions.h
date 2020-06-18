@@ -8,11 +8,18 @@
 #include "TreeClasses/MatrixTree.h"
 #include "DVR/DeltaVTree.h"
 #include "ExplicitEdgeWavefunction.h"
+#include "TreeGrids.h"
 
 namespace cdvr_functions {
 
-	void Update(DeltaVTree& deltaVTree, const ExplicitEdgeWavefunction& Chi, const TensorTreecd& dvr,
-		const MatrixTreed& edge_dvr, const Tree& tree);
+	void fillXNode(Vectord& X, vector<size_t> idx, const TreeGrids& grids, const TreeGrids& holegrids,
+		const Node& node);
+
+	void fillXEdge(Vectord& X, vector<size_t> idx, const TreeGrids& grids, const TreeGrids& holegrids,
+		const Node& node);
+
+	void CalculateDeltaVs(DeltaVTree& deltaVTree, const ExplicitEdgeWavefunction& Chi,
+		const TensorTreecd& Vnodes, const MatrixTreed& Vedges, const Tree& tree);
 
 }
 

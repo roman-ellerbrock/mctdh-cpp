@@ -14,6 +14,8 @@ public:
 
 	void Initialize(const Tree& tree);
 
+	void print(const Tree& tree);
+
 };
 
 
