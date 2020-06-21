@@ -21,6 +21,8 @@ namespace cdvr_functions {
 	void CalculateDeltaVs(DeltaVTree& deltaVTree, const ExplicitEdgeWavefunction& Chi,
 		const TensorTreecd& Vnodes, const MatrixTreed& Vedges, const Tree& tree);
 
+	TensorTreecd Apply(const ExplicitEdgeWavefunction& Chi, const TensorTreecd& V,
+		const DeltaVTree& DeltaVs, const Tree& tree);
 }
 
 #endif //CDVR_FUNCTIONS_H

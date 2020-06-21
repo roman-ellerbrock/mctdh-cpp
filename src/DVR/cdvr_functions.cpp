@@ -6,6 +6,20 @@
 
 namespace cdvr_functions {
 
+	/**
+	 * Notes on notation:
+	 * Cdown: Top-down normalized, reads C^{p(p\circ k)} in equations
+	 * Cup: Bottom-up normalized, reads C^{p(p\circ 0)} in equations
+	 */
+
+	/**
+	 * Fill a vector with grid points corresponding to intex "idx".
+	 * @param X
+	 * @param idx
+	 * @param grids
+	 * @param node
+	 */
+
 	void fillX(Vectord& X, size_t idx, const TreeGrids& grids, const Node& node) {
 		/// Fill full-dimensional grid points from all neighboring node-grids
 		for (size_t k = 0; k < X.Dim(); ++k) {
@@ -48,7 +62,7 @@ namespace cdvr_functions {
 		fillX(X, idx.back(), holegrids, node);
 	}
 
-	void CalculateDeltaEdgeBottom(Tensorcd& deltaV, const Tensorcd& Cdown,
+	void CalculateDeltaEdgeBottom(Tensorcd& deltaV, const Tensorcd& Cup,
 		const Tensorcd& Vnode, const Matrixd& Vedge, const Node& node) {
 		/**
 		 * \brief Calculate deltaV-tensor for bottomlayer node
@@ -62,8 +76,10 @@ namespace cdvr_functions {
 		 */
 
 		const TensorShape& shape = Vnode.shape();
+		const TensorShape& Cshape = Cup.shape();
 		size_t dim = shape.lastDimension();
 		size_t dimbef = shape.lastBefore();
+		assert(shape.totalDimension() == Cshape.totalDimension());
 
 		/// Sanity checks
 		assert(!node.isToplayer());
@@ -77,7 +93,7 @@ namespace cdvr_functions {
 					vector<size_t> idxs = {l1, i0, m1, i0};
 					size_t J = indexMapping(idxs, deltaV.shape());
 					for (size_t Ibef = 0; Ibef < dimbef; Ibef++) {
-						deltaV(J) += conj(Cdown(Ibef, l1)) * Vnode(Ibef, i0) * Cdown(Ibef, m1);
+						deltaV(J) += conj(Cup(Ibef, l1)) * Vnode(Ibef, i0) * Cup(Ibef, m1);
 					}
 				}
 			}
@@ -97,38 +113,70 @@ namespace cdvr_functions {
 		const TensorTreecd& Vnodes, const MatrixTreed& Vedges,
 		const Tree& tree) {
 
-		const TensorTreecd& Cdown = Chi.TopDownNormalized(tree);
+		const TensorTreecd& Cup = Chi.BottomUpNormalized(tree);
 		for (const Node& node : tree) {
 			if (node.isBottomlayer()) {
-				CalculateDeltaEdgeBottom(deltaVs[node], Cdown[node],
+				CalculateDeltaEdgeBottom(deltaVs[node], Cup[node],
 					Vnodes[node], Vedges[node], node);
 			} else if (!node.isToplayer()) {
 			}
 		}
 	}
 
-	void ApplyCorrection(Tensorcd& VPhi, const Tensorcd& Phi, const Tensorcd& C,
+	Tensorcd ApplyCorrection(const Tensorcd& Phi, const Tensorcd& C,
 		const Tensorcd& deltaV, const Node& child) {
 
-		const TensorShape& shape = C.shape();
 		size_t k = child.childIdx();
+		const TensorShape& shape = deltaV.shape();
 
+		child.info();
+		/// I: Contract over
+		Matrixcd X = Contraction(C, Phi, k);
+		cout << "X:\n";
+		X.print();
 
+		/// II: Apply DeltaV
+		size_t dim = shape[k];
+		Matrixcd Y(dim, dim);
+		for (size_t L = 0; L < shape.totalDimension(); ++L) {
+			const auto l = indexMapping(L, shape);
+			Y(l[0], l[1]) += deltaV(L) * X(l[2], l[3]);
+		}
+		cout << "Y:\n";
+		Y.print();
+
+		/// III: M * C
+		Tensorcd VPhi = MatrixTensor(Y, C, k);
+		cout << "VPhi:\n";
+		VPhi.print();
+		return VPhi;
 	}
 
-	void Apply(Tensorcd& VPhi, const Tensorcd& C, const Tensorcd& Phi,
-		const Tensorcd& V, const DeltaVTree& deltaVs, const Node& node) {
+	Tensorcd Apply(const Tensorcd& Phi, const Tensorcd& V,
+		const TensorTreecd& Cdown, const DeltaVTree& deltaVs, const Node& node) {
 
-		const TensorShape& shape = node.shape();
-		for (size_t I = 0; I < shape.totalDimension(); ++I) {
-			VPhi(I) += V(I) * Phi(I);
-		}
+		Tensorcd VPhi = coeffprod(V, Phi);
 
 		if (!node.isBottomlayer()) {
 			for (size_t k = 0; k < node.nChildren(); ++k) {
 				const Node& child = node.child(k);
-//				ApplyCorrection(VPhi, Phi, deltaVs[child], child);
+				VPhi += ApplyCorrection(Phi, Cdown[child], deltaVs[child], child);
 			}
 		}
+		return VPhi;
+	}
+
+	TensorTreecd Apply(const ExplicitEdgeWavefunction& Chi,
+		const TensorTreecd& V, const DeltaVTree& DeltaVs, const Tree& tree) {
+
+		const TensorTreecd& C = Chi.TopDownNormalized(tree);
+		TensorTreecd Psi = Chi.BottomUpNormalized(tree);
+		TensorTreecd VPsi = Psi;
+
+		for (const Node& node : tree) {
+			VPsi[node] = Apply(Psi[node], V[node], C, DeltaVs, node);
+		}
+		return VPsi;
 	}
 }
+

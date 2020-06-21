@@ -78,5 +78,11 @@ void CDVR::Update(const Wavefunction& Psi, const Potential& V,
 
 	cdvr_functions::CalculateDeltaVs(deltaV_, Chi, Vnode_, Vedge_, tree);
 
+	cout << "deltaV:\n";
+	deltaV_.print(tree);
+	auto VPsi = cdvr_functions::Apply(Chi, Vnode_, deltaV_, tree);
+	auto Vmat = TreeFunctions::DotProduct(Psi, VPsi, tree);
+//	Vmat.print(tree);
+
 }
 
