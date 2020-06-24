@@ -18,5 +18,16 @@ SUITE(CDVR) {
 
 		CDVR cdvr(Psi, V, tree);
 
+		ExplicitEdgeWavefunction Chi(Psi, tree, true);
+
+		cout << "Psi:\n";
+		for (const Node& node : tree) {
+			auto Phi = Chi.nodes()[node];
+			auto VPhi = cdvr.Apply(Phi, node);
+		}
+
+		cout << "Global Apply function for CDVR:\n";
+		auto VPsi = cdvr.Apply(Psi, tree);
+
 	}
 }

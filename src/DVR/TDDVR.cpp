@@ -85,7 +85,7 @@ void TDDVR::Update(const Wavefunction& Psi, const Tree& tree) {
 	UpdateGrids(hole_grids_, hole_trafo_, Xs_.holes_, &rho_, tree);
 }
 
-void TDDVR::GridTransformationLocal(Tensorcd& Phi, const Node& node, bool inverse) {
+void TDDVR::GridTransformationLocal(Tensorcd& Phi, const Node& node, bool inverse) const {
 
 	/// Transform underlying A-coefficient
 	for (size_t k = 0; k < node.nChildren(); ++k) {
@@ -106,7 +106,7 @@ void TDDVR::GridTransformationLocal(Tensorcd& Phi, const Node& node, bool invers
 	}
 }
 
-void TDDVR::GridTransformation(Wavefunction& Psi, const Tree& tree, bool inverse) {
+void TDDVR::GridTransformation(Wavefunction& Psi, const Tree& tree, bool inverse) const {
 	for (const Node& node : tree) {
 		GridTransformationLocal(Psi[node], node, inverse);
 	}
@@ -134,7 +134,6 @@ void TDDVR::NodeTransformation(Tensorcd& Phi, const Node& node, bool inverse) co
 			Phi = multATB(hole_trafo_[node], Phi, node.nChildren());
 		}
 	}
-
 }
 
 void TDDVR::EdgeTransformation(Matrixcd& B_inv, const Edge& edge, bool inverse) const{
@@ -147,23 +146,54 @@ void TDDVR::EdgeTransformation(Matrixcd& B_inv, const Edge& edge, bool inverse) 
 	}
 }
 
-void TDDVR::NodeTransformation(Wavefunction& Psi, const Tree& tree, bool inverse) {
+void TDDVR::NodeTransformation(Wavefunction& Psi, const Tree& tree, bool inverse) const {
 	for (const Node& node : tree) {
 		NodeTransformation(Psi[node], node, inverse);
 	}
 }
 
-void TDDVR::EdgeTransformation(MatrixTreecd& B_inv, const Tree& tree, bool inverse) {
+void TDDVR::EdgeTransformation(MatrixTreecd& B_inv, const Tree& tree, bool inverse) const {
 	for (const Edge& edge : tree.Edges()) {
 		EdgeTransformation(B_inv[edge], edge, inverse);
 	}
 }
 
-void TDDVR::GridTransformation(ExplicitEdgeWavefunction& Psi, const Tree& tree, bool inverse) {
+void TDDVR::GridTransformation(ExplicitEdgeWavefunction& Psi, const Tree& tree, bool inverse) const {
 	NodeTransformation(Psi.nodes(), tree, inverse);
 	EdgeTransformation(Psi.edges(), tree, inverse);
 }
 
+void TDDVR::print(const Tree& tree) const {
+	cout << "TDDVR: " << endl;
+	cout << "Grids:" << endl;
+	for (const Node& node : tree) {
+		size_t dim = trafo_[node].Dim1();
+		node.info();
+		for (size_t i = 0; i < dim; ++i) {
+			for (const SparseVectorTreed& grid : grids_) {
+				if (grid.Active(node)) {
+					const Vectord& g = grid[node];
+					cout << g(i) << "\t";
+				}
+			}
+			cout << endl;
+		}
+	}
+	cout << "Hole grids:" << endl;
+	for (const Node& node : tree) {
+		size_t dim = trafo_[node].Dim1();
+		node.info();
+		for (size_t i = 0; i < dim; ++i) {
+			for (const SparseVectorTreed& grid : hole_grids_) {
+				if (grid.Active(node)) {
+					const Vectord& g = grid[node];
+					cout << g(i) << "\t";
+				}
+			}
+			cout << endl;
+		}
+	}
+}
 
 
 

@@ -24,43 +24,13 @@ public:
 
 	~TDDVR() = default;
 
-	void GridTransformation(ExplicitEdgeWavefunction& Psi, const Tree& tree, bool inverse = false);
+	void GridTransformation(ExplicitEdgeWavefunction& Psi, const Tree& tree, bool inverse = false) const;
 
 	void Update(const Wavefunction& Psi, const Tree& tree);
 
-	void print(const Tree& tree) const {
-		cout << "TDDVR: " << endl;
-		cout << "Grids:" << endl;
-		for (const Node& node : tree) {
-			size_t dim = trafo_[node].Dim1();
-			node.info();
-			for (size_t i = 0; i < dim; ++i) {
-				for (const SparseVectorTreed& grid : grids_) {
-					if (grid.Active(node)) {
-						const Vectord& g = grid[node];
-						cout << g(i) << "\t";
-					}
-				}
-				cout << endl;
-			}
-		}
-		cout << "Hole grids:" << endl;
-		for (const Node& node : tree) {
-			size_t dim = trafo_[node].Dim1();
-			node.info();
-			for (size_t i = 0; i < dim; ++i) {
-				for (const SparseVectorTreed& grid : hole_grids_) {
-					if (grid.Active(node)) {
-						const Vectord& g = grid[node];
-						cout << g(i) << "\t";
-					}
-				}
-				cout << endl;
-			}
-		}
-	}
+	void print(const Tree& tree) const;
 
-	void NodeTransformation(Tensorcd& Phi, const Node& node, bool inverse)const;
+	void NodeTransformation(Tensorcd& Phi, const Node& node, bool inverse) const;
 
 	TreeGrids grids_;
 	MatrixTreecd trafo_;
@@ -71,14 +41,13 @@ private:
 	XMatrixTrees Xs_;
 	MatrixTreecd rho_;
 
-	void NodeTransformation(Wavefunction& Psi, const Tree& tree, bool inverse);
+	void NodeTransformation(Wavefunction& Psi, const Tree& tree, bool inverse) const;
 
-	void EdgeTransformation(Matrixcd& B_inv, const Edge& edge, bool inverse)const;
-	void EdgeTransformation(MatrixTreecd& B_inv, const Tree& tree, bool inverse);
+	void EdgeTransformation(Matrixcd& B_inv, const Edge& edge, bool inverse) const;
+	void EdgeTransformation(MatrixTreecd& B_inv, const Tree& tree, bool inverse) const;
 
-	void GridTransformation(Wavefunction& Psi, const Tree& tree, bool inverse = false);
-
-	void GridTransformationLocal(Tensorcd& Phi, const Node& node, bool inverse = false);
+	void GridTransformation(Wavefunction& Psi, const Tree& tree, bool inverse = false) const;
+	void GridTransformationLocal(Tensorcd& Phi, const Node& node, bool inverse = false) const;
 };
 
 

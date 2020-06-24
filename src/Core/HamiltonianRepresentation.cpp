@@ -26,12 +26,6 @@ Tensorcd Apply(const Hamiltonian& H, const Tensorcd& Phi,
 	return dPhi;
 }
 
-Tensorcd ApplyCDVR(const Hamiltonian& H, const Tensorcd& Phi,
-	const HamiltonianRepresentation& hRep,
-	const Node& node) {
-	Tensorcd xi = hRep.
-}
-
 Matrixcd Expectation(const HamiltonianRepresentation& hRep,
 	const Wavefunction& Psi, const Hamiltonian& H, const Tree& tree) {
 

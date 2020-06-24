@@ -162,15 +162,12 @@ namespace cdvr_functions {
 		return VXi;
 	}
 
-	TensorTreecd Apply(const ExplicitEdgeWavefunction& Chi,
+	TensorTreecd Apply(const Wavefunction& Psi, const TensorTreecd& Cdown,
 		const TensorTreecd& V, const DeltaVTree& DeltaVs, const Tree& tree) {
 
-		const TensorTreecd& C = Chi.TopDownNormalized(tree);
-		TensorTreecd Psi = Chi.BottomUpNormalized(tree);
-		TensorTreecd VPsi = Psi;
-
+		Wavefunction VPsi = Psi;
 		for (const Node& node : tree) {
-			VPsi[node] = Apply(Psi[node], V[node], C, DeltaVs, node);
+			VPsi[node] = Apply(Psi[node], V[node], Cdown, DeltaVs, node);
 		}
 
 		return VPsi;

@@ -18,6 +18,8 @@ public:
 
 	Tensorcd Apply(Tensorcd Phi, const Node& node) const;
 
+	TensorTreecd Apply(const Wavefunction& Psi, const Tree& tree) const;
+
 	TDDVR tddvr_;
 
 private:
