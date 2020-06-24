@@ -16,6 +16,8 @@ public:
 
 	void Update(const Wavefunction& Psi, const Potential& V, const Tree& tree, size_t part = 0);
 
+	Tensorcd Apply(Tensorcd Phi, const Node& node) const;
+
 	TDDVR tddvr_;
 
 private:
@@ -23,6 +25,9 @@ private:
 	MatrixTreed Vedge_;
 
 	DeltaVTree deltaV_;
+
+	ExplicitEdgeWavefunction Chi_;
+	TensorTreecd Cdown_;
 };
 
 #endif //CDVR_H

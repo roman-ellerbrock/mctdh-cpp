@@ -5,7 +5,14 @@
 #include "ExplicitEdgeWavefunction.h"
 #include "TreeClasses/SpectralDecompositionTree.h"
 
-ExplicitEdgeWavefunction::ExplicitEdgeWavefunction(const Wavefunction& Psi, const Tree& tree, bool orthogonal) {
+ExplicitEdgeWavefunction::ExplicitEdgeWavefunction(const Wavefunction& Psi,
+	const Tree& tree, bool orthogonal) {
+	Initialize(Psi, tree, orthogonal);
+}
+
+void ExplicitEdgeWavefunction::Initialize(const Wavefunction& Psi,
+	const Tree& tree, bool orthogonal) {
+
 	/// Note: Requires orthogonal wavefunction representation (typically given)
 	assert(orthogonal);
 	Wavefunction& nodes_ = first;
@@ -24,7 +31,7 @@ ExplicitEdgeWavefunction::ExplicitEdgeWavefunction(const Wavefunction& Psi, cons
 		A = MatrixTensor(B[e], A, node.nChildren());
 	}
 
-	edges_= inverse(B, tree);
+	edges_ = inverse(B, tree);
 }
 
 TensorTreecd ExplicitEdgeWavefunction::TopDownNormalized(const Tree& tree) const {
@@ -60,7 +67,10 @@ bool IsWorking_bottomup(const ExplicitEdgeWavefunction& Psi, const Tree& tree, d
 	for (const Node& node : tree) {
 		auto x = Contraction(bottomup[node], bottomup[node], node.nChildren());
 		auto r = Residual(x, IdentityMatrixcd(x.Dim1()));
-		if (r > eps) { cerr << "bottom-up normalization failed.\n"; return false; }
+		if (r > eps) {
+			cerr << "bottom-up normalization failed.\n";
+			return false;
+		}
 	}
 	return true;
 }
@@ -71,7 +81,10 @@ bool IsWorking_topdown(const ExplicitEdgeWavefunction& Psi, const Tree& tree, do
 		const Node& node = e.down();
 		auto x = Contraction(topdown[node], topdown[node], node.childIdx());
 		auto r = Residual(x, IdentityMatrixcd(x.Dim1()));
-		if (r > eps) { cerr << "top-down normalization failed.\n"; return false; }
+		if (r > eps) {
+			cerr << "top-down normalization failed.\n";
+			return false;
+		}
 	}
 	return true;
 }

@@ -112,7 +112,7 @@ void TDDVR::GridTransformation(Wavefunction& Psi, const Tree& tree, bool inverse
 	}
 }
 
-void TDDVR::NodeTransformation(Tensorcd& Phi, const Node& node, bool inverse) {
+void TDDVR::NodeTransformation(Tensorcd& Phi, const Node& node, bool inverse) const {
 
 	/// Transform underlying A-coefficient
 	if (!node.isBottomlayer()) {
@@ -137,7 +137,7 @@ void TDDVR::NodeTransformation(Tensorcd& Phi, const Node& node, bool inverse) {
 
 }
 
-void TDDVR::EdgeTransformation(Matrixcd& B_inv, const Edge& edge, bool inverse) {
+void TDDVR::EdgeTransformation(Matrixcd& B_inv, const Edge& edge, bool inverse) const{
 	if (!inverse) {
 		B_inv = trafo_[edge].Transpose().Adjoint() * B_inv;
 		B_inv = B_inv * hole_trafo_[edge].Adjoint();

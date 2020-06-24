@@ -1,7 +1,7 @@
 #include "CDVRModelV.h"
 
-CDVRModelV::CDVRModelV(size_t f_)
-:f(f_)
+CDVRModelV::CDVRModelV(size_t f_, bool coupling)
+:f(f_), coupling_(coupling)
 {}
 
 double CDVRModelV::Evaluate(const Vectord & Xv, size_t part)const
@@ -13,8 +13,10 @@ double CDVRModelV::Evaluate(const Vectord & Xv, size_t part)const
 	for (int i = 0; i < f; i++)
 		v += 0.5*omega*omega*Xv(i)*Xv(i);
 
-	for (size_t i = 0; i < f; ++i) {
-		v += lambda*lambda*Xv(i)*Xv((i+1)%f);
+	if (coupling_) {
+		for (size_t i = 0; i < f; ++i) {
+			v += lambda * lambda * Xv(i) * Xv((i + 1) % f);
+		}
 	}
 
 	return v;

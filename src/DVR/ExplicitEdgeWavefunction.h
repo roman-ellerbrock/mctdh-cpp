@@ -14,6 +14,9 @@ public:
 	 * \brief All-normalized wavefunction representation with A\tilde's and B_inv's.
 	 */
 
+	void Initialize(const Wavefunction& Psi,
+		const Tree& tree, bool orthogonal);
+
 	const TensorTreecd& nodes()const { return first; }
 	TensorTreecd& nodes() { return first; }
 

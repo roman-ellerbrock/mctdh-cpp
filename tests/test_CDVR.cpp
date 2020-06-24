@@ -18,6 +18,5 @@ SUITE(CDVR) {
 
 		CDVR cdvr(Psi, V, tree);
 
-
 	}
 }

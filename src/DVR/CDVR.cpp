@@ -7,7 +7,7 @@
 using namespace cdvr_functions;
 
 CDVR::CDVR(const Wavefunction& Psi, const Potential& V, const Tree& tree, size_t part)
-	: tddvr_(Psi, tree), Vnode_(tree), Vedge_(tree), deltaV_(tree) {
+	: tddvr_(Psi, tree), Vnode_(tree), Vedge_(tree), deltaV_(tree), Chi_(Psi, tree, true) {
 	Update(Psi, V, tree, part);
 }
 
@@ -34,9 +34,7 @@ void UpdateNodeDVRLocal(Tensorcd& dvr, const TreeGrids& grids, const TreeGrids& 
 void UpdateNodeDVR(TensorTreecd& dvr, const TreeGrids& grids, const TreeGrids& holegrids,
 	const Potential& V, const Tree& tree, size_t part) {
 	for (const Node& node : tree) {
-		if (!node.isToplayer()) {
-			UpdateNodeDVRLocal(dvr[node], grids, holegrids, V, node, part);
-		}
+		UpdateNodeDVRLocal(dvr[node], grids, holegrids, V, node, part);
 	}
 }
 
@@ -66,23 +64,29 @@ void UpdateEdgeDVR(MatrixTreed& cdvr, const TreeGrids& grids, const TreeGrids& h
 void CDVR::Update(const Wavefunction& Psi, const Potential& V,
 	const Tree& tree, size_t part) {
 
+	/// Get Edge wavefunction
+	Chi_ = ExplicitEdgeWavefunction(Psi, tree, true);
+
 	/// Build X-matrices, diagonalize them simultaneously
 	tddvr_.Update(Psi, tree);
+
+	/// Transform to grid
+	tddvr_.GridTransformation(Chi_, tree);
+	Cdown_ = Chi_.TopDownNormalized(tree);
 
 	UpdateNodeDVR(Vnode_, tddvr_.grids_, tddvr_.hole_grids_, V, tree, part);
 
 	UpdateEdgeDVR(Vedge_, tddvr_.grids_, tddvr_.hole_grids_, V, tree, part);
 
-	ExplicitEdgeWavefunction Chi(Psi, tree, true);
-	tddvr_.GridTransformation(Chi, tree);
-
-	cdvr_functions::CalculateDeltaVs(deltaV_, Chi, Vnode_, Vedge_, tree);
-
-	cout << "deltaV:\n";
-	deltaV_.print(tree);
-	auto VPsi = cdvr_functions::Apply(Chi, Vnode_, deltaV_, tree);
-	auto Vmat = TreeFunctions::DotProduct(Psi, VPsi, tree);
-//	Vmat.print(tree);
-
+	cdvr_functions::CalculateDeltaVs(deltaV_, Chi_, Vnode_, Vedge_, tree);
 }
 
+Tensorcd CDVR::Apply(Tensorcd Phi, const Node& node) const {
+
+	tddvr_.NodeTransformation(Phi, node, false);
+
+	auto VXi = cdvr_functions::Apply(Phi, Vnode_[node], Cdown_, deltaV_, node);
+
+	tddvr_.NodeTransformation(VXi, node, false);
+	return VXi;
+}

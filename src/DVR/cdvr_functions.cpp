@@ -126,44 +126,40 @@ namespace cdvr_functions {
 	Tensorcd ApplyCorrection(const Tensorcd& Phi, const Tensorcd& C,
 		const Tensorcd& deltaV, const Node& child) {
 
+		/// I: Contract over
 		size_t k = child.childIdx();
 		const TensorShape& shape = deltaV.shape();
+		assert(C.shape().totalDimension() == Phi.shape().totalDimension());
+		size_t dim = shape[k];
 
-		child.info();
-		/// I: Contract over
 		Matrixcd X = Contraction(C, Phi, k);
-		cout << "X:\n";
-		X.print();
 
 		/// II: Apply DeltaV
-		size_t dim = shape[k];
 		Matrixcd Y(dim, dim);
 		for (size_t L = 0; L < shape.totalDimension(); ++L) {
 			const auto l = indexMapping(L, shape);
-			Y(l[0], l[1]) += deltaV(L) * X(l[2], l[3]);
+			Y(l[0], l[1]) += deltaV(L) * X(l[3], l[2]);
 		}
-		cout << "Y:\n";
-		Y.print();
 
 		/// III: M * C
 		Tensorcd VPhi = MatrixTensor(Y, C, k);
-		cout << "VPhi:\n";
-		VPhi.print();
 		return VPhi;
 	}
 
-	Tensorcd Apply(const Tensorcd& Phi, const Tensorcd& V,
+	Tensorcd Apply(const Tensorcd& Xi, const Tensorcd& V,
 		const TensorTreecd& Cdown, const DeltaVTree& deltaVs, const Node& node) {
 
-		Tensorcd VPhi = coeffprod(V, Phi);
+		/// TODO: V diagonal in last idx for toplayer
+		Tensorcd VXi = productElementwise(V, Xi);
 
 		if (!node.isBottomlayer()) {
 			for (size_t k = 0; k < node.nChildren(); ++k) {
 				const Node& child = node.child(k);
-				VPhi += ApplyCorrection(Phi, Cdown[child], deltaVs[child], child);
+				VXi += ApplyCorrection(Xi, Cdown[child], deltaVs[child], child);
 			}
 		}
-		return VPhi;
+
+		return VXi;
 	}
 
 	TensorTreecd Apply(const ExplicitEdgeWavefunction& Chi,
@@ -176,6 +172,7 @@ namespace cdvr_functions {
 		for (const Node& node : tree) {
 			VPsi[node] = Apply(Psi[node], V[node], C, DeltaVs, node);
 		}
+
 		return VPsi;
 	}
 }

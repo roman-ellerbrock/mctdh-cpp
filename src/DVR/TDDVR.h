@@ -60,6 +60,8 @@ public:
 		}
 	}
 
+	void NodeTransformation(Tensorcd& Phi, const Node& node, bool inverse)const;
+
 	TreeGrids grids_;
 	MatrixTreecd trafo_;
 
@@ -69,10 +71,9 @@ private:
 	XMatrixTrees Xs_;
 	MatrixTreecd rho_;
 
-	void NodeTransformation(Tensorcd& Phi, const Node& node, bool inverse);
 	void NodeTransformation(Wavefunction& Psi, const Tree& tree, bool inverse);
 
-	void EdgeTransformation(Matrixcd& B_inv, const Edge& edge, bool inverse);
+	void EdgeTransformation(Matrixcd& B_inv, const Edge& edge, bool inverse)const;
 	void EdgeTransformation(MatrixTreecd& B_inv, const Tree& tree, bool inverse);
 
 	void GridTransformation(Wavefunction& Psi, const Tree& tree, bool inverse = false);

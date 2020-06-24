@@ -23,6 +23,9 @@ namespace cdvr_functions {
 
 	TensorTreecd Apply(const ExplicitEdgeWavefunction& Chi, const TensorTreecd& V,
 		const DeltaVTree& DeltaVs, const Tree& tree);
+
+	Tensorcd Apply(const Tensorcd& Xi, const Tensorcd& V, const TensorTreecd& Cdown,
+		const DeltaVTree& deltaVs, const Node& node);
 }
 
 #endif //CDVR_FUNCTIONS_H
