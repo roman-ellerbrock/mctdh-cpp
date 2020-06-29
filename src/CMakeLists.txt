@@ -5,6 +5,8 @@ target_compile_features(mctdh_lib PRIVATE cxx_std_14)
 target_sources(mctdh_lib PUBLIC
         Core/CMFIntegrator.h
         Core/CMFIntegrator.cpp
+        Core/Eigenstates.h
+        Core/Eigenstates.cpp
         Core/LayerInterface.h
         Core/LayerInterface.cpp
         Core/Hamiltonian.h

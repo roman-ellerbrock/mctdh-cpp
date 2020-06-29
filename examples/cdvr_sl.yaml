@@ -1,6 +1,4 @@
 
-
-
 run:
   - job: tree
     type: manual
@@ -39,28 +37,31 @@ run:
       - mode: 0
         r0: 0.
         omega: 0.018
-        wfr0: 0
+        wfr0: 0.
         wfomega: 0.018
 
       - mode: 1
         r0: 0.
         omega: 0.018
-        wfr0: 0
+        wfr0: 0.
         wfomega: 0.018
 
       - mode: 2
         r0: 0.
         omega: 0.018
-        wfr0: 0
+        wfr0: 0.0
         wfomega: 0.018
 
       - mode: 3
         r0: 0.
         omega: 0.018
-        wfr0: 0
+        wfr0: 0.
         wfomega: 0.018
 
   - job: hamiltonian
+    name: kinetic_energy
+
+  - job: potential
     name: coupled_ho
 
   - job: wavefunction

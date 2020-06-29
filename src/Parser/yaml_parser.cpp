@@ -8,6 +8,28 @@
 #include "Hamiltonians.h"
 
 namespace parser {
+
+	template <typename T>
+	T evaluate(const YAML::Node& node, const string& key) {
+		T val;
+		if (auto par = node[key]) {
+			return par.as<T>();
+		} else {
+			cerr << "Did not specify key '" << key << "' in yaml node " << node << endl;
+			exit(3);
+		}
+	}
+
+	template <typename T>
+	T evaluate(const YAML::Node& node, const string& key, T default_) {
+		T val;
+		if (auto par = node[key]) {
+			return par.as<T>();
+		} else {
+			return default_;
+		}
+	}
+
 	Leaf create_leaf(const YAML::Node& yaml_node) {
 		auto dim = yaml_node["dim"].as<size_t>();
 		auto mode = yaml_node["mode"].as<size_t>();
@@ -80,12 +102,14 @@ namespace parser {
 	}
 
 	shared_ptr<Hamiltonian> read_hamiltonian(const YAML::Node& node, const Tree& tree) {
-		auto name = node["name"].as<string>();
+		auto name = evaluate<string>(node, "name");
 		shared_ptr<Hamiltonian> H_ptr(new Hamiltonian);
 		Hamiltonian& H = *H_ptr;
 
 		if (name == "coupled_ho") {
 			H = CoupledHO(tree);
+		} else if (name == "kinetic_energy") {
+			H = Operator::KineticEnergy(tree);
 		} else {
 			cerr << "No valid Hamiltonian name." << endl;
 			cerr << "Choices: (coupled_ho)" << endl;
@@ -96,11 +120,23 @@ namespace parser {
 
 	}
 
+	PotentialOperator set_potential(const YAML::Node& node, const Tree& tree) {
+		auto name = evaluate<string>(node, "name");
+		if (name == "coupled_ho") {
+			auto V = make_shared<CDVRModelV>(tree.nLeaves());
+			return PotentialOperator(V, 0, 0);
+		} else {
+			cerr << "Did not recognise potential energy operator name\n";
+			exit(1);
+		}
+		return PotentialOperator();
+	}
+
 	void new_wavefunction(mctdh_state& state, const YAML::Node& node) {
-		auto type = node["type"].as<string>();
-		auto name = node["name"].as<string>();
+		auto name = evaluate<string>(node, "name");
+		auto type = evaluate<string>(node, "type");
 		if (type == "read") {
-			auto filename = node["filename"].as<string>();
+			auto filename = evaluate<string>(node, "filename");
 			state.wavefunctions_[name] = Wavefunction(filename);
 		} else if (type == "create") {
 			state.wavefunctions_[name] = Wavefunction(state.rng_, state.tree_);
@@ -129,6 +165,9 @@ namespace parser {
 				state.tree_ = read_tree(node);
 			} else if (name  == "hamiltonian") {
 				state.hamiltonian_ = read_hamiltonian(node, state.tree_);
+			} else if (name == "potential") {
+				state.hamiltonian_->V_ = set_potential(node, state.tree_);
+				state.hamiltonian_->hasV = true;
 			} else if (name == "wavefunction") {
 				new_wavefunction(state, node);
 			}

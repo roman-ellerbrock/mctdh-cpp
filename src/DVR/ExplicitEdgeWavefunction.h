@@ -9,6 +9,7 @@
 
 class ExplicitEdgeWavefunction : public pair<Wavefunction, MatrixTreecd> {
 public:
+	ExplicitEdgeWavefunction() = default;
 	ExplicitEdgeWavefunction(const Wavefunction& Psi, const Tree& tree, bool orthogonal);
 	/**
 	 * \brief All-normalized wavefunction representation with A\tilde's and B_inv's.
@@ -22,6 +23,8 @@ public:
 
 	const MatrixTreecd& edges()const { return second; }
 	MatrixTreecd& edges() { return second; }
+
+	const TensorTreecd& DensityWeighted() const { return nodes(); }
 
 	TensorTreecd TopDownNormalized(const Tree& tree) const;
 

@@ -9,6 +9,8 @@
 add_library(Operators Operators.h
         CoupledHO/CoupledHO.cpp
         CoupledHO/CoupledHO.h
+        PhysicalSystems/StandardOperatorLibrary.cpp
+        PhysicalSystems/StandardOperatorLibrary.h
         )
 
 target_compile_features(Operators PRIVATE cxx_std_14)

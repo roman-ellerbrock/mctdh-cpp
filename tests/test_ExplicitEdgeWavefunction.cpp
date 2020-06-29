@@ -10,7 +10,7 @@ SUITE (ExplicitEdgeWavefunction) {
 	double eps = 1e-7;
 
 	TEST (Init) {
-		string yaml_filename("../examples/ho_sl.yaml");
+		string yaml_filename("../examples/test_ExplicitEdgeWavefunction.yaml");
 		auto state = parser::run(yaml_filename);
 		auto Psi = state.wavefunctions_["Psi"];
 		const auto& tree = state.tree_;

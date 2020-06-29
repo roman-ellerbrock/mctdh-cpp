@@ -23,6 +23,14 @@ Tensorcd Apply(const Hamiltonian& H, const Tensorcd& Phi,
 			dPhi += Psi;
 		}
 	}
+
+	if (H.hasV) {
+		auto x_sqrt_rho = sqrt(hRep.rho_decomposition_[node]);
+		x_sqrt_rho.second = Regularize(x_sqrt_rho.second, 1e-6);
+		auto sqrt_rho = toMatrix(x_sqrt_rho);
+		auto VPhi = hRep.cdvr_.Apply(Phi, sqrt_rho, node);
+		dPhi += VPhi;
+	}
 	return dPhi;
 }
 

@@ -1,5 +1,5 @@
 #pragma once
-#include "DVR/Potential.h"
+#include "TreeOperators/Potential.h"
 
 class CDVRModelV :
 	public Potential

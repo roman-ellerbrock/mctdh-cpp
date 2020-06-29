@@ -1,11 +1,9 @@
 
-
-
 run:
   - job: tree
     type: manual
     tree:
-      dim: 1
+      dim: 2
       children:
         - type: node
           dim: 2
@@ -61,6 +59,9 @@ run:
         wfomega: 0.018
 
   - job: hamiltonian
+    name: kinetic_energy
+
+  - job: potential
     name: coupled_ho
 
   - job: wavefunction

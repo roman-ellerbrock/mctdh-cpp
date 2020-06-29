@@ -6,8 +6,8 @@
 #include <chrono>
 #include "TreeClasses/TreeIO.h"
 
-CMFIntegrator::CMFIntegrator(const Hamiltonian& H, const Tree& tree,
-	complex<double> phase)
+CMFIntegrator::CMFIntegrator(const Hamiltonian& H,
+	const Tree& tree, complex<double> phase)
 	: matrices_(H, tree), tconst_(0.25), max_increase_(2.25) {
 	for (const Node& node : tree) {
 		interfaces_.emplace_back(LayerInterface(H, matrices_, node, phase));
@@ -167,20 +167,27 @@ void CMFIntegrator::Integrate(IntegratorVariables& job, ostream& os) {
 	job.dt = dt;
 }
 
-void CMFIntegrator::CMFstep(Wavefunction& Psi, double time, double timeend, double accuracy_leaf, const Tree& tree) {
+void CMFIntegrator::CMFstep(Wavefunction& Psi, double time, double timeend,
+	double accuracy_leaf, const Tree& tree) {
 	//Derivative for standard mctdh nodes
-	function<void(LayerInterface&, const double, Tensorcd&, const Tensorcd&)> ddt = &LayerInterface::Derivative;
+	function<void(LayerInterface&, const double, Tensorcd&, const Tensorcd&)> ddt =
+		&LayerInterface::Derivative;
 
 	//Error function for standard MCTDH nodes
-	function<double(const LayerInterface&, const Tensorcd&, const Tensorcd&)> Delta = &LayerInterface::Error;
+	function<double(const LayerInterface&, const Tensorcd&, const Tensorcd&)> Delta =
+		&LayerInterface::Error;
 
+	bool eom_spf = false;
 	// Integrate on every layer_ with constant matrices
 	for (const Node& node : tree) {
-		LayerInterface I = interfaces_[node.Address()];
-		bs_integrator& layer_bs = bs_integrators_[node.Address()];
-		Tensorcd& Phi = Psi[node];
-		double layertime = time;
-		layer_bs.Integrate(Phi, layertime, timeend, dt_bs_[node.Address()], accuracy_leaf, ddt, Delta, I);
+		if (node.isToplayer() || eom_spf) {
+			LayerInterface I = interfaces_[node.Address()];
+			bs_integrator& layer_bs = bs_integrators_[node.Address()];
+			Tensorcd& Phi = Psi[node];
+			double layertime = time;
+			layer_bs.Integrate(Phi, layertime, timeend, dt_bs_[node.Address()],
+				accuracy_leaf, ddt, Delta, I);
+		}
 	}
 	Orthogonal(Psi, tree);
 }

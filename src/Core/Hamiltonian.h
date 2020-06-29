@@ -4,8 +4,11 @@
 class Hamiltonian : public SOPcd
 {
 public:
-	Hamiltonian() = default;
+	Hamiltonian() : hasV(false) {}
 	~Hamiltonian() = default;
+
+	PotentialOperator V_;
+	bool hasV;
 
 	using SOPcd::operator=;
 

@@ -10,12 +10,12 @@
 #include "TreeClasses/MatrixTreeFunctions.h"
 #include "TreeClasses/SpectralDecompositionTree.h"
 #include "Util/QMConstants.h"
+#include "DVR/CDVR.h"
 
 class HamiltonianRepresentation {
 public:
 	HamiltonianRepresentation(const Hamiltonian& H, const Tree& tree)
-		: rho_(tree),
-		  rho_decomposition_(tree), rho_inverse_(tree) {
+		: rho_(tree), rho_decomposition_(tree), rho_inverse_(tree), cdvr_(tree) {
 		for (const auto& M : H) {
 			hMats_.emplace_back(SparseMatrixTreecd(M, tree));
 			hContractions_.emplace_back(SparseMatrixTreecd(M, tree));
@@ -39,6 +39,9 @@ public:
 
 		/// Calculate h-matrix tree contractions
 		TreeFunctions::Contraction(hContractions_, hMats_, Psi, Psi, tree);
+
+		/// Calculate CDVR
+		if (H.hasV) { cdvr_.Update(Psi, H.V_, tree); }
 	}
 
 	void print(const Tree& tree, ostream& os = cout) {
@@ -59,6 +62,8 @@ public:
 	MatrixTreecd rho_inverse_;
 	SparseMatrixTreescd hMats_;
 	SparseMatrixTreescd hContractions_;
+
+	CDVR cdvr_;
 };
 
 Tensorcd Apply(const Hamiltonian& H, const Tensorcd& Phi,

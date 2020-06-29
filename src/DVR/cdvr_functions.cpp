@@ -126,6 +126,44 @@ namespace cdvr_functions {
 	Tensorcd ApplyCorrection(const Tensorcd& Phi, const Tensorcd& C,
 		const Tensorcd& deltaV, const Node& child) {
 
+		/**
+		 * Bug analysis:
+		 * works for:
+		 * - Hartree approximation
+		 *
+		 * fails for:
+		 * - more than one SPF per dof
+		 *
+		 * Possible bugs:
+		 * - Cdown
+		 * - deltaV calculated wrong
+		 * - I: X
+		 * - II: Y
+		 * - III: VPhi
+		 * - grid representation of..
+		 * 		- C
+		 * 		- Phi
+		 * 		- DeltaV components
+		 * 	- norm-related issues
+		 * 	- Edgewavefunction issues
+		 * 	- regularization issues (WSD, TDDVR, edgewavefunction, ...?)
+		 *
+		 * possible additional tests (TODO):
+		 * - Does expectation value of more complex starting wavefunctions work
+		 * 		- norm != 1
+		 * 		- non-Hartree
+		 * - Compare eom values for SOP operator & CDVR
+		 * - Test grid representation for nontrivial
+		 * - uncoupled HO, multiple states (SPF eom only!)
+		 * - unweighted simul diag
+		 *
+		 * External TODOs:
+		 * - Check grid representation and node-potential for failing wavefunction
+		 * - Check explicitedgewavefunctionn for nontrivial case
+		 *
+		 * Is it rather something internal (plugging matrices together) or external (TDDVR, edgewavefunction,...)?
+		 * */
+
 		/// I: Contract over
 		size_t k = child.childIdx();
 		const TensorShape& shape = deltaV.shape();
@@ -143,6 +181,7 @@ namespace cdvr_functions {
 
 		/// III: M * C
 		Tensorcd VPhi = MatrixTensor(Y, C, k);
+//		Tensorcd VPhi = TensorMatrix(C, Y, k);
 		return VPhi;
 	}
 
@@ -155,7 +194,8 @@ namespace cdvr_functions {
 		if (!node.isBottomlayer()) {
 			for (size_t k = 0; k < node.nChildren(); ++k) {
 				const Node& child = node.child(k);
-				VXi += ApplyCorrection(Xi, Cdown[child], deltaVs[child], child);
+				Tensorcd DeltaXi = ApplyCorrection(Xi, Cdown[child], deltaVs[child], child);
+//				VXi += DeltaXi;
 			}
 		}
 
@@ -172,5 +212,6 @@ namespace cdvr_functions {
 
 		return VPsi;
 	}
+
 }
 

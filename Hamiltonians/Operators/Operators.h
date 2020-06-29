@@ -1,4 +1,5 @@
 #include "CoupledHO/CoupledHO.h"
+#include "PhysicalSystems/StandardOperatorLibrary.h"
 /*#include "NOCl/NOCl.h"
 #include "CH3_meanfield/CH3_meanfield.h"
 #include "CH3_quasiexact/CH3_quasiexact.h"
