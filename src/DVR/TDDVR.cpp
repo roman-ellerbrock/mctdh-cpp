@@ -56,13 +56,15 @@ void LayerGrid(TreeGrids& grids, Matrixcd& trafo, const vector<SparseMatrixTreec
 	auto diags = WeightedSimultaneousDiagonalization::Calculate(xs, w, 1e-12);
 	setGrids(grids, diags.second, node);
 	trafo = diags.first;
+	trafo = trafo.Adjoint();
 }
 
 void UpdateGrids(TreeGrids& grids, MatrixTreecd& trafo, const vector<SparseMatrixTreecd>& Xs,
 	const MatrixTreecd* rho_ptr, const Tree& tree) {
 	for (const Node& node : tree) {
 		if (!node.isToplayer()) {
-			if (rho_ptr == nullptr) {
+			if ((rho_ptr == nullptr) || node.isBottomlayer()) {
+//			if ((rho_ptr == nullptr) ) {
 				LayerGrid(grids, trafo[node], Xs, nullptr, node);
 	 		} else {
 				LayerGrid(grids, trafo[node], Xs, &rho_ptr->operator[](node), node);
@@ -193,6 +195,7 @@ void TDDVR::print(const Tree& tree) const {
 			cout << endl;
 		}
 	}
+
 }
 
 

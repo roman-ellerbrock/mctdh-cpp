@@ -6,31 +6,31 @@ run:
       dim: 1
       children:
         - type: node
-          dim: 2
+          dim: 4
           children:
             - type: leaf
-              dim: 6
+              dim: 4
               leaftype: 0
               mode: 0
         - type: node
-          dim: 2
+          dim: 4
           children:
             - type: leaf
-              dim: 6
+              dim: 4
               leaftype: 0
               mode: 1
         - type: node
-          dim: 2
+          dim: 4
           children:
             - type: leaf
-              dim: 6
+              dim: 4
               leaftype: 0
               mode: 2
         - type: node
-          dim: 2
+          dim: 4
           children:
             - type: leaf
-              dim: 6
+              dim: 4
               leaftype: 0
               mode: 3
     leaves:

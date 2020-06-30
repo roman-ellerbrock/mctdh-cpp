@@ -140,6 +140,7 @@ namespace cdvr_functions {
 		 * - I: X
 		 * - II: Y
 		 * - III: VPhi
+		 * - Equations I,II, III could be wrong
 		 * - grid representation of..
 		 * 		- C
 		 * 		- Phi

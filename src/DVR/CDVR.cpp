@@ -30,8 +30,10 @@ void UpdateNodeDVRLocal(Tensorcd& dvr, const TreeGrids& grids, const TreeGrids& 
 	for (size_t I = 0; I < shape.totalDimension(); ++I) {
 		auto idxs = indexMapping(I, shape);
 		fillXNode(X, idxs, grids, holegrids, node);
+		X.print();
 		dvr(I) = V.Evaluate(X, part);
 	}
+	cout << endl;
 }
 
 void UpdateNodeDVR(TensorTreecd& dvr, const TreeGrids& grids, const TreeGrids& holegrids,
@@ -89,13 +91,17 @@ void CDVR::Update(const Wavefunction& Psi, const PotentialOperator& V,
 
 Tensorcd CDVR::Apply(Tensorcd Phi, const Matrixcd& sqrho, const Node& node) const {
 
-	Phi = MatrixTensor(sqrho, Phi, node.nChildren());
+	if (!node.isToplayer()) {
+		Phi = MatrixTensor(sqrho, Phi, node.nChildren());
+	}
 	tddvr_.NodeTransformation(Phi, node, false);
 
 	auto VXi = cdvr_functions::Apply(Phi, Vnode_[node], Cdown_, deltaV_, node);
 
 	tddvr_.NodeTransformation(VXi, node, true);
-	VXi = TensorMatrix(VXi, sqrho, node.nChildren());
+	if (!node.isToplayer()) {
+		VXi = TensorMatrix(VXi, sqrho, node.nChildren());
+	}
 	return VXi;
 }
 
