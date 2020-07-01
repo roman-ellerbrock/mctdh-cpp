@@ -28,29 +28,30 @@ namespace Operator {
 	}
 
 // dissociation (R)
-	Tensorcd qd1(const LeafInterface& grid, const Tensorcd& Acoeffs) {
-		return Applyqd(grid, Acoeffs, 1);
+	void qd1(const LeafInterface& grid, Tensorcd& hA, const Tensorcd& Acoeffs) {
+		hA = Applyqd(grid, Acoeffs, 1);
 	}
 
-	Tensorcd qd2(const LeafInterface& grid, const Tensorcd& Acoeffs) {
-		return Applyqd(grid, Acoeffs, 2);
+	void qd2(const LeafInterface& grid, Tensorcd& hA, const Tensorcd& Acoeffs) {
+		hA = Applyqd(grid, Acoeffs, 2);
 	}
 
-	Tensorcd qd3(const LeafInterface& grid, const Tensorcd& Acoeffs) {
-		return Applyqd(grid, Acoeffs, 3);
+	void qd3(const LeafInterface& grid, Tensorcd& hA, const Tensorcd& Acoeffs) {
+		hA = Applyqd(grid, Acoeffs, 3);
 	}
 
-	Tensorcd qd4(const LeafInterface& grid, const Tensorcd& Acoeffs) {
-		return Applyqd(grid, Acoeffs, 4);
+	void qd4(const LeafInterface& grid, Tensorcd& hA, const Tensorcd& Acoeffs) {
+		hA = Applyqd(grid, Acoeffs, 4);
 	}
 
-	Tensorcd qdminus(const LeafInterface& grid, const Tensorcd& Acoeffs) {
-		Tensorcd xAcoeffs = qd1(grid, Acoeffs);
-		return (Acoeffs - xAcoeffs);
+	Tensorcd qdminus(const LeafInterface& grid, Tensorcd& hA, const Tensorcd& Acoeffs) {
+		Tensorcd xAcoeffs(Acoeffs.shape());
+		qd1(grid, xAcoeffs, Acoeffs);
+		hA = (Acoeffs - xAcoeffs);
 	}
 
 // vibration (r)
-	Tensorcd const Applyqv(const LeafInterface& grid, const Tensorcd& Acoeffs, int exponent) {
+	Tensorcd Applyqv(const LeafInterface& grid, const Tensorcd& Acoeffs, int exponent) {
 		const Vectord& x = grid.GetX();
 		Tensorcd xAcoeffs(Acoeffs);
 		// mu stuff
@@ -71,24 +72,24 @@ namespace Operator {
 		return xAcoeffs;
 	}
 
-	Tensorcd qv1(const LeafInterface& grid, const Tensorcd& Acoeffs) {
-		return Applyqv(grid, Acoeffs, 1);
+	void qv1(const LeafInterface& grid, Tensorcd& hA, const Tensorcd& Acoeffs) {
+		hA = Applyqv(grid, Acoeffs, 1);
 	}
 
-	Tensorcd qv2(const LeafInterface& grid, const Tensorcd& Acoeffs) {
-		return Applyqv(grid, Acoeffs, 2);
+	void qv2(const LeafInterface& grid, Tensorcd& hA, const Tensorcd& Acoeffs) {
+		hA = Applyqv(grid, Acoeffs, 2);
 	}
 
-	Tensorcd qv3(const LeafInterface& grid, const Tensorcd& Acoeffs) {
-		return Applyqv(grid, Acoeffs, 3);
+	void qv3(const LeafInterface& grid, Tensorcd& hA, const Tensorcd& Acoeffs) {
+		hA = Applyqv(grid, Acoeffs, 3);
 	}
 
-	Tensorcd qv4(const LeafInterface& grid, const Tensorcd& Acoeffs) {
-		return Applyqv(grid, Acoeffs, 4);
+	void qv4(const LeafInterface& grid, Tensorcd& hA, const Tensorcd& Acoeffs) {
+		hA = Applyqv(grid, Acoeffs, 4);
 	}
 
 // Parts for the moments of inertia
-	Tensorcd recrsq(const LeafInterface& grid, const Tensorcd& Acoeffs) {
+	void recrsq(const LeafInterface& grid, Tensorcd& hA, const Tensorcd& Acoeffs) {
 
 		const Vectord& x = grid.GetX();
 		Tensorcd xAcoeffs(Acoeffs);
@@ -97,10 +98,10 @@ namespace Operator {
 				xAcoeffs(i, n) /= x(i) * x(i);
 			}
 		}
-		return xAcoeffs;
+		hA = xAcoeffs;
 	}
 
-	Tensorcd ApplyW00(const LeafInterface& grid, const Tensorcd& Acoeff) {
+	void ApplyW00(const LeafInterface& grid, Tensorcd& hA, const Tensorcd& Acoeff) {
 		const Vectord& x = grid.GetX();
 		const double beta = 1.1;
 		const double rthetae = -0.60737584;
@@ -123,10 +124,10 @@ namespace Operator {
 				hAcoeff(i, n) = factor * Acoeff(i, n);
 			}
 		}
-		return hAcoeff;
+		hA = hAcoeff;
 	}
 
-	Tensorcd ApplyW01(const LeafInterface& grid, const Tensorcd& Acoeff) {
+	void ApplyW01(const LeafInterface& grid, Tensorcd& hA, const Tensorcd& Acoeff) {
 		const Vectord& x = grid.GetX();
 		const double beta = 1.1;
 		const double rthetae = -0.60737584;
@@ -149,10 +150,10 @@ namespace Operator {
 				hAcoeff(i, n) = factor * Acoeff(i, n);
 			}
 		}
-		return hAcoeff;
+		hA = hAcoeff;
 	}
 
-	Tensorcd ApplyW02(const LeafInterface& grid, const Tensorcd& Acoeff) {
+	void ApplyW02(const LeafInterface& grid, Tensorcd& hA, const Tensorcd& Acoeff) {
 		const Vectord& x = grid.GetX();
 		const double beta = 1.1;
 		const double rthetae = -0.60737584;
@@ -175,10 +176,10 @@ namespace Operator {
 				hAcoeff(i, n) = factor * Acoeff(i, n);
 			}
 		}
-		return hAcoeff;
+		hA = hAcoeff;
 	}
 
-	Tensorcd ApplyW03(const LeafInterface& grid, const Tensorcd& Acoeff) {
+	void ApplyW03(const LeafInterface& grid, Tensorcd& hA, const Tensorcd& Acoeff) {
 		const Vectord& x = grid.GetX();
 		const double beta = 1.1;
 		const double rthetae = -0.60737584;
@@ -201,10 +202,10 @@ namespace Operator {
 				hAcoeff(i, n) = factor * Acoeff(i, n);
 			}
 		}
-		return hAcoeff;
+		hA = hAcoeff;
 	}
 
-	Tensorcd ApplyW04(const LeafInterface& grid, const Tensorcd& Acoeff) {
+	void ApplyW04(const LeafInterface& grid, Tensorcd& hA, const Tensorcd& Acoeff) {
 		const Vectord& x = grid.GetX();
 		const double beta = 1.1;
 		const double rthetae = -0.60737584;
@@ -227,10 +228,10 @@ namespace Operator {
 				hAcoeff(i, n) = factor * Acoeff(i, n);
 			}
 		}
-		return hAcoeff;
+		hA = hAcoeff;
 	}
 
-	Tensorcd ApplyW10(const LeafInterface& grid, const Tensorcd& Acoeff) {
+	void ApplyW10(const LeafInterface& grid, Tensorcd& hA, const Tensorcd& Acoeff) {
 		const Vectord& x = grid.GetX();
 		const double beta = 1.1;
 		const double rthetae = -0.60737584;
@@ -253,10 +254,10 @@ namespace Operator {
 				hAcoeff(i, n) = factor * Acoeff(i, n);
 			}
 		}
-		return hAcoeff;
+		hA = hAcoeff;
 	}
 
-	Tensorcd ApplyW11(const LeafInterface& grid, const Tensorcd& Acoeff) {
+	void ApplyW11(const LeafInterface& grid, Tensorcd& hA, const Tensorcd& Acoeff) {
 		const Vectord& x = grid.GetX();
 		const double beta = 1.1;
 		const double rthetae = -0.60737584;
@@ -279,10 +280,10 @@ namespace Operator {
 				hAcoeff(i, n) = factor * Acoeff(i, n);
 			}
 		}
-		return hAcoeff;
+		hA = hAcoeff;
 	}
 
-	Tensorcd ApplyW12(const LeafInterface& grid, const Tensorcd& Acoeff) {
+	void ApplyW12(const LeafInterface& grid, Tensorcd& hA, const Tensorcd& Acoeff) {
 		const Vectord& x = grid.GetX();
 		const double beta = 1.1;
 		const double rthetae = -0.60737584;
@@ -305,10 +306,10 @@ namespace Operator {
 				hAcoeff(i, n) = factor * Acoeff(i, n);
 			}
 		}
-		return hAcoeff;
+		hA = hAcoeff;
 	}
 
-	Tensorcd ApplyW13(const LeafInterface& grid, const Tensorcd& Acoeff) {
+	void ApplyW13(const LeafInterface& grid, Tensorcd& hA, const Tensorcd& Acoeff) {
 		const Vectord& x = grid.GetX();
 		const double beta = 1.1;
 		const double rthetae = -0.60737584;
@@ -331,10 +332,10 @@ namespace Operator {
 				hAcoeff(i, n) = factor * Acoeff(i, n);
 			}
 		}
-		return hAcoeff;
+		hA = hAcoeff;
 	}
 
-	Tensorcd ApplyW14(const LeafInterface& grid, const Tensorcd& Acoeff) {
+	void ApplyW14(const LeafInterface& grid, Tensorcd& hA, const Tensorcd& Acoeff) {
 		const Vectord& x = grid.GetX();
 		const double beta = 1.1;
 		const double rthetae = -0.60737584;
@@ -357,10 +358,10 @@ namespace Operator {
 				hAcoeff(i, n) = factor * Acoeff(i, n);
 			}
 		}
-		return hAcoeff;
+		hA = hAcoeff;
 	}
 
-	Tensorcd ApplyW20(const LeafInterface& grid, const Tensorcd& Acoeff) {
+	void ApplyW20(const LeafInterface& grid, Tensorcd& hA, const Tensorcd& Acoeff) {
 		const Vectord& x = grid.GetX();
 		const double beta = 1.1;
 		const double rthetae = -0.60737584;
@@ -383,10 +384,10 @@ namespace Operator {
 				hAcoeff(i, n) = factor * Acoeff(i, n);
 			}
 		}
-		return hAcoeff;
+		hA = hAcoeff;
 	}
 
-	Tensorcd ApplyW21(const LeafInterface& grid, const Tensorcd& Acoeff) {
+	void ApplyW21(const LeafInterface& grid, Tensorcd& hA, const Tensorcd& Acoeff) {
 		const Vectord& x = grid.GetX();
 		const double beta = 1.1;
 		const double rthetae = -0.60737584;
@@ -409,10 +410,10 @@ namespace Operator {
 				hAcoeff(i, n) = factor * Acoeff(i, n);
 			}
 		}
-		return hAcoeff;
+		hA = hAcoeff;
 	}
 
-	Tensorcd ApplyW22(const LeafInterface& grid, const Tensorcd& Acoeff) {
+	void ApplyW22(const LeafInterface& grid, Tensorcd& hA, const Tensorcd& Acoeff) {
 		const Vectord& x = grid.GetX();
 		const double beta = 1.1;
 		const double rthetae = -0.60737584;
@@ -435,10 +436,10 @@ namespace Operator {
 				hAcoeff(i, n) = factor * Acoeff(i, n);
 			}
 		}
-		return hAcoeff;
+		hA = hAcoeff;
 	}
 
-	Tensorcd ApplyW23(const LeafInterface& grid, const Tensorcd& Acoeff) {
+	void ApplyW23(const LeafInterface& grid, Tensorcd& hA, const Tensorcd& Acoeff) {
 		const Vectord& x = grid.GetX();
 		const double beta = 1.1;
 		const double rthetae = -0.60737584;
@@ -461,10 +462,10 @@ namespace Operator {
 				hAcoeff(i, n) = factor * Acoeff(i, n);
 			}
 		}
-		return hAcoeff;
+		hA = hAcoeff;
 	}
 
-	Tensorcd ApplyW24(const LeafInterface& grid, const Tensorcd& Acoeff) {
+	void ApplyW24(const LeafInterface& grid, Tensorcd& hA, const Tensorcd& Acoeff) {
 		const Vectord& x = grid.GetX();
 		const double beta = 1.1;
 		const double rthetae = -0.60737584;
@@ -487,10 +488,10 @@ namespace Operator {
 				hAcoeff(i, n) = factor * Acoeff(i, n);
 			}
 		}
-		return hAcoeff;
+		hA = hAcoeff;
 	}
 
-	Tensorcd ApplyW30(const LeafInterface& grid, const Tensorcd& Acoeff) {
+	void ApplyW30(const LeafInterface& grid, Tensorcd& hA, const Tensorcd& Acoeff) {
 		const Vectord& x = grid.GetX();
 		const double beta = 1.1;
 		const double rthetae = -0.60737584;
@@ -513,10 +514,10 @@ namespace Operator {
 				hAcoeff(i, n) = factor * Acoeff(i, n);
 			}
 		}
-		return hAcoeff;
+		hA = hAcoeff;
 	}
 
-	Tensorcd ApplyW31(const LeafInterface& grid, const Tensorcd& Acoeff) {
+	void ApplyW31(const LeafInterface& grid, Tensorcd& hA, const Tensorcd& Acoeff) {
 		const Vectord& x = grid.GetX();
 		const double beta = 1.1;
 		const double rthetae = -0.60737584;
@@ -539,10 +540,10 @@ namespace Operator {
 				hAcoeff(i, n) = factor * Acoeff(i, n);
 			}
 		}
-		return hAcoeff;
+		hA = hAcoeff;
 	}
 
-	Tensorcd ApplyW32(const LeafInterface& grid, const Tensorcd& Acoeff) {
+	void ApplyW32(const LeafInterface& grid, Tensorcd& hA, const Tensorcd& Acoeff) {
 		const Vectord& x = grid.GetX();
 		const double beta = 1.1;
 		const double rthetae = -0.60737584;
@@ -565,10 +566,10 @@ namespace Operator {
 				hAcoeff(i, n) = factor * Acoeff(i, n);
 			}
 		}
-		return hAcoeff;
+		hA = hAcoeff;
 	}
 
-	Tensorcd ApplyW33(const LeafInterface& grid, const Tensorcd& Acoeff) {
+	void ApplyW33(const LeafInterface& grid, Tensorcd& hA, const Tensorcd& Acoeff) {
 		const Vectord& x = grid.GetX();
 		const double beta = 1.1;
 		const double rthetae = -0.60737584;
@@ -591,10 +592,10 @@ namespace Operator {
 				hAcoeff(i, n) = factor * Acoeff(i, n);
 			}
 		}
-		return hAcoeff;
+		hA = hAcoeff;
 	}
 
-	Tensorcd ApplyW34(const LeafInterface& grid, const Tensorcd& Acoeff) {
+	void ApplyW34(const LeafInterface& grid, Tensorcd& hA, const Tensorcd& Acoeff) {
 		const Vectord& x = grid.GetX();
 		const double beta = 1.1;
 		const double rthetae = -0.60737584;
@@ -617,10 +618,10 @@ namespace Operator {
 				hAcoeff(i, n) = factor * Acoeff(i, n);
 			}
 		}
-		return hAcoeff;
+		hA = hAcoeff;
 	}
 
-	Tensorcd ApplyNOpotential(const LeafInterface& grid, const Tensorcd& Acoeff) {
+	void ApplyNOpotential(const LeafInterface& grid, Tensorcd& hA, const Tensorcd& Acoeff) {
 		const Vectord& x = grid.GetX();
 		// mu stuff
 		const double mh = 1836.;
@@ -646,7 +647,7 @@ namespace Operator {
 				hAcoeff(i, n) = factor * Acoeff(i, n);
 			}
 		}
-		return hAcoeff;
+		hA = hAcoeff;
 	}
 
 /*	Vectord NOCl::getW(vector<double> coeffs, const LeafInterface& grid)
