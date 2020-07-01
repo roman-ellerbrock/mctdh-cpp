@@ -8,28 +8,28 @@ run:
       dim: 1
       children:
         - type: node
-          dim: 4
+          dim: 2
           children:
             - type: leaf
               dim: 6
               leaftype: 0
               mode: 0
         - type: node
-          dim: 4
+          dim: 2
           children:
             - type: leaf
               dim: 6
               leaftype: 0
               mode: 1
         - type: node
-          dim: 4
+          dim: 2
           children:
             - type: leaf
               dim: 6
               leaftype: 0
               mode: 2
         - type: node
-          dim: 4
+          dim: 2
           children:
             - type: leaf
               dim: 6

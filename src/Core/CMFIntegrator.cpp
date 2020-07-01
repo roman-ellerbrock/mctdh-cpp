@@ -177,7 +177,7 @@ void CMFIntegrator::CMFstep(Wavefunction& Psi, double time, double timeend,
 	function<double(const LayerInterface&, const Tensorcd&, const Tensorcd&)> Delta =
 		&LayerInterface::Error;
 
-	bool eom_spf = false;
+	bool eom_spf = true;
 	// Integrate on every layer_ with constant matrices
 	for (const Node& node : tree) {
 		if (node.isToplayer() || eom_spf) {

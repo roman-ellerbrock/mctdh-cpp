@@ -30,10 +30,8 @@ void UpdateNodeDVRLocal(Tensorcd& dvr, const TreeGrids& grids, const TreeGrids& 
 	for (size_t I = 0; I < shape.totalDimension(); ++I) {
 		auto idxs = indexMapping(I, shape);
 		fillXNode(X, idxs, grids, holegrids, node);
-		X.print();
 		dvr(I) = V.Evaluate(X, part);
 	}
-	cout << endl;
 }
 
 void UpdateNodeDVR(TensorTreecd& dvr, const TreeGrids& grids, const TreeGrids& holegrids,

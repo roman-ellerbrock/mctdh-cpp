@@ -9,6 +9,8 @@
 add_library(Operators Operators.h
         CoupledHO/CoupledHO.cpp
         CoupledHO/CoupledHO.h
+        Molecules/NOCl.cpp
+        Molecules/NOCl.h
         PhysicalSystems/StandardOperatorLibrary.cpp
         PhysicalSystems/StandardOperatorLibrary.h
         )
