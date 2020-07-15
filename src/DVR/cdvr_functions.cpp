@@ -3,6 +3,7 @@
 //
 
 #include "cdvr_functions.h"
+#include "Core/Tensor_Extension.h"
 
 namespace cdvr_functions {
 
@@ -62,12 +63,50 @@ namespace cdvr_functions {
 		fillX(X, idx.back(), holegrids, node);
 	}
 
-	void CalculateDeltaEdgeUpper(Tensorcd& deltaV, const Tensorcd& Cup,
-		const Tensorcd& Vnode, const Matrixd& Vedge, const Node& node) {
-		/// @TODO: Add recursion for DeltaVs
+	void DeltaEdgeCorrection(Tensorcd& deltaV, const Tensorcd& Cup,
+		const TensorTreecd& Cdown, const DeltaVTree& DeltaVs,
+		const Node& node) {
+
+		assert(!node.isBottomlayer());
+		const TensorShape& shape = node.shape();
+		for (size_t k = 0; k < node.nChildren(); ++k) {
+			const Node& child = node.child(k);
+			const Tensorcd& SubDeltaV = DeltaVs[child];
+			size_t dimc = shape[k];
+			size_t dimn = shape[node.nChildren()];
+
+			auto D = Tensor_Extension::DoubleHoleContraction(Cdown[child], Cup, k, node.nChildren());
+			auto F = Tensor_Extension::DoubleHoleContraction(Cup, Cdown[child], k, node.nChildren());
+
+			TensorShape eshape({dimc, dimc, dimn, dimn});
+			Tensorcd E(eshape);
+			for (size_t J = 0; J < eshape.totalDimension(); ++J) {
+				for (size_t l2 = 0; l2 < dimc; ++l2) {
+					for (size_t l1 = 0; l1 < dimc; ++l1) {
+						auto idx = indexMapping(J, eshape);
+						vector<size_t> vidx({idx[0], idx[1], l1, l2});
+						vector<size_t> didx({l2, idx[3], l1, idx[2]});
+						E(J) += SubDeltaV(vidx) * D(didx);
+					}
+				}
+			}
+
+			const TensorShape& vshape = deltaV.shape();
+			for (size_t I = 0; I < vshape.totalDimension(); ++I) {
+				for(size_t l1 = 0; l1 < dimc; ++l1) {
+					for (size_t l2 = 0; l2 < dimc; ++l2) {
+						auto idx = indexMapping(I, vshape);
+						vector<size_t> fidx({l1, idx[0], l2, idx[1]});
+						vector<size_t> eidx({l1, l2, idx[2], idx[3]});
+						deltaV(I) += F(fidx) * E(eidx);
+					}
+				}
+			}
+		}
+
 	}
 
-	void CalculateDeltaEdgeBottom(Tensorcd& deltaV, const Tensorcd& Cup,
+	void CalculateDeltaEdgeLocal(Tensorcd& deltaV, const Tensorcd& Cup,
 		const Tensorcd& Vnode, const Matrixd& Vedge, const Node& node) {
 		/**
 		 * \brief Calculate deltaV-tensor for bottomlayer node
@@ -88,7 +127,6 @@ namespace cdvr_functions {
 
 		/// Sanity checks
 		assert(!node.isToplayer());
-		assert(node.isBottomlayer());
 		assert(deltaV.shape().totalDimension() == pow(shape.lastDimension(), 4));
 
 		deltaV.Zero();
@@ -119,11 +157,17 @@ namespace cdvr_functions {
 		const Tree& tree) {
 
 		const TensorTreecd& Cup = Chi.BottomUpNormalized(tree);
+		const TensorTreecd& Cdown = Chi.TopDownNormalized(tree);
 		for (const Node& node : tree) {
 			if (node.isBottomlayer()) {
-				CalculateDeltaEdgeBottom(deltaVs[node], Cup[node],
+				CalculateDeltaEdgeLocal(deltaVs[node], Cup[node],
 					Vnodes[node], Vedges[node], node);
+
 			} else if (!node.isToplayer()) {
+				CalculateDeltaEdgeLocal(deltaVs[node], Cup[node],
+					Vnodes[node], Vedges[node], node);
+				DeltaEdgeCorrection(deltaVs[node], Cup[node], Cdown,
+					deltaVs, node);
 			}
 		}
 	}
@@ -135,9 +179,11 @@ namespace cdvr_functions {
 		size_t k = child.childIdx();
 		const TensorShape& shape = deltaV.shape();
 		assert(C.shape().totalDimension() == Phi.shape().totalDimension());
-		size_t dim = shape[k];
+		size_t dim = Phi.shape()[k];
 
 		Matrixcd X = Contraction(C, Phi, k);
+		assert(X.Dim1() == dim);
+		assert(X.Dim2() == dim);
 
 		/// II: Apply DeltaV
 		Matrixcd Y(dim, dim);
@@ -177,6 +223,5 @@ namespace cdvr_functions {
 
 		return VPsi;
 	}
-
 }
 

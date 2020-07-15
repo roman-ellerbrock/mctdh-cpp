@@ -1,0 +1,58 @@
+
+run:
+  - job: tree
+    type: manual
+    tree:
+      dim: 1
+      children:
+        - type: node
+          dim: 3
+          children:
+            - type: leaf
+              dim: 24
+              leaftype: 0
+              mode: 0
+        - type: node
+          dim: 3
+          children:
+            - type: leaf
+              dim: 96
+              leaftype: 1
+              mode: 1
+        - type: node
+          dim: 3
+          children:
+            - type: leaf
+              dim: 60
+              leaftype: 2
+              mode: 2
+    leaves:
+      - mode: 0
+        r0: 249.24
+        omega: 0.010006
+        wfr0: 251.
+        wfomega: 0.008
+
+      - mode: 1
+        r0: 1407.36
+        omega: 583.54
+        wfr0: 740.56
+        wfomega: 0.0027
+
+      - mode: 2
+        r0: 0.
+        omega: 1000.
+        wfr0: 2.22
+        wfomega: 90.
+
+  - job: hamiltonian
+    name: nocl
+    V: false
+
+  - job: potential
+    name: nocl
+
+  - job: wavefunction
+    name: Psi
+    type: create
+

@@ -1,14 +1,13 @@
 #pragma once
-#include "CoordinateTransformation.h"
+#include "TreeOperators/CoordinateTransformation.h"
 
 
-class TrafoCH3Quasiexact :
-	public CoordinateTransformation
-{
-  public:
+class TrafoCH3Quasiexact:
+	public CoordinateTransformation {
+public:
 	TrafoCH3Quasiexact(Vectord mass_);
 
-	Vectord Transform(const Vectord& q)const override;
+	Vectord Transform(const Vectord& q) const override;
 
 private:
 	Vectord mass;

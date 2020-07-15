@@ -6,18 +6,16 @@ extern "C" {
 		int* dim, double* matrix, double* trafo, double* ort);
 }
 
-CH3_quasiexact::CH3_quasiexact(const mctdhBasis &basis) {
-	SpecialInitialize(basis);
+CH3_quasiexact::CH3_quasiexact(const Tree& tree) {
+	SpecialInitialize(tree);
 }
 
-void CH3_quasiexact::callHinit(Vectorcd & fortrancoeffs, Matrix<int>& diag)
-{
+void CH3_quasiexact::callHinit(Vectorcd & fortrancoeffs, Matrix<int>& diag) {
 	// Call Hinit here
 	hinitchhh_((double*) (&fortrancoeffs(0)), (int*) &diag(0, 0), &nmodes);
 }
 
-void CH3_quasiexact::InitOperator()
-{
+void CH3_quasiexact::InitOperator() {
 	// Set nparts and nmodes
 	nparts = 58;
 	nmodes = 6;

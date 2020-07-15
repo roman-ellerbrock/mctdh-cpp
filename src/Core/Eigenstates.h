@@ -13,8 +13,8 @@ Vectord propagatorEnergies(const Wavefunction& Psi, const Tree& tree, double out
 
 Vectord Eigenstate(Wavefunction& Psi, const Hamiltonian& H, const Tree& tree);
 
-void Status(const Vectord& eigenvalues, const Vectord& propergatorev, ostream& os);
+void Status(const Vectord& eigenvalues, const Vectord& propergatorev, const Matrixcd& S, ostream& os);
 
-void Eigenstates(Wavefunction& Psi, const Hamiltonian& H, const Tree& tree);
+void Eigenstates(IntegratorVariables& ivar);
 
 #endif //EIGENSTATES_H

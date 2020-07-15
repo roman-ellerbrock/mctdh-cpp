@@ -3,6 +3,31 @@
 //
 #include "Core/HamiltonianRepresentation.h"
 
+Tensorcd RegularizeX(const Tensorcd& Phi, const TDDVR& tddvr,
+	const Matrixcd& rho, const Node& node, double alpha) {
+
+	const XMatrixTrees& xs = tddvr.Xs_;
+	Tensorcd yPhi(Phi.shape());
+	for (size_t k = 0; k < node.nChildren(); ++k) {
+		const Node& child = node.child(k);
+		const MLOcd& xop = xs.xops_[k];
+		const SparseMatrixTreecd& x = xs.mats_[k];
+		if (x.Active(node)) {
+			Tensorcd xPhi = TreeFunctions::Apply(x, Phi, xop, node);
+
+			double scalar = abs(xPhi.DotProduct(xPhi).Trace());
+			xPhi /= scalar * scalar;
+
+			xPhi = ProjectOut(xPhi, Phi);
+			xPhi = TreeFunctions::Apply(x, xPhi, xop, node);
+			yPhi += xPhi;
+		}
+	}
+	yPhi = MatrixTensor(rho, yPhi, node.nChildren());
+	yPhi *= alpha;
+	return yPhi;
+}
+
 Tensorcd Apply(const Hamiltonian& H, const Tensorcd& Phi,
 	const HamiltonianRepresentation& hRep,
 	const Node& node) {
@@ -31,6 +56,7 @@ Tensorcd Apply(const Hamiltonian& H, const Tensorcd& Phi,
 		auto VPhi = hRep.cdvr_.Apply(Phi, sqrt_rho, node);
 		dPhi += VPhi;
 	}
+
 	return dPhi;
 }
 

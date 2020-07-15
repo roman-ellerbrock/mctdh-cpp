@@ -3,6 +3,11 @@
 add_library(PESs PESs.h
         CDVRModelV/CDVRModelV.h
         CDVRModelV/CDVRModelV.cpp
+        CH3_1/CH3Potential.cpp
+        CH3_1/CH3Potential.h
+        CH3_1/CH3Potential.f
+        NOCl/NOClPotential.h
+        NOCl/NOClPotential.cpp
         )
 
 #add_subdirectory("CDVRModelV")

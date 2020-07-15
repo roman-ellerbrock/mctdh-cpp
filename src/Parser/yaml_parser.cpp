@@ -6,6 +6,7 @@
 #include "yaml-cpp/yaml.h"
 #include "TreeShape/TreeFactory.h"
 #include "Hamiltonians.h"
+#include "Core/Eigenstates.h"
 
 namespace parser {
 
@@ -64,12 +65,12 @@ namespace parser {
 
 	void read_leaf_parameters(Tree& tree, const YAML::Node& node) {
 		for (const auto& child : node["leaves"]) {
-			auto mode = child["mode"].as<size_t>();
+			auto mode = evaluate<size_t>(child, "mode");
 			auto& leaf = tree.GetLeaf(mode);
-			auto r0 = child["r0"].as<double>();
-			auto wfr0 = child["wfr0"].as<double>();
-			auto omega = child["omega"].as<double>();
-			auto wfomega = child["wfomega"].as<double>();
+			auto r0 = evaluate<double>(child, "r0");
+			auto wfr0 = evaluate<double>(child, "wfr0");
+			auto omega = evaluate<double>(child, "omega");
+			auto wfomega = evaluate<double>(child, "wfomega");
 			auto& grid = leaf.PrimitiveGrid();
 			grid.Initialize(omega, r0, wfr0, wfomega);
 		}
@@ -85,14 +86,28 @@ namespace parser {
 	}
 
 	Tree read_tree(const YAML::Node& node) {
-		auto type = node["type"].as<string>();
+		auto type = evaluate<string>(node, "type");
 		if (type == "balanced") {
-			auto num_leaves = node["number_leaves"].as<size_t>();
-			auto dim_leaves = node["dimension_leaves"].as<size_t>();
-			auto dim_nodes = node["dimension_nodes"].as<size_t>();
+			auto num_leaves = evaluate<size_t>(node, "number_leaves");
+			auto dim_leaves = evaluate<size_t>(node, "dimension_leaves");
+			auto dim_nodes = evaluate<size_t>(node, "dimension_nodes");
 			return TreeFactory::BalancedTree(num_leaves, dim_leaves, dim_nodes);
 		} else if (type == "manual") {
 			return create_tree(node);
+		} else if (type == "compact") {
+			auto tree_str = evaluate<string>(node, "tree");
+			stringstream ss(tree_str);
+			Tree tree(ss);
+//			tree.info();
+/*			cout << "checking tree.." << endl;
+			if (!tree.IsWorking()) {
+				cerr << "Failed to read tree with .yaml parser in compact format.\n";
+				cerr << "Error caused by tree input string reading:\n";
+				cerr << tree_str << endl;
+				exit(2);
+			}
+			cout << "tree checked." << endl;*/
+			return tree;
 		} else {
 			cerr << "No valid tree type." << endl;
 			cerr << "Choices: (balanced, manual)" << endl;
@@ -110,14 +125,22 @@ namespace parser {
 			H = CoupledHO(tree);
 		} else if (name == "kinetic_energy") {
 			H = Operator::KineticEnergy(tree);
+		} else if (name == "nocl") {
+			bool V = evaluate<bool>(node, "V", true);
+			H = Operator::NOCl_H(V);
+		} else if (name == "ch3_meanfield") {
+			H = Operator::CH3_meanfield();
+		} else if (name == "ch3_quasiexact") {
+			CH3_quasiexact Hch3(tree);
+			H = Hch3;
+			cout << "YAML H size: " << H.size() << endl;
 		} else {
-			cerr << "No valid Hamiltonian name." << endl;
-			cerr << "Choices: (coupled_ho)" << endl;
+			cout << "No valid Hamiltonian name." << endl;
+			cout << "Choices: (coupled_ho)" << endl;
 			exit(1);
 		}
 		assert(H_ptr->size() > 0);
 		return H_ptr;
-
 	}
 
 	PotentialOperator set_potential(const YAML::Node& node, const Tree& tree) {
@@ -125,6 +148,19 @@ namespace parser {
 		if (name == "coupled_ho") {
 			auto V = make_shared<CDVRModelV>(tree.nLeaves());
 			return PotentialOperator(V, 0, 0);
+		} else if (name == "nocl") {
+			auto V = make_shared<NOClPotential>(tree.nLeaves());
+			return PotentialOperator(V, 0, 0);
+		} else if(name == "ch3") {
+			auto V = make_shared<CH3Potential>();
+			Vectord mass(4);
+			mass(0) = 12.0;
+			mass(1) = 1.007;
+			mass(2) = 1.007;
+			mass(3) = 1.007;
+			PotentialOperator Vop(V, 0, 0);
+			Vop.Q_ = make_shared<TrafoCH3Quasiexact>(mass);
+			return Vop;
 		} else {
 			cerr << "Did not recognise potential energy operator name\n";
 			exit(1);
@@ -147,6 +183,21 @@ namespace parser {
 		}
 	}
 
+	IntegratorVariables new_ivar(const YAML::Node& node, mctdh_state& state) {
+		auto t_end = evaluate<double>(node, "t_end", 100*41.362);
+		auto t = evaluate<double>(node, "t", 0.);
+		auto out = evaluate<double>(node, "out", 41.362);
+		auto dt = evaluate<double>(node, "dt", 1.);
+		auto cmf = evaluate<double>(node, "eps_cmf", 1e-4);
+		auto bs = evaluate<double>(node, "eps_bs", 1e-5);
+		auto file_in = evaluate<string>(node, "file_in", "in.dat");
+		auto file_out = evaluate<string>(node, "file_out", "out.dat");
+		auto save = evaluate<bool>(node, "save_psi", true);
+		IntegratorVariables ivar(t, t_end, dt, out, cmf, bs,
+			state.wavefunctions_["Psi"], *state.hamiltonian_, state.tree_, "out.dat", "in.dat", false);
+		return ivar;
+	}
+
 	mctdh_state read(const string& yaml_filename) {
 		YAML::Node config = YAML::LoadFile(yaml_filename);
 		mctdh_state job;
@@ -166,10 +217,14 @@ namespace parser {
 			} else if (name  == "hamiltonian") {
 				state.hamiltonian_ = read_hamiltonian(node, state.tree_);
 			} else if (name == "potential") {
-				state.hamiltonian_->V_ = set_potential(node, state.tree_);
+				PotentialOperator V = set_potential(node, state.tree_);
+				state.hamiltonian_->V_ = V;
 				state.hamiltonian_->hasV = true;
 			} else if (name == "wavefunction") {
 				new_wavefunction(state, node);
+			} else if (name == "eigenstates") {
+				auto ivar = new_ivar(node, state);
+				Eigenstates(ivar);
 			}
 		}
 		return state;

@@ -5,6 +5,7 @@
 ###########################################################################
 cmake_minimum_required(VERSION 2.8)
 project(mctdh-cpp C CXX)
+enable_language(Fortran)
 enable_language(C)
 enable_language(CXX)
 cmake_policy(SET "CMP0076" NEW)

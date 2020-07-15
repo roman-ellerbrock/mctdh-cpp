@@ -7,6 +7,12 @@ target_sources(mctdh_lib PUBLIC
         Core/CMFIntegrator.cpp
         Core/Eigenstates.h
         Core/Eigenstates.cpp
+
+        Core/FortranOperator.h
+        Core/FortranOperator.cpp
+        Core/FortranSOP.h
+        Core/FortranSOP.cpp
+
         Core/LayerInterface.h
         Core/LayerInterface.cpp
         Core/Hamiltonian.h

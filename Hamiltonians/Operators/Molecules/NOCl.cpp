@@ -44,7 +44,7 @@ namespace Operator {
 		hA = Applyqd(grid, Acoeffs, 4);
 	}
 
-	Tensorcd qdminus(const LeafInterface& grid, Tensorcd& hA, const Tensorcd& Acoeffs) {
+	void qdminus(const LeafInterface& grid, Tensorcd& hA, const Tensorcd& Acoeffs) {
 		Tensorcd xAcoeffs(Acoeffs.shape());
 		qd1(grid, xAcoeffs, Acoeffs);
 		hA = (Acoeffs - xAcoeffs);
@@ -811,5 +811,13 @@ namespace Operator {
 			H.push_back(M, 1.);
 		}
 		return H;
+	}
+
+	SOPcd NOCl_H(bool potential) {
+		if (potential) {
+			return NOCl_KEO() + NOCl_V();
+		} else {
+			return NOCl_KEO();
+		}
 	}
 }

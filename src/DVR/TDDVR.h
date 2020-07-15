@@ -37,8 +37,9 @@ public:
 
 	TreeGrids hole_grids_;
 	MatrixTreecd hole_trafo_;
-private:
+
 	XMatrixTrees Xs_;
+private:
 	MatrixTreecd rho_;
 
 	void NodeTransformation(Wavefunction& Psi, const Tree& tree, bool inverse) const;

@@ -2,16 +2,15 @@
 #include "TreeOperators/Potential.h"
 
 class NOClPotential
-	:public Potential
-{
+	: public Potential {
 public:
 	explicit NOClPotential(bool dissociation = true);
-	~NOClPotential()override = default;
-	double Evaluate(const Vectord& Xv, size_t part) const override ;
+	~NOClPotential() override = default;
+	double Evaluate(const Vectord& Xv, size_t part) const override;
 
 private:
-    double EvaluateGS(const Vectord & Xv, size_t part);
-    double EvaluateS1(const Vectord & Xv, size_t part);
-    bool dissociation;
+	double EvaluateGS(const Vectord& Xv, size_t part) const;
+	double EvaluateS1(const Vectord& Xv, size_t part) const;
+	bool dissociation;
 };
 

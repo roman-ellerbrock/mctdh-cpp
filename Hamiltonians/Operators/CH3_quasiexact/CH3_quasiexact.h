@@ -1,11 +1,11 @@
 #pragma once
-#include "FortranSOP.h"
+#include "Core/FortranSOP.h"
 
 class CH3_quasiexact :
 	public FortranSOP
 {
 public:
-	CH3_quasiexact(const mctdhBasis& basis);
+	CH3_quasiexact(const Tree& tree);
 	~CH3_quasiexact() = default;
 
 private:

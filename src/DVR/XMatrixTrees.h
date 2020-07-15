@@ -12,6 +12,8 @@
 
 SOPcd Xsop(const Tree& tree);
 
+Wavefunction Regularize(Wavefunction Psi, const Tree& tree, double eps);
+
 class XMatrixTrees {
 public:
 	explicit XMatrixTrees(const Tree& tree)
@@ -36,15 +38,16 @@ public:
 		assert(xops_.size() == mats_.size());
 		assert(xops_.size() == holes_.size());
 		Represent(mats_, xops_, Psi, Psi, tree);
-		Contraction(holes_, mats_, Psi, Psi, tree);
-		UnweightContractions(holes_, Psi, tree);
+		Wavefunction Chi = Regularize(Psi, tree, 1e-5);
+		Contraction(holes_, mats_, Chi, Chi, tree);
+		UnweightContractions(holes_, Chi, tree);
 	}
 
 	void UnweightContractions(vector<SparseMatrixTreecd>& holes,
 		const Wavefunction& Psi, const Tree& tree) const {
 		auto rho = TreeFunctions::Contraction(Psi, tree, true);
 		auto rho_sqrt = sqrt(rho, tree);
-		auto isqrt_rho = inverse(rho_sqrt, tree, 1e-6);
+		auto isqrt_rho = inverse(rho_sqrt, tree, 1e-7);
 
 		for (auto& xhole : holes) {
 			const auto& stree = xhole.Active();

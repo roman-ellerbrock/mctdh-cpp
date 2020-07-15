@@ -1,7 +1,7 @@
 c######################################################################
 c MCTDH-Modul Operatoren
 c
-c Enthaelt die Unterprogramme "h init" und "h" sowie dazu lokale 
+c Enthaelt die Unterprogramme "h init" und "h" sowie dazu lokale
 c Unterprogramme. "h" berechnet die Wirkung einer Komponente des
 c Hamiltonoperators dargestellt in der Primaerbasis auf eine Funktion
 c der Sekundaerbasis. Der Uebergabeparameter "mode" spezifiziert den
@@ -69,7 +69,7 @@ c##############################################################
 c structure
 c row 1:  11, 22, 33
 c row 2:  44[1, 2, 3, 4]
-c row 3:  45[1, 2, 3, 4, 5] 
+c row 3:  45[1, 2, 3, 4, 5]
 c row 4:  54[1, 2, 3, 4, 5]
 c row 5:  46[1, 2, 3, 4, 5]
 c row 6:  64[1, 2, 3, 4, 5]
@@ -90,7 +90,7 @@ c    .      8,
 c    .      8,
      .      8,8,8,8,8,8,8,
      .      8,8,8,8,8,8,8,
-c    .      8 
+c    .      8
      .      8,8,8,8,8,8,8,8,8,8,8
      .      ) teil
  2000 goto (
@@ -105,7 +105,7 @@ c    .      1,
 c    .      1,
      .      8,8,8,8,8,8,8,
      .      8,8,8,8,8,8,8,
-c    .      1 
+c    .      1
      .      8,8,8,8,8,8,8,8,8,8,8
      .      ) teil
  3000 goto (
@@ -120,7 +120,7 @@ c    .      1,
 c    .      1,
      .      8,8,8,8,8,8,1,
      .      8,8,8,8,8,8,1,
-c    .      1 
+c    .      1
      .      8,8,8,8,8,8,8,8,8,8,1
      .      ) teil
  4000 goto (
@@ -135,7 +135,7 @@ c    .      2,
 c    .      8,
      .      8,8,1,1,1,8,8,
      .      8,8,1,1,1,8,8,
-c    .      8 
+c    .      8
      .      8,8,8,8,1,1,8,8,8,8,1
      .      ) teil
  5000 goto (
@@ -148,9 +148,9 @@ c    .      1,
      .      8,8,8,8,8,
      .      3,3,3,3,3,3,
 c    .      2,
-     .      5,5,5,5,5,5,5,    
+     .      5,5,5,5,5,5,5,
      .      7,7,7,7,7,7,7,
-c    .      1 
+c    .      1
      .      8,8,8,8,8,8,8,8,8,8,8
      .      ) teil
  6000 goto (
@@ -164,8 +164,8 @@ c    .      1,
      .      8,8,8,8,8,8,
 c    .      1,
      .      7,7,7,7,7,7,7,
-     .      5,5,5,5,5,5,5, 
-c    .      3 
+     .      5,5,5,5,5,5,5,
+c    .      3
      .      3,3,3,3,3,3,3,3,3,3,3
      .      ) teil
 
@@ -228,7 +228,7 @@ c      H = G sqrt(v) d/dx 1/sqrt(v)
       enddo
       return
 
-c      H = -0.5 /sqrt(v) d/dx sqrt(v) 
+c      H = -0.5 /sqrt(v) d/dx sqrt(v)
 
  6    do i=1,dim
          h psi(i)=psi(i)*sqrt(vol(ort(i),mode))
@@ -267,7 +267,7 @@ c--------------------------------------------------------------
       integer mode
       parameter     (pi=3.1415926535897931d0)
       pi3=pi/3.d0
- 
+
       select case (mode)
          case(1)
             vol=x**2
@@ -297,9 +297,9 @@ c           vol=(0.5d0-dcos(x))
 c--------------------------------------------------------------
 
       real*8 function G(x,mode,teil)
-     
+
       real*8 x,rhoeq,pi,pi3
-      integer mode,teil 
+      integer mode,teil
       parameter     (pi=3.1415926535897931d0)
       pi3=pi/3.d0
 
@@ -312,8 +312,8 @@ c--------------------------------------------------------------
          G=16.d0/27.d0
       endif
 
-c gamma phi     
-      if(mode.eq.5.and.(teil.ge.4.and.teil.le.90))then 
+c gamma phi
+      if(mode.eq.5.and.(teil.ge.4.and.teil.le.90))then
          G=( 1.d0
      .      +(x-pi3)**2
      .      -(x-pi3)**3/(3.d0*dsqrt(3.d0))
@@ -343,11 +343,11 @@ c    .        10,
 c    .        21,                                 ! c3v 55 term
      .        12, 17, 14, 15, 14, 13, 10,         ! the 56 term
      .        12, 17, 14, 15, 14, 13, 10,         ! the 65 term
-c    .        10 
+c    .        10
      .10, 13, 12, 19, 14, 15, 14, 13, 11, 10, 11  ! the 66 term
 c    .                                            10 ! c3v 66 term
      .      ) teil
- 2000 goto (   
+ 2000 goto (
      .         1,  1, 32,                         ! 11,22,33 terms
      .        32, 32, 32, 33,                     ! the 44 term
 c    .         1,
@@ -359,7 +359,7 @@ c    .         1,
 c    .         1,                                 ! c3v 55 term
      .        32, 32, 32, 32, 32, 32, 33,         ! the 56 term
      .        32, 32, 32, 32, 32, 32, 33,         ! the 65 term
-c    .         1 
+c    .         1
      .32, 32, 32, 32, 32, 32, 32, 32, 33, 33, 33  ! the 66 term
 c    .                                            1 ! c3v 56 term
      .      ) teil
@@ -375,7 +375,7 @@ c    .         1,
 c    .         1,                                 ! c3v 55 term
      .        34, 34, 35, 35, 35, 35,  1,         ! the 56 term
      .        34, 34, 35, 35, 35, 35,  1,         ! the 65 term
-c    .         1 
+c    .         1
      .34, 34, 34, 34, 34, 34, 35, 35,  1,  1,  1  ! the 66 term
 c    .                                            1  ! c3v 66 term
      .      ) teil
@@ -391,7 +391,7 @@ c    .         1,
 c    .        45,                                 ! c3v 55 term
      .        41, 41,  1,  1,  1, 43, 41,         ! the 56 term
      .        41, 41,  1,  1,  1, 43, 41,         ! the 65 term
-c    .        46 
+c    .        46
      .41, 41, 41,  1,  1,  1, 41, 41, 43, 43,  1  ! the 66 term
 c    .                                            46 ! c3v 66 term
      ,      ) teil
@@ -399,7 +399,7 @@ c    .                                            46 ! c3v 66 term
      .         1,  1,  1,                         ! 11,22,33 terms
      .        52, 53, 58, 58,                     ! the 44 term
 c    .         1,
-     .        56, 52, 54, 60, 61,                 ! the 45 term 
+     .        56, 52, 54, 60, 61,                 ! the 45 term
      .        56, 52, 54, 60, 61,                 ! the 54 term
      .        66, 65, 71, 56, 60,                 ! the 46 term
      .        66, 65, 71, 56, 60,                 ! the 64 term
@@ -407,7 +407,7 @@ c    .         1,
 c    .         1,                                 ! c3v 55 term
      .        50, 56, 67, 60, 52, 52, 54,         ! the 56 term
      .        50, 56, 67, 60, 52, 52, 54,         ! the 65 term
-c    .         1 
+c    .         1
      .53, 76, 64, 58, 52, 60, 56, 65, 60, 67, 52  ! the 66 term
 c    .                                            1 ! c3v 66 term
      .      ) teil
@@ -423,12 +423,12 @@ c    .         1,
 c    .         1,                                 ! c3v 55 term
      .        50, 56,  1, 51, 52, 52, 50,         ! the 56 term
      .        50, 56,  1, 51, 52, 52, 50,         ! the 65 term
-c    .         1 
+c    .         1
      .53, 51,  1,  1, 53, 51, 56, 50, 51,  1, 52  ! the 66 term
 c    .                                            1 ! c3v 66 term
      .      ) teil
 
-1     return    
+1     return
 
 10    G=+G*1.d0/x**2        ! 1/x**2
       return
@@ -456,7 +456,7 @@ c    .                                            1 ! c3v 66 term
       return
 22    G=+G*9.d0/4.d0/x**2
       return
-23    G=+G     /9.d0/x**2 
+23    G=+G     /9.d0/x**2
       return
 24    G=+G*4.d0/9.d0/x**2
       return
@@ -512,10 +512,10 @@ c    .                                            1 ! c3v 66 term
 61    G=G*dsin(x)**2*dsin(2.d0*x)             ! sin^2 x sin 2x
       return
 62    G=G           *(1.d0+dsin(x)**2)        !         (1 + sin^2 x)
-      return 
+      return
 63    G=G*dsin(x)   *(1.d0+dsin(x)**2)        ! sin x   (1 + sin^2 x)
       return
-64    G=G           *(1.d0+dcos(x)**2)        !         (1 + cos^2 x) 
+64    G=G           *(1.d0+dcos(x)**2)        !         (1 + cos^2 x)
       return
 65    G=G*dsin(x)   *(1.d0+dcos(x)**2)        ! sin x   (1 + cos^2 x)
       return

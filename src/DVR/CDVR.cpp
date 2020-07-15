@@ -98,7 +98,8 @@ Tensorcd CDVR::Apply(Tensorcd Phi, const Matrixcd& sqrho, const Node& node) cons
 
 	tddvr_.NodeTransformation(VXi, node, true);
 	if (!node.isToplayer()) {
-		VXi = TensorMatrix(VXi, sqrho, node.nChildren());
+//		VXi = TensorMatrix(VXi, sqrho, node.nChildren());
+		VXi = MatrixTensor(sqrho.Adjoint(), VXi, node.nChildren());
 	}
 	return VXi;
 }

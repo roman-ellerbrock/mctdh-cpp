@@ -2,6 +2,7 @@
 // Created by Roman Ellerbrock on 6/26/20.
 //
 #include "Core/Eigenstates.h"
+#include "TreeClasses/SpectralDecompositionTree.h"
 
 Vectord propagatorEnergies(const Wavefunction& Psi, const Tree& tree, double out) {
 	auto S = TreeFunctions::DotProduct(Psi, Psi, tree);
@@ -14,6 +15,7 @@ Vectord propagatorEnergies(const Wavefunction& Psi, const Tree& tree, double out
 }
 
 Vectord Eigenstate(Wavefunction& Psi, const Hamiltonian& H, const Tree& tree) {
+
 	HamiltonianRepresentation hRep(H, tree);
 	hRep.build(H, Psi, tree);
 	auto Hval = Expectation(hRep, Psi, H, tree);
@@ -26,8 +28,15 @@ Vectord Eigenstate(Wavefunction& Psi, const Hamiltonian& H, const Tree& tree) {
 }
 
 void Status(const Vectord& eigenvalues, const Vectord& propergatorev,
-	ostream& os) {
+	const Matrixcd& S, ostream& os) {
 	pair<string, double> energy("cm", 219474.6313705);
+
+	Vectord s(S.Dim1());
+	for (size_t i = 0; i < S.Dim1(); ++i) {
+		for (size_t j = 0; j < S.Dim2(); ++j) {
+			s(i) += pow(abs(S(i,j)), 2);
+		}
+	}
 
 	// Write out Eigenvalues
 	int zero = propergatorev.Dim() - 1;
@@ -35,44 +44,51 @@ void Status(const Vectord& eigenvalues, const Vectord& propergatorev,
 	   << " / Propagatormatrix)" << endl;
 	os << "Ground state :\t" << eigenvalues(0) * energy.second << " " << energy.first;
 	os << "\t" << propergatorev(zero) * energy.second << " " << energy.first;
-	os << "\t" << eigenvalues(0) << " a.u." << endl;
+	os << "\t" << eigenvalues(0) << " a.u." ;
+	os << "\t" << (1.-s(0)) << endl;
 	for (int i = 1; i < eigenvalues.Dim(); i++) {
 		os << i << "\t" << (eigenvalues(i) - eigenvalues(0)) * energy.second << " " << energy.first;
 		os << "\t" << (propergatorev(zero - i) - propergatorev(zero)) * energy.second
 		   << " " << energy.first;
-		os << "\t" << (eigenvalues(i) - eigenvalues(0)) << " a.u." << endl;
+		os << "\t" << (eigenvalues(i) - eigenvalues(0)) << " a.u.";
+		os << "\t(" << (1.-s(i)) << ")" << endl;
 	}
 }
 
-void Eigenstates(Wavefunction& Psi, const Hamiltonian& H, const Tree& tree) {
-	double t = 0.;
-	double t_end = 300.;
-	double out = 10.;
-	double dt = 1.;
-	size_t num_iterations = (t_end - t) / out;
-	IntegratorVariables ivar(t, out, dt, out + 1e-6, 1e-4, 1e-6, Psi, H, tree, "out.dat", "in.dat", false);
+void Eigenstates(IntegratorVariables& ivar) {
+	Wavefunction& Psi = *ivar.psi;
+	const Hamiltonian& H = *ivar.h;
+	const Tree& tree = *ivar.tree;
+	size_t num_iterations = (ivar.time_end - ivar.time_now) / ivar.out;
+	auto eigenvar = ivar;
 
 //	IntegratorInterface I(H, tree, -QM::im);
 	CMFIntegrator cmf(H, tree, -QM::im);
 	auto energies = Eigenstate(Psi, H, tree);
-	Status(energies, energies, cout);
+	Matrixcd s(energies.Dim(), energies.Dim());
+	Status(energies, energies, s, cout);
 	TreeIO::Output(Psi, tree);
 
 	for (size_t iter = 0; iter < num_iterations; ++iter) {
-		// Integrate in imaginary time
-//		RungeKutta4::Integrate<IntegratorInterface, Wavefunction, double>(t, out, dt, Psi, I);
-		cmf.Integrate(ivar);
+		Wavefunction lastPsi = Psi;
 
-		auto propagator_energies = propagatorEnergies(Psi, tree, out);
+		// Integrate in imaginary time
+		eigenvar.time_now=0.;
+		eigenvar.time_end =ivar.out -1e-5;
+//		RungeKutta4::Integrate<IntegratorInterface, Wavefunction, double>(t, out, dt, Psi, I);
+		cmf.Integrate(eigenvar);
+
+		auto propagator_energies = propagatorEnergies(Psi, tree, ivar.out);
 
 		Orthonormal(Psi, tree);
 
 		// Transform Psi to eigenbasis and get energies
 		energies = Eigenstate(Psi, H, tree);
+		auto overlap = TreeFunctions::DotProduct(Psi, lastPsi, tree);
 
 		// I/O
-		Status(energies, propagator_energies, cout);
-		TreeIO::Output(Psi, tree);
+		Status(energies, propagator_energies, overlap[tree.TopNode()], cout);
+//		TreeIO::Output(Psi, tree);
 	}
 }
 

@@ -40,8 +40,37 @@ Matrixcd Regularize(Matrixcd w) {
 	return w;
 }
 
+vector<double> CalculateShift(const vector<Matrixcd>& xs, const Matrixcd& w) {
+	vector<double> shifts;
+	for (const auto& x : xs) {
+		double s = abs(x.Trace());
+		shifts.push_back(s);
+	}
+	return shifts;
+}
+
+void shift(vector<Matrixcd>& xs, const vector<double>& shift) {
+	for (size_t i = 0; i < xs.size(); ++i) {
+		double s = shift[i];
+		Matrixcd& x = xs[i];
+		for (size_t j = 0; j < x.Dim1(); ++j) {
+			x(j, j) -= s;
+		}
+	}
+}
+
+void shift(vector<Vectord>& xs, const vector<double>& shift) {
+	for (size_t i = 0; i < xs.size(); ++i) {
+		double s = shift[i];
+		Vectord& x = xs[i];
+		for (size_t j = 0; j < x.Dim(); ++j) {
+			x(j) += s;
+		}
+	}
+}
+
 void LayerGrid(TreeGrids& grids, Matrixcd& trafo, const vector<SparseMatrixTreecd>& Xs,
-	const Matrixcd* w_ptr, const Node& node) {
+	const Matrixcd *w_ptr, const Node& node) {
 	assert(grids.size() == Xs.size());
 	auto xs = getXs(Xs, node);
 	Matrixcd w;
@@ -53,20 +82,24 @@ void LayerGrid(TreeGrids& grids, Matrixcd& trafo, const vector<SparseMatrixTreec
 	}
 
 	assert(!xs.empty());
+
+	auto shifts = CalculateShift(xs, w);
+	shift(xs, shifts);
 	auto diags = WeightedSimultaneousDiagonalization::Calculate(xs, w, 1e-12);
+	shift(diags.second, shifts);
 	setGrids(grids, diags.second, node);
 	trafo = diags.first;
 	trafo = trafo.Adjoint();
 }
 
 void UpdateGrids(TreeGrids& grids, MatrixTreecd& trafo, const vector<SparseMatrixTreecd>& Xs,
-	const MatrixTreecd* rho_ptr, const Tree& tree) {
+	const MatrixTreecd *rho_ptr, const Tree& tree) {
 	for (const Node& node : tree) {
 		if (!node.isToplayer()) {
 			if ((rho_ptr == nullptr) || node.isBottomlayer()) {
 //			if ((rho_ptr == nullptr) ) {
 				LayerGrid(grids, trafo[node], Xs, nullptr, node);
-	 		} else {
+			} else {
 				LayerGrid(grids, trafo[node], Xs, &rho_ptr->operator[](node), node);
 			}
 		}
@@ -138,7 +171,7 @@ void TDDVR::NodeTransformation(Tensorcd& Phi, const Node& node, bool inverse) co
 	}
 }
 
-void TDDVR::EdgeTransformation(Matrixcd& B_inv, const Edge& edge, bool inverse) const{
+void TDDVR::EdgeTransformation(Matrixcd& B_inv, const Edge& edge, bool inverse) const {
 	if (!inverse) {
 		B_inv = trafo_[edge].Transpose().Adjoint() * B_inv;
 		B_inv = B_inv * hole_trafo_[edge].Adjoint();
@@ -195,7 +228,6 @@ void TDDVR::print(const Tree& tree) const {
 			cout << endl;
 		}
 	}
-
 }
 
 
