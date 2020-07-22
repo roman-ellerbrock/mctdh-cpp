@@ -17,6 +17,9 @@ public:
 
 	void Update(const Wavefunction& Psi, const PotentialOperator& V, const Tree& tree, size_t part = 0);
 
+	void Update(const Wavefunction& Psi, const PotentialOperator& V, const Tree& tree,
+		const Tree& smalltree, size_t part = 0);
+
 	Tensorcd Apply(Tensorcd Phi, const Matrixcd& invsq_rho, const Node& node) const;
 
 	TensorTreecd Apply(const Wavefunction& Psi, const Tree& tree) const;

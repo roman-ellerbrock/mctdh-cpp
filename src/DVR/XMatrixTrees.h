@@ -9,6 +9,7 @@
 #include "TreeClasses/SOPMatrixTrees.h"
 #include "TreeClasses/MatrixTreeFunctions.h"
 #include "TreeClasses/SpectralDecompositionTree.h"
+#include "Core/Tensor_Extension.h"
 
 SOPcd Xsop(const Tree& tree);
 
@@ -62,6 +63,14 @@ public:
 		}
 	}
 
+	Tensorcd Optimize(const Tensorcd& Phi, const Matrixcd& rho,
+		const Node& node, const Node& node_small) const;
+
+	Wavefunction Optimize(Wavefunction Psi,
+		const MatrixTreecd& rho, const Tree& tree, const Tree& tree_small);
+
+	Matrixcd BuildX(const Tensorcd& Phi, const Matrixcd& rho, const Node& node) const;
+
 	void print() const {
 		cout << "Xs:\n";
 		for (const auto& x : mats_) {
@@ -85,5 +94,11 @@ public:
 	SparseMatrixTreescd mats_;
 	SparseMatrixTreescd holes_;
 };
+
+Matrixcd UnProject(size_t n_occupied, const Matrixcd& X,
+	const Tensorcd& Phi);
+
+Tensorcd Occupy(const Tensorcd& Phi, const Matrixcd& trafo,
+	size_t n_occupied, const Node& node);
 
 #endif //XMATRIXTREES_H

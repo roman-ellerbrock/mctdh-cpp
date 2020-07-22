@@ -37,10 +37,13 @@ void CMFIntegrator::Integrate(IntegratorVariables& job, ostream& os) {
 	double accuracy_BS = job.accuracy_leaf;
 
 	bool savepsi = job.save_psi;
+//	ofstream opsi(job.ofname);
 
 	const Tree& tree = *job.tree;
 	Wavefunction& Psi = *job.psi;
 	const Hamiltonian& H = *job.h;
+
+	Psi.Write(job.ofname);
 
 	// Reinitiate initia; steps
 	double timepart = 0.25;
@@ -57,6 +60,8 @@ void CMFIntegrator::Integrate(IntegratorVariables& job, ostream& os) {
 	Wavefunction Psistart = Psi;
 
 	// Initial output
+	matrices_.build(H, Psi, tree);
+	calc_mat = false;
 	Output(time, Psi, Psistart, H, tree, os);
 
 	while (time + 1E-6 < timeend) {
@@ -145,6 +150,8 @@ void CMFIntegrator::Integrate(IntegratorVariables& job, ostream& os) {
 			// Datout
 			if (time + 1E-10 >= t_next) {
 //				Psi.Write(files.PsiFile(), savepsi);
+				Psi.Write(job.ofname);
+//				opsi << Psi;
 				Output(time, Psi, Psistart, H, tree, os);
 				double time_tot = mattime.count() + steptime.count();
 				cout << "Time in CMF-Integrator: " << time_tot / 1000000. << " s\n";
@@ -217,7 +224,7 @@ void CMFIntegrator::Output(double time, const Wavefunction& Psi,
 	const Wavefunction& Psistart, const Hamiltonian& H,
 	const Tree& tree, ostream& os) {
 	// @TODO: Check if it should be calculated here (its not efficient)
-	matrices_.build(H, Psi, tree);
+//	matrices_.build(H, Psi, tree);
 
 	// Output for CMF Integrator
 	cout << "Time: " << time << " a.u. /" << time / 41.362 << " fs\n";
@@ -228,7 +235,7 @@ void CMFIntegrator::Output(double time, const Wavefunction& Psi,
 	auto s_top = S[tree.TopNode()];
 	for (size_t i = 0; i < h_matrix.Dim1(); ++i) {
 		double e = real(h_matrix(i, i) / s_top(i, i));
-		cout << i << ":\t" << e * QM::cm << " 1/cm\t" << e * QM::cm << endl;
+		cout << i << ":\t" << e * QM::cm << " 1/cm\t" << e << " a.u." << endl;
 	}
 
 	// Calculate Autocorrelation function

@@ -41,7 +41,7 @@ SOPcd CoupledHO(const Tree& tree) {
 		H.push_back(M, lambda * lambda);
 	}
 	return H;
-
+	/// H = a * (h1 * h2 *...*hd) + b(g1 * g2 * ...)
 }
 
 

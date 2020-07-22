@@ -149,7 +149,9 @@ namespace parser {
 			auto V = make_shared<CDVRModelV>(tree.nLeaves());
 			return PotentialOperator(V, 0, 0);
 		} else if (name == "nocl") {
-			auto V = make_shared<NOClPotential>(tree.nLeaves());
+			auto state = evaluate<string>(node, "state", "S1");
+			bool S1 = (state == "S1");
+			auto V = make_shared<NOClPotential>(S1);
 			return PotentialOperator(V, 0, 0);
 		} else if(name == "ch3") {
 			auto V = make_shared<CH3Potential>();
@@ -173,7 +175,10 @@ namespace parser {
 		auto type = evaluate<string>(node, "type");
 		if (type == "read") {
 			auto filename = evaluate<string>(node, "filename");
-			state.wavefunctions_[name] = Wavefunction(filename);
+			Wavefunction Psi(state.tree_);
+			ifstream is(filename);
+			is >> Psi;
+			state.wavefunctions_[name] = Psi;
 		} else if (type == "create") {
 			state.wavefunctions_[name] = Wavefunction(state.rng_, state.tree_);
 		} else {
@@ -194,7 +199,8 @@ namespace parser {
 		auto file_out = evaluate<string>(node, "file_out", "out.dat");
 		auto save = evaluate<bool>(node, "save_psi", true);
 		IntegratorVariables ivar(t, t_end, dt, out, cmf, bs,
-			state.wavefunctions_["Psi"], *state.hamiltonian_, state.tree_, "out.dat", "in.dat", false);
+			state.wavefunctions_["Psi"], *state.hamiltonian_,
+			state.tree_, file_out, file_in, false);
 		return ivar;
 	}
 
@@ -225,6 +231,12 @@ namespace parser {
 			} else if (name == "eigenstates") {
 				auto ivar = new_ivar(node, state);
 				Eigenstates(ivar);
+			} else if (name == "cmf") {
+				auto ivar = new_ivar(node, state);
+				const Hamiltonian& H = *ivar.h;
+				const Tree& tree = *ivar.tree;
+				CMFIntegrator cmf(H, tree, 1.);
+				cmf.Integrate(ivar);
 			}
 		}
 		return state;

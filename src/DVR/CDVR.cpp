@@ -129,4 +129,13 @@ TensorTreecd CDVR::Apply(const Wavefunction& Psi, const Tree& tree) const {
 	return VPsi;
 }
 
+void CDVR::Update(const Wavefunction& Psi, const PotentialOperator& V,
+	const Tree& tree, const Tree& smalltree, size_t part) {
+
+	/// Psi -> Chi
+
+	/// CDVR(Chi)
+
+}
+
 

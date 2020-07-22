@@ -20,19 +20,16 @@ run:
 
   - job: potential
     name: nocl
+    state: S0
 
   - job: wavefunction
     name: Psi
-    type: read
-    filename: psi.mctdh
+    type: create
 
-  - job: cmf            # Integrate TDSE using constant mean field (CMF) integrator
-    t: 0.               # start time
-    t_end: 1985.38      # end time
-    dt: 0.1             # initial time step
-    out: 41.362         # output intervall
-    cmf: 1e-4           # accuracy of CMF integrator
-    bs: 1e-5            # accuracy of Bulirsch-Stoer integrator
-    file_out: out.dat   # output file for wavefunction
+  - job: eigenstates
+    t_end: 5000.
+    dt: 1.5
+    out: 50.
+    file_out: psi.mctdh
 
 

@@ -202,30 +202,34 @@ void TDDVR::print(const Tree& tree) const {
 	cout << "TDDVR: " << endl;
 	cout << "Grids:" << endl;
 	for (const Node& node : tree) {
-		size_t dim = trafo_[node].Dim1();
-		node.info();
-		for (size_t i = 0; i < dim; ++i) {
-			for (const SparseVectorTreed& grid : grids_) {
-				if (grid.Active(node)) {
-					const Vectord& g = grid[node];
-					cout << g(i) << "\t";
+		if (!node.isToplayer() && !node.isBottomlayer()) {
+			size_t dim = trafo_[node].Dim1();
+			node.info();
+			for (size_t i = 0; i < dim; ++i) {
+				for (const SparseVectorTreed& grid : grids_) {
+					if (grid.Active(node)) {
+						const Vectord& g = grid[node];
+						cout << g(i) << "\t";
+					}
 				}
+				cout << endl;
 			}
-			cout << endl;
 		}
 	}
 	cout << "Hole grids:" << endl;
 	for (const Node& node : tree) {
-		size_t dim = trafo_[node].Dim1();
-		node.info();
-		for (size_t i = 0; i < dim; ++i) {
-			for (const SparseVectorTreed& grid : hole_grids_) {
-				if (grid.Active(node)) {
-					const Vectord& g = grid[node];
-					cout << g(i) << "\t";
+		if (!node.isToplayer() && !node.isBottomlayer()) {
+			size_t dim = trafo_[node].Dim1();
+			node.info();
+			for (size_t i = 0; i < dim; ++i) {
+				for (const SparseVectorTreed& grid : hole_grids_) {
+					if (grid.Active(node)) {
+						const Vectord& g = grid[node];
+						cout << g(i) << "\t";
+					}
 				}
+				cout << endl;
 			}
-			cout << endl;
 		}
 	}
 }

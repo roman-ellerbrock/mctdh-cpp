@@ -770,13 +770,6 @@ namespace Operator {
 	}
 
 	SOPcd NOCl_KEO() {
-//		function < Tensorcd(
-//		const LeafInterface&, const Tensorcd&)> x = &LeafInterface::applyX;
-/*		function < Tensorcd(
-		const LeafInterface&, const Tensorcd&)> kin = &LeafInterface::ApplyKin;
-		function < Tensorcd(
-		const LeafInterface&, const Tensorcd&)> p = &LeafInterface::ApplyP;
-*/
 		auto x = &LeafInterface::applyX;
 		auto kin = &LeafInterface::applyKin;
 		auto p = &LeafInterface::applyP;
