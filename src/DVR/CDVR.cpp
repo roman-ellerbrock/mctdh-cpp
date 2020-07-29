@@ -11,11 +11,12 @@ CDVR::CDVR(const Wavefunction& Psi, const PotentialOperator& V, const Tree& tree
 	Update(Psi, V, tree, part);
 }
 
-CDVR::CDVR(const Tree& tree) : tddvr_(tree), Vnode_(tree),
-	Vedge_(tree), deltaV_(tree) { }
+CDVR::CDVR(const Tree& tree)
+	: tddvr_(tree), Vnode_(tree),
+	  Vedge_(tree), deltaV_(tree) {}
 
 void UpdateNodeDVRLocal(Tensorcd& dvr, const TreeGrids& grids, const TreeGrids& holegrids,
-	const PotentialOperator& V, const Node& node, size_t part) {
+	const PotentialOperator& V, const Node& node, size_t part, bool out = false, ostream& os = cout) {
 
 	/// Check-a-lot
 	assert(grids.size() == holegrids.size());
@@ -31,18 +32,25 @@ void UpdateNodeDVRLocal(Tensorcd& dvr, const TreeGrids& grids, const TreeGrids& 
 		auto idxs = indexMapping(I, shape);
 		fillXNode(X, idxs, grids, holegrids, node);
 		dvr(I) = V.Evaluate(X, part);
+
+		if (out) {
+			for (size_t i = 0; i < X.Dim(); ++i) {
+				os << X(i) << "\t";
+			}
+			os << real(dvr(I)) << endl;
+		}
 	}
 }
 
 void UpdateNodeDVR(TensorTreecd& dvr, const TreeGrids& grids, const TreeGrids& holegrids,
-	const PotentialOperator& V, const Tree& tree, size_t part) {
+	const PotentialOperator& V, const Tree& tree, size_t part, bool out, ostream& os) {
 	for (const Node& node : tree) {
-		UpdateNodeDVRLocal(dvr[node], grids, holegrids, V, node, part);
+		UpdateNodeDVRLocal(dvr[node], grids, holegrids, V, node, part, out, os);
 	}
 }
 
 void UpdateEdgeDVRLocal(Matrixd& edgedvr, const TreeGrids& grids, const TreeGrids& holegrids,
-	const PotentialOperator& V, const Node& node, size_t part) {
+	const PotentialOperator& V, const Node& node, size_t part, bool out = false, ostream& os = cout) {
 	const TensorShape& shape = node.shape();
 	size_t ngrid = shape.lastDimension();
 	Vectord X(grids.size());
@@ -51,21 +59,27 @@ void UpdateEdgeDVRLocal(Matrixd& edgedvr, const TreeGrids& grids, const TreeGrid
 		auto idxs = indexMapping(I, gridshape);
 		fillXEdge(X, idxs, grids, holegrids, node);
 		edgedvr(idxs.front(), idxs.back()) = V.Evaluate(X, part);
+		if (out) {
+			for (size_t i = 0; i < X.Dim(); ++i) {
+				os << X(i) << "\t";
+			}
+			os << edgedvr(idxs.front(), idxs.back()) << endl;
+		}
 	}
 }
 
 void UpdateEdgeDVR(MatrixTreed& cdvr, const TreeGrids& grids, const TreeGrids& holegrids,
-	const PotentialOperator& V, const Tree& tree, size_t part) {
+	const PotentialOperator& V, const Tree& tree, size_t part, bool out, ostream& os = cout) {
 
 	for (const Node& node : tree) {
 		if (!node.isToplayer()) {
-			UpdateEdgeDVRLocal(cdvr[node], grids, holegrids, V, node, part);
+			UpdateEdgeDVRLocal(cdvr[node], grids, holegrids, V, node, part, out, os);
 		}
 	}
 }
 
 void CDVR::Update(const Wavefunction& Psi, const PotentialOperator& V,
-	const Tree& tree, size_t part) {
+	const Tree& tree, size_t part, bool out, ostream& os) {
 
 	/// Get Edge wavefunction
 	Chi_ = ExplicitEdgeWavefunction(Psi, tree, true);
@@ -80,8 +94,9 @@ void CDVR::Update(const Wavefunction& Psi, const PotentialOperator& V,
 	Cdown_ = Chi_.TopDownNormalized(tree);
 
 	/// Evaluate potential at Nodes and edges
-	UpdateNodeDVR(Vnode_, tddvr_.grids_, tddvr_.hole_grids_, V, tree, part);
-	UpdateEdgeDVR(Vedge_, tddvr_.grids_, tddvr_.hole_grids_, V, tree, part);
+	UpdateNodeDVR(Vnode_, tddvr_.grids_, tddvr_.hole_grids_, V, tree, part, out, os);
+	UpdateEdgeDVR(Vedge_, tddvr_.grids_, tddvr_.hole_grids_, V, tree, part, out, os);
+	if (out) { os << endl; }
 
 	/// Evaluate correction matrices
 	cdvr_functions::CalculateDeltaVs(deltaV_, Chi_, Vnode_, Vedge_, tree);

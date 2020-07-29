@@ -15,7 +15,8 @@ public:
 	CDVR(const Wavefunction& Psi, const PotentialOperator& V, const Tree& tree, size_t part = 0);
 	~CDVR() = default;
 
-	void Update(const Wavefunction& Psi, const PotentialOperator& V, const Tree& tree, size_t part = 0);
+	void Update(const Wavefunction& Psi, const PotentialOperator& V, const Tree& tree,
+		size_t part = 0, bool out = false, ostream& os = cout);
 
 	void Update(const Wavefunction& Psi, const PotentialOperator& V, const Tree& tree,
 		const Tree& smalltree, size_t part = 0);

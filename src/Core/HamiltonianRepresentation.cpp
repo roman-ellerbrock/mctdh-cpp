@@ -39,8 +39,8 @@ Matrixcd Expectation(const HamiltonianRepresentation& hRep,
 	const Wavefunction& Psi, const Hamiltonian& H, const Tree& tree) {
 
 	const Node& top = tree.TopNode();
-	auto dPhi = Apply(H, Psi[top], hRep, top);
-	return Psi[top].DotProduct(dPhi);
+	auto HPhi = Apply(H, Psi[top], hRep, top);
+	return Psi[top].DotProduct(HPhi);
 }
 
 void LayerDerivative(Tensorcd& dPhi, double time, const Tensorcd& Phi,
@@ -61,6 +61,11 @@ void LayerDerivative(Tensorcd& dPhi, double time, const Tensorcd& Phi,
 	}
 
 	dPhi *= -propagation_phase * QM::im;
+
+	Matrixcd A(5, 5);
+	auto eigenA = toEigen(A);
+	// ..
+	A = toQutree(eigenA);
 }
 
 void Derivative(Wavefunction& dPsi, HamiltonianRepresentation& hRep,

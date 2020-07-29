@@ -50,6 +50,7 @@ vector<double> CalculateShift(const vector<Matrixcd>& xs, const Matrixcd& w) {
 }
 
 void shift(vector<Matrixcd>& xs, const vector<double>& shift) {
+	assert(xs.size() == shift.size());
 	for (size_t i = 0; i < xs.size(); ++i) {
 		double s = shift[i];
 		Matrixcd& x = xs[i];
@@ -60,6 +61,7 @@ void shift(vector<Matrixcd>& xs, const vector<double>& shift) {
 }
 
 void shift(vector<Vectord>& xs, const vector<double>& shift) {
+	assert(xs.size() == shift.size());
 	for (size_t i = 0; i < xs.size(); ++i) {
 		double s = shift[i];
 		Vectord& x = xs[i];
@@ -69,14 +71,15 @@ void shift(vector<Vectord>& xs, const vector<double>& shift) {
 	}
 }
 
-void LayerGrid(TreeGrids& grids, Matrixcd& trafo, const vector<SparseMatrixTreecd>& Xs,
+void LayerGrid(TreeGrids& grids, Matrixcd& trafo,
+	const vector<SparseMatrixTreecd>& Xs,
 	const Matrixcd *w_ptr, const Node& node) {
 	assert(grids.size() == Xs.size());
 	auto xs = getXs(Xs, node);
 	Matrixcd w;
 	if (w_ptr != nullptr) {
 		w = *w_ptr;
-		w = Regularize(w);
+		w = Regularize(w, 1e-5);
 	} else {
 		w = IdentityMatrix<complex<double>>(trafo.Dim1());
 	}
@@ -84,7 +87,13 @@ void LayerGrid(TreeGrids& grids, Matrixcd& trafo, const vector<SparseMatrixTreec
 	assert(!xs.empty());
 
 	auto shifts = CalculateShift(xs, w);
+
 	shift(xs, shifts);
+/*	node.info();
+	for (auto s : shifts) {
+		cout << s << "\t";
+	}
+	cout << endl;*/
 	auto diags = WeightedSimultaneousDiagonalization::Calculate(xs, w, 1e-12);
 	shift(diags.second, shifts);
 	setGrids(grids, diags.second, node);

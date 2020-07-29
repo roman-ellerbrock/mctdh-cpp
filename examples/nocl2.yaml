@@ -23,12 +23,11 @@ run:
 
   - job: wavefunction
     name: Psi
-    type: read
-    filename: psi.mctdh
+    type: create
 
   - job: cmf            # Integrate TDSE using constant mean field (CMF) integrator
     t: 0.               # start time
-    t_end: 1985.38      # end time
+    t_end: 2700.00      # end time
     dt: 0.1             # initial time step
     out: 41.362         # output intervall
     cmf: 1e-4           # accuracy of CMF integrator

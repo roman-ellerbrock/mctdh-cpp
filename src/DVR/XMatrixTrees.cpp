@@ -5,13 +5,15 @@
 #include <random>
 
 Wavefunction Regularize(Wavefunction Psi, const Tree& tree, double eps) {
-	const Node& top = tree.TopNode();
-	const Tensorcd& A = Psi[top];
-	const TensorShape& shape = A.shape();
+
 	normal_distribution<double> dist;
 	mt19937 gen(23949);
-	for (size_t i = 0; i < shape.totalDimension(); ++i) {
-		A(i) += eps * dist(gen);
+	for (const Node& node : tree) {
+		Tensorcd& A = Psi[node];
+		for (size_t i = 0; i < A.shape().totalDimension(); ++i) {
+			A(i) += eps * dist(gen);
+		}
+		GramSchmidt(A);
 	}
 	return Psi;
 }
@@ -62,7 +64,7 @@ Matrixcd XMatrixTrees::BuildX(const Tensorcd& Phi, const Matrixcd& rho,
 	const Leaf& leaf = node.getLeaf();
 	const LeafInterface& grid = leaf.PrimitiveGrid();
 	auto w = 1. / abs(rho.Trace()) * rho;
-//	w = Regularize(w, 1e-5);
+	w = Regularize(w, 1e-5);
 	Tensorcd xPhi(Phi.shape());
 	grid.applyX(xPhi, Phi);
 	auto wxPhi = MatrixTensor(w, xPhi, node.parentIdx());

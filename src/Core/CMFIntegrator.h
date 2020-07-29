@@ -49,6 +49,9 @@ private:
 
 	void CMFstep(Wavefunction& Psi, double time, double timeend, double accuracy_leaf, const Tree& tree);
 
+	ofstream cdvr_file_;
+	size_t cdvr_nr_;
+
 	HamiltonianRepresentation matrices_;
 
 	vector<bs_integrator> bs_integrators_;

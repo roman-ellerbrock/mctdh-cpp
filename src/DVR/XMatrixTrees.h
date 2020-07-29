@@ -27,7 +27,7 @@ public:
 			MLOcd M(x, mode);
 
 			mats_.emplace_back(SparseMatrixTreecd(M, tree));
-			holes_.emplace_back(SparseMatrixTreecd(M, tree, true, true));
+			holes_.emplace_back(SparseMatrixTreecd(M, tree, false, true));
 		}
 
 	}
@@ -38,9 +38,18 @@ public:
 		using namespace TreeFunctions;
 		assert(xops_.size() == mats_.size());
 		assert(xops_.size() == holes_.size());
+		/**
+		 * Analysis:
+		 * - density is not included in mean-field x-matrices of lower layers
+		 *   in ml trees for inverse trees.
+		 * Find Evidence:
+		 * - Calculate full mean-field x-matrices (dense tree)
+		 *
+		 */
 		Represent(mats_, xops_, Psi, Psi, tree);
-		Wavefunction Chi = Regularize(Psi, tree, 1e-5);
-		Contraction(holes_, mats_, Chi, Chi, tree);
+		Wavefunction Chi = Regularize(Psi, tree, 1e-4);
+		auto rho = TreeFunctions::Contraction(Chi, tree, true);
+		Contraction(holes_, Chi, Chi, mats_, rho, tree);
 		UnweightContractions(holes_, Chi, tree);
 	}
 
@@ -48,7 +57,7 @@ public:
 		const Wavefunction& Psi, const Tree& tree) const {
 		auto rho = TreeFunctions::Contraction(Psi, tree, true);
 		auto rho_sqrt = sqrt(rho, tree);
-		auto isqrt_rho = inverse(rho_sqrt, tree, 1e-7);
+		auto isqrt_rho = inverse(rho_sqrt, tree, 1e-4);
 
 		for (auto& xhole : holes) {
 			const auto& stree = xhole.Active();
