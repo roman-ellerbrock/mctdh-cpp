@@ -47,7 +47,7 @@ public:
 		 *
 		 */
 		Represent(mats_, xops_, Psi, Psi, tree);
-		Wavefunction Chi = Regularize(Psi, tree, 1e-4);
+		Wavefunction Chi = Regularize(Psi, tree, 1e-3);
 		auto rho = TreeFunctions::Contraction(Chi, tree, true);
 		Contraction(holes_, Chi, Chi, mats_, rho, tree);
 		UnweightContractions(holes_, Chi, tree);
@@ -57,7 +57,7 @@ public:
 		const Wavefunction& Psi, const Tree& tree) const {
 		auto rho = TreeFunctions::Contraction(Psi, tree, true);
 		auto rho_sqrt = sqrt(rho, tree);
-		auto isqrt_rho = inverse(rho_sqrt, tree, 1e-4);
+		auto isqrt_rho = inverse(rho_sqrt, tree, 1e-5);
 
 		for (auto& xhole : holes) {
 			const auto& stree = xhole.Active();
@@ -66,7 +66,11 @@ public:
 				if (!node.isToplayer()) {
 					const auto& isq_rho = isqrt_rho[node];
 					auto& x = xhole[node];
+//					node.info();
+//					x.print();
+//					isq_rho.print();
 					x = isq_rho * xhole[node] * isq_rho;
+//					x.print();
 				}
 			}
 		}

@@ -7,8 +7,8 @@
 #include "TreeClasses/TreeIO.h"
 
 CMFIntegrator::CMFIntegrator(const Hamiltonian& H,
-	const Tree& tree, complex<double> phase)
-	: matrices_(H, tree), tconst_(0.25), max_increase_(2.25),
+	const Tree& tree, const Tree& cdvrtree, complex<double> phase)
+	: matrices_(H, tree, cdvrtree), tconst_(0.25), max_increase_(2.25),
 	  cdvr_nr_(0) {
 	for (const Node& node : tree) {
 		interfaces_.emplace_back(LayerInterface(H, matrices_, node, phase));
@@ -226,10 +226,10 @@ void CMFIntegrator::Output(double time, const Wavefunction& Psi,
 	const Tree& tree, ostream& os) {
 	// @TODO: Check if it should be calculated here (its not efficient)
 //	matrices_.build(H, Psi, tree);
-	cdvr_file_.open("grid/cdvr." + to_string(cdvr_nr_) + ".dat");
+/*	cdvr_file_.open("grid/cdvr." + to_string(cdvr_nr_) + ".dat");
 	matrices_.cdvr_.Update(Psi, H.V_, tree, 0, true, cdvr_file_);
 	cdvr_file_.close();
-	cdvr_nr_++;
+	cdvr_nr_++;*/
 
 	// Output for CMF Integrator
 	cout << "Time: " << time << " a.u. /" << time / 41.362 << " fs\n";

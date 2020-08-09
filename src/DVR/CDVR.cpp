@@ -6,17 +6,22 @@
 
 using namespace cdvr_functions;
 
-CDVR::CDVR(const Wavefunction& Psi, const PotentialOperator& V, const Tree& tree, size_t part)
-	: tddvr_(Psi, tree), Vnode_(tree), Vedge_(tree), deltaV_(tree), Chi_(Psi, tree, true) {
-	Update(Psi, V, tree, part);
-}
+/*CDVR::CDVR(const Wavefunction& Psi, const PotentialOperator& V, const Tree& tree, size_t part)
+	: ltree_(tree), tddvr_(Psi, tree), Vnode_(tree), Vedge_(tree),
+		deltaV_(tree), Chi_(Psi, tree, true) {
+	auto Chi = Psi;
+	TreeFunctions::Adjust(Chi, ltree_);
+	Update(Chi, V, ltree_, part);
+}*/
 
 CDVR::CDVR(const Tree& tree)
-	: tddvr_(tree), Vnode_(tree),
-	  Vedge_(tree), deltaV_(tree) {}
+	: ltree_(tree), tddvr_(tree), Vnode_(tree),
+	  Vedge_(tree), deltaV_(tree) {
+}
 
-void UpdateNodeDVRLocal(Tensorcd& dvr, const TreeGrids& grids, const TreeGrids& holegrids,
-	const PotentialOperator& V, const Node& node, size_t part, bool out = false, ostream& os = cout) {
+void UpdateNodeDVRLocal(Tensorcd& dvr, const TreeGrids& grids,
+	const TreeGrids& holegrids, const PotentialOperator& V,
+	const Node& node, size_t part, bool out = false, ostream& os = cout) {
 
 	/// Check-a-lot
 	assert(grids.size() == holegrids.size());
@@ -107,11 +112,19 @@ Tensorcd CDVR::Apply(Tensorcd Phi, const Matrixcd& sqrho, const Node& node) cons
 	if (!node.isToplayer()) {
 		Phi = MatrixTensor(sqrho, Phi, node.nChildren());
 	}
+	/// adjust size
+	const Node& lnode = ltree_.GetNode(node.Address());
+	Phi = Phi.AdjustDimensions(lnode.shape());
+
 	tddvr_.NodeTransformation(Phi, node, false);
 
 	auto VXi = cdvr_functions::Apply(Phi, Vnode_[node], Cdown_, deltaV_, node);
 
 	tddvr_.NodeTransformation(VXi, node, true);
+
+	/// adjust size
+	VXi = VXi.AdjustDimensions(node.shape());
+
 	if (!node.isToplayer()) {
 //		VXi = TensorMatrix(VXi, sqrho, node.nChildren());
 		VXi = MatrixTensor(sqrho.Adjoint(), VXi, node.nChildren());
@@ -119,38 +132,35 @@ Tensorcd CDVR::Apply(Tensorcd Phi, const Matrixcd& sqrho, const Node& node) cons
 	return VXi;
 }
 
-TensorTreecd CDVR::Apply(const Wavefunction& Psi, const Tree& tree) const {
-	ExplicitEdgeWavefunction Chi(Psi, tree, true);
+void CDVR::Update2(Wavefunction Psi, const PotentialOperator& V,
+	const Tree& smalltree, size_t part, bool out, ostream& os) {
 
-	auto phi = Chi.DensityWeighted();
-	Wavefunction VPsi2 = Psi;
-	for (const Node& node : tree) {
-//		VPsi2[node] = Apply(phi[node], node);
-		tddvr_.NodeTransformation(VPsi2[node], node, false);
-	}
+	/// Inflate wavefunction basis
+	TreeFunctions::Adjust(Psi, ltree_);
+//	tddvr_.Update(Psi, ltree_);
+	tddvr_.Xs_.Update(Psi, ltree_);
+	auto rho = TreeFunctions::Contraction(Psi, ltree_, true);
+	Psi = tddvr_.Xs_.Optimize(Psi, rho, ltree_, smalltree);
 
-	tddvr_.GridTransformation(Chi, tree, false);
-	auto VPsi = cdvr_functions::Apply(Chi.DensityWeighted(), Cdown_, Vnode_, deltaV_, tree);
+	/// Build X-matrices, diagonalize them simultaneously
+	tddvr_.Update(Psi, ltree_);
 
-	for (const Node& node : tree) {
-		const auto xi = Chi.DensityWeighted()[node];
-		node.info();
-		cout << "S1:\n";
-		xi.DotProduct(VPsi[node]).print();
-		cout << "S2:\n";
-		xi.DotProduct(VPsi2[node]).print();
-	}
+	/// Get Edge wavefunction
+	Chi_ = ExplicitEdgeWavefunction(Psi, ltree_, true);
 
-	return VPsi;
-}
+	/// Transform to grid
+	tddvr_.GridTransformation(Chi_, ltree_);
 
-void CDVR::Update(const Wavefunction& Psi, const PotentialOperator& V,
-	const Tree& tree, const Tree& smalltree, size_t part) {
+	/// Save top-down normalized wavefunction, since it is needed to apply the CDVR-operator
+	Cdown_ = Chi_.TopDownNormalized(ltree_);
 
-	/// Psi -> Chi
+	/// Evaluate potential at Nodes and edges
+	UpdateNodeDVR(Vnode_, tddvr_.grids_, tddvr_.hole_grids_, V, ltree_, part, out, os);
+	UpdateEdgeDVR(Vedge_, tddvr_.grids_, tddvr_.hole_grids_, V, ltree_, part, out, os);
+	if (out) { os << endl; }
 
-	/// CDVR(Chi)
-
+	/// Evaluate correction matrices
+	cdvr_functions::CalculateDeltaVs(deltaV_, Chi_, Vnode_, Vedge_, ltree_);
 }
 
 

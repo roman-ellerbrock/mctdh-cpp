@@ -32,7 +32,11 @@ typedef BS_integrator<LayerInterface&, Tensorcd, complex<double>> bs_integrator;
 class CMFIntegrator {
 public:
 	CMFIntegrator(const Hamiltonian& H,
-		const Tree& tree, complex<double> phase);
+		const Tree& tree, const Tree& cdvrtree, complex<double> phase);
+
+	CMFIntegrator(const Hamiltonian& H,
+		const Tree& tree, complex<double> phase)
+		: CMFIntegrator(H, tree, tree, phase) {}
 
 	~CMFIntegrator() = default;
 

@@ -14,9 +14,10 @@ Vectord propagatorEnergies(const Wavefunction& Psi, const Tree& tree, double out
 	return propagator_ev;
 }
 
-Vectord Eigenstate(Wavefunction& Psi, const Hamiltonian& H, const Tree& tree) {
+Vectord Eigenstate(Wavefunction& Psi, const Hamiltonian& H, const Tree& tree,
+	const Tree& cdvrtree) {
 
-	HamiltonianRepresentation hRep(H, tree);
+	HamiltonianRepresentation hRep(H, tree, cdvrtree);
 	hRep.build(H, Psi, tree);
 	auto Hval = Expectation(hRep, Psi, H, tree);
 	auto spec = Diagonalize(Hval);
@@ -59,12 +60,17 @@ void Eigenstates(IntegratorVariables& ivar) {
 	Wavefunction& Psi = *ivar.psi;
 	const Hamiltonian& H = *ivar.h;
 	const Tree& tree = *ivar.tree;
+	const Tree& cdvrtree = *ivar.cdvrtree;
 	size_t num_iterations = (ivar.time_end - ivar.time_now) / ivar.out;
 	auto eigenvar = ivar;
 
+	cout << "=======================================================" << endl;
+	cout << "=============== Eigenstate calculation ================" << endl;
+	cout << "=======================================================" << endl;
+
 //	IntegratorInterface I(H, tree, -QM::im);
-	CMFIntegrator cmf(H, tree, -QM::im);
-	auto energies = Eigenstate(Psi, H, tree);
+	CMFIntegrator cmf(H, tree, cdvrtree, -QM::im);
+	auto energies = Eigenstate(Psi, H, tree, cdvrtree);
 	Matrixcd s(energies.Dim(), energies.Dim());
 	Status(energies, energies, s, cout);
 	TreeIO::Output(Psi, tree);
@@ -83,7 +89,7 @@ void Eigenstates(IntegratorVariables& ivar) {
 		Orthonormal(Psi, tree);
 
 		// Transform Psi to eigenbasis and get energies
-		energies = Eigenstate(Psi, H, tree);
+		energies = Eigenstate(Psi, H, tree, cdvrtree);
 		auto overlap = TreeFunctions::DotProduct(Psi, lastPsi, tree);
 
 		// I/O

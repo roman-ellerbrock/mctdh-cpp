@@ -52,8 +52,11 @@ Wavefunction XMatrixTrees::Optimize(Wavefunction Psi,
 
 	Wavefunction Chi(Psi);
 	for (const Node& node : tree) {
-		Chi[node] = Optimize(Psi[node], rho[node],
-			node, tree_small.GetNode(node.Address()));
+		if (!node.isToplayer()) {
+			Chi[node] = Optimize(Psi[node], rho[node],
+				node, tree_small.GetNode(node.Address()));
+			Update(Chi, tree);
+		}
 	}
 	return Chi;
 }
@@ -112,11 +115,20 @@ Tensorcd Occupy(const Tensorcd& Phi, const Matrixcd& trafo,
 	int last = (int) dimpart - 1;
 	for (int n = 0; n < (ntensor - n_occupied); ++n) {
 		int mat_idx = last - n;
-		int t_idx = (int) n_occupied + n;
+		int t_idx = (int) n;
 		for (size_t i = 0; i < dimpart; i++) {
 			oPhi(i, (size_t) t_idx) = trafo(i, (size_t) mat_idx);
 		}
 	}
+
+/*	int last = (int) dimpart - 1;
+	for (int n = 0; n < (ntensor - n_occupied); ++n) {
+		int mat_idx = last - n;
+		int t_idx = (int) n_occupied + n;
+		for (size_t i = 0; i < dimpart; i++) {
+			oPhi(i, (size_t) t_idx) = trafo(i, (size_t) mat_idx);
+		}
+	}*/
 
 	GramSchmidt(oPhi);
 	return oPhi;

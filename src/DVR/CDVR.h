@@ -8,22 +8,22 @@
 #include "TreeOperators/Potential.h"
 #include "DVR/DeltaVTree.h"
 #include "DVR/cdvr_functions.h"
+#include "TreeClasses/TensorTreeFunctions.h"
 
 class CDVR {
 public:
 	CDVR(const Tree& tree);
-	CDVR(const Wavefunction& Psi, const PotentialOperator& V, const Tree& tree, size_t part = 0);
+//	CDVR(const Wavefunction& Psi, const PotentialOperator& V, const Tree& tree, size_t part = 0);
 	~CDVR() = default;
 
 	void Update(const Wavefunction& Psi, const PotentialOperator& V, const Tree& tree,
 		size_t part = 0, bool out = false, ostream& os = cout);
 
-	void Update(const Wavefunction& Psi, const PotentialOperator& V, const Tree& tree,
-		const Tree& smalltree, size_t part = 0);
+	void Update2(Wavefunction Psi, const PotentialOperator& V,
+		const Tree& smalltree, size_t part = 0,
+		bool out = false, ostream& os = cout);
 
 	Tensorcd Apply(Tensorcd Phi, const Matrixcd& invsq_rho, const Node& node) const;
-
-	TensorTreecd Apply(const Wavefunction& Psi, const Tree& tree) const;
 
 	TDDVR tddvr_;
 
@@ -35,6 +35,8 @@ private:
 
 	ExplicitEdgeWavefunction Chi_;
 	TensorTreecd Cdown_;
+
+	Tree ltree_;
 };
 
 #endif //CDVR_H

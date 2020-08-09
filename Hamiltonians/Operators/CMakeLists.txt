@@ -23,6 +23,8 @@ add_library(Operators Operators.h
 
         PhysicalSystems/StandardOperatorLibrary.cpp
         PhysicalSystems/StandardOperatorLibrary.h
+        PhysicalSystems/SpinBoson.cpp
+        PhysicalSystems/SpinBoson.h
         CWrapper.f
         )
 

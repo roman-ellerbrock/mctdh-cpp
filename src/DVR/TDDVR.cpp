@@ -79,7 +79,7 @@ void LayerGrid(TreeGrids& grids, Matrixcd& trafo,
 	Matrixcd w;
 	if (w_ptr != nullptr) {
 		w = *w_ptr;
-		w = Regularize(w, 1e-5);
+		w = Regularize(w, 1e-8);
 	} else {
 		w = IdentityMatrix<complex<double>>(trafo.Dim1());
 	}

@@ -13,6 +13,10 @@ double CDVRModelV::Evaluate(const Vectord & Xv, size_t part)const
 	for (int i = 0; i < f; i++)
 		v += 0.5*omega*omega*Xv(i)*Xv(i);
 
+	double alpha = 500. / cm;
+	for (int i = 0; i < f; i++)
+		v += 0.5*alpha*alpha*Xv(i)*Xv(i)*Xv(i)*Xv(i);
+
 	if (coupling_) {
 		for (size_t i = 0; i < f; ++i) {
 			v += lambda * lambda * Xv(i) * Xv((i + 1) % f);

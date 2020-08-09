@@ -14,12 +14,17 @@
 
 class HamiltonianRepresentation {
 public:
-	HamiltonianRepresentation(const Hamiltonian& H, const Tree& tree)
-		: rho_(tree), rho_decomposition_(tree), rho_inverse_(tree), cdvr_(tree) {
+	HamiltonianRepresentation(const Hamiltonian& H, const Tree& tree,
+		const Tree& cdvrtree)
+		: rho_(tree), rho_decomposition_(tree), rho_inverse_(tree), cdvr_(cdvrtree) {
 		for (const auto& M : H) {
 			hMats_.emplace_back(SparseMatrixTreecd(M, tree));
 			hContractions_.emplace_back(SparseMatrixTreecd(M, tree));
 		}
+	}
+
+	HamiltonianRepresentation(const Hamiltonian& H, const Tree& tree)
+		: HamiltonianRepresentation(H, tree, tree) {
 	}
 
 	~HamiltonianRepresentation() = default;
@@ -41,7 +46,8 @@ public:
 		TreeFunctions::Contraction(hContractions_, hMats_, Psi, Psi, tree);
 
 		/// Calculate CDVR
-		if (H.hasV) { cdvr_.Update(Psi, H.V_, tree); }
+//		if (H.hasV) { cdvr_.Update(Psi, H.V_, tree); }
+		if (H.hasV) { cdvr_.Update2(Psi, H.V_, tree); }
 	}
 
 	void print(const Tree& tree, ostream& os = cout) {

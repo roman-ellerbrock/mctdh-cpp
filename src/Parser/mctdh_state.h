@@ -14,6 +14,7 @@ struct mctdh_state {
 	~mctdh_state() = default;
 
 	Tree tree_;
+	Tree cdvrtree_;
 	shared_ptr<Hamiltonian> hamiltonian_;
 	map<string, Wavefunction> wavefunctions_;
 

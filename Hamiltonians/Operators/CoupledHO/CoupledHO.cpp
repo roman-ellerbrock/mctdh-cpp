@@ -42,6 +42,7 @@ SOPcd CoupledHO(const Tree& tree) {
 	}
 
 	return H;
+
 	/// H = a * (h1 * h2 *...*hd) + b(g1 * g2 * ...)
 }
 

@@ -130,13 +130,16 @@ namespace parser {
 			H = Operator::NOCl_H(V);
 		} else if (name == "ch3_meanfield") {
 			H = Operator::CH3_meanfield();
+		} else if (name == "exciton") {
+			H = Operator::Exciton("matrix.out", tree);
 		} else if (name == "ch3_quasiexact") {
 			CH3_quasiexact Hch3(tree);
 			H = Hch3;
 			cout << "YAML H size: " << H.size() << endl;
 		} else {
 			cout << "No valid Hamiltonian name." << endl;
-			cout << "Choices: (coupled_ho)" << endl;
+			cout << "Chosen name: " << name << endl;
+			cout << "See Parser/yaml_parser.cpp function read_hamiltonian for a list of choices.\n" << endl;
 			exit(1);
 		}
 		assert(H_ptr->size() > 0);
@@ -146,7 +149,8 @@ namespace parser {
 	PotentialOperator set_potential(const YAML::Node& node, const Tree& tree) {
 		auto name = evaluate<string>(node, "name");
 		if (name == "coupled_ho") {
-			auto V = make_shared<CDVRModelV>(tree.nLeaves());
+			auto coupling = evaluate<bool>(node, "coupling", "true");
+			auto V = make_shared<CDVRModelV>(tree.nLeaves(), coupling);
 			return PotentialOperator(V, 0, 0);
 		} else if (name == "nocl") {
 			auto state = evaluate<string>(node, "state", "S1");
@@ -200,7 +204,7 @@ namespace parser {
 		auto save = evaluate<bool>(node, "save_psi", true);
 		IntegratorVariables ivar(t, t_end, dt, out, cmf, bs,
 			state.wavefunctions_["Psi"], *state.hamiltonian_,
-			state.tree_, file_out, file_in, false);
+			state.tree_, state.cdvrtree_, file_out, file_in, false);
 		return ivar;
 	}
 
@@ -220,6 +224,8 @@ namespace parser {
 			const auto& name = node["job"].as<string>();
 			if (name == "tree") {
 				state.tree_ = read_tree(node);
+				state.cdvrtree_ = state.tree_;
+//				if (state.cdvrtree_.nNodes() == 0) { state.cdvrtree_ = state.tree_; }
 			} else if (name  == "hamiltonian") {
 				state.hamiltonian_ = read_hamiltonian(node, state.tree_);
 			} else if (name == "potential") {
@@ -235,8 +241,11 @@ namespace parser {
 				auto ivar = new_ivar(node, state);
 				const Hamiltonian& H = *ivar.h;
 				const Tree& tree = *ivar.tree;
-				CMFIntegrator cmf(H, tree, 1.);
+				const Tree& cdvrtree = *ivar.cdvrtree;
+				CMFIntegrator cmf(H, tree, cdvrtree, 1.);
 				cmf.Integrate(ivar);
+			} else if (name == "cdvrtree") {
+				state.cdvrtree_ = read_tree(node);
 			}
 		}
 		return state;
