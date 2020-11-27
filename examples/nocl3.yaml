@@ -25,13 +25,3 @@ run:
     name: Psi
     type: create
 
-  - job: cmf            # Integrate TDSE using constant mean field (CMF) integrator
-    t: 0.               # start time
-    t_end: 2200.00      # end time
-    dt: 0.1             # initial time step
-    out: 41.362         # output intervall
-    cmf: 1e-4           # accuracy of CMF integrator
-    bs: 1e-5            # accuracy of Bulirsch-Stoer integrator
-    file_out: out.dat   # output file for wavefunction
-
-

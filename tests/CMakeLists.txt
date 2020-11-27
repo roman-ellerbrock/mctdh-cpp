@@ -2,15 +2,19 @@ find_package(UnitTest++ REQUIRED)
 include_directories(${UTPP_INCLUDE_DIRS})
 
 set(mctdh_tests
-        test_CDVR.cpp
+#        test_CDVR.cpp
         test_ExplicitEdgeWavefunction.cpp
-        test_TDDVR.cpp
+#        test_TDDVR.cpp
         test_hrep.cpp
         test_Integrator.cpp
         tests.cpp
         )
 
 add_executable(tests ${mctdh_tests})
+
+set(tests_DEBUG_FLAGS "-g")
+target_compile_options(tests PUBLIC "$<$<CONFIG:DEBUG>:${mctdh_tests_DEBUG_FLAGS}>")
+
 target_link_libraries(tests mctdh_lib UnitTest++ QuTree::QuTree)
 
 # run unit tests as post build step

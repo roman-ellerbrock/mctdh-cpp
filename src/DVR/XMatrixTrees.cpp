@@ -52,9 +52,10 @@ Wavefunction XMatrixTrees::Optimize(Wavefunction Psi,
 
 	Wavefunction Chi(Psi);
 	for (const Node& node : tree) {
-		if (!node.isToplayer()) {
+		const Node& node2 = tree_small.GetNode(node.Address());
+		if (!node.isToplayer() && (node.shape() != node2.shape())) {
 			Chi[node] = Optimize(Psi[node], rho[node],
-				node, tree_small.GetNode(node.Address()));
+				node, node2);
 			Update(Chi, tree);
 		}
 	}
@@ -71,7 +72,7 @@ Matrixcd XMatrixTrees::BuildX(const Tensorcd& Phi, const Matrixcd& rho,
 	Tensorcd xPhi(Phi.shape());
 	grid.applyX(xPhi, Phi);
 	auto wxPhi = MatrixTensor(w, xPhi, node.parentIdx());
-	return Tensor_Extension::OuterProduct(wxPhi, Phi);
+	return Tensor_Extension::OuterProduct(wxPhi, xPhi);
 }
 
 Matrixcd UnProject(size_t n_occupied, const Matrixcd& X,
@@ -80,6 +81,7 @@ Matrixcd UnProject(size_t n_occupied, const Matrixcd& X,
 	 * Calculate (1 - P) A (1 - P) from A
 	 */
 	size_t dimpart = Phi.shape().lastBefore();
+	size_t nlast = Phi.shape().lastDimension();
 	assert (Phi.shape().lastDimension() >= n_occupied);
 
 	// Build unit
@@ -88,6 +90,16 @@ Matrixcd UnProject(size_t n_occupied, const Matrixcd& X,
 		Pu(i, i) = 1;
 
 	// Build P (it doesnt matter if you use ntesor or small_ntensor
+	size_t start = nlast - n_occupied;
+	for (size_t i = 0; i < dimpart; ++i) {
+		for (size_t j = 0; j < dimpart; ++j) {
+			for (size_t n = start; n < nlast; ++n) {
+				Pu(j, i) -= Phi(j, n) * conj(Phi(i, n));
+			}
+		}
+	}
+	/*
+	// Build P (it doesnt matter if you use ntesor or small_ntensor
 	for (size_t i = 0; i < dimpart; ++i) {
 		for (size_t j = 0; j < dimpart; ++j) {
 			for (size_t n = 0; n < n_occupied; ++n) {
@@ -95,6 +107,7 @@ Matrixcd UnProject(size_t n_occupied, const Matrixcd& X,
 			}
 		}
 	}
+	*/
 	// (1 - P) A (1 - P)
 	Matrixcd B = X * Pu;
 	return Pu * B;
@@ -130,7 +143,7 @@ Tensorcd Occupy(const Tensorcd& Phi, const Matrixcd& trafo,
 		}
 	}*/
 
-	GramSchmidt(oPhi);
+//	GramSchmidt(oPhi);
 	return oPhi;
 }
 

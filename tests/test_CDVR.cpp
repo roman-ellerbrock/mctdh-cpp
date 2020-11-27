@@ -19,7 +19,8 @@ SUITE (CDVR) {
 		auto Vpot = make_shared<CDVRModelV>(4);
 		PotentialOperator V(Vpot, 0, 0);
 
-		CDVR cdvr(Psi, V, tree);
+		CDVR cdvr(tree);
+//		CDVR cdvr(Psi, V, tree);
 
 		ExplicitEdgeWavefunction Chi(Psi, tree, true);
 	}
@@ -103,8 +104,8 @@ SUITE (CDVR) {
 		double out = 100.;
 		double dt = 1.0;
 		IntegratorVariables ivar(t, t_end, dt, out, 1e-4, 1e-5,
-			Psi, H, tree, "out.dat", "in.dat", false);
-		Eigenstates(ivar);
+			Psi, H, tree, tree, "out.dat", "in.dat", false);
+//		Eigenstates(ivar);
 		cout << "CH3 eigenstates done.\n" << endl;
 	}
 }

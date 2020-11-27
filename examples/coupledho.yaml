@@ -5,7 +5,7 @@ run:
   - job: tree
     type: manual
     tree:
-      dim: 5
+      dim: 1
       children:
         - type: node
           dim: 6

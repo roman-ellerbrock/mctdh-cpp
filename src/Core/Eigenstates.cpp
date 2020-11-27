@@ -30,6 +30,7 @@ Vectord Eigenstate(Wavefunction& Psi, const Hamiltonian& H, const Tree& tree,
 
 void Status(const Vectord& eigenvalues, const Vectord& propergatorev,
 	const Matrixcd& S, ostream& os) {
+//	pair<string, double> energy("eV", 27.2114);
 	pair<string, double> energy("cm", 219474.6313705);
 
 	Vectord s(S.Dim1());

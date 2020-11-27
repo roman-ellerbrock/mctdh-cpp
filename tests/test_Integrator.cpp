@@ -82,14 +82,15 @@ SUITE (IntegratorInterface) {
 	}
 
 	TEST(CMF_Integrator) {
-		string yaml_filename("../examples/coupledho.yaml");
+//		string yaml_filename("../examples/coupledho.yaml");
+		string yaml_filename("../examples/coupledHO.ml.yaml");
 		auto state = parser::run(yaml_filename);
 		auto& Psi = state.wavefunctions_["Psi"];
 		const auto& H = *state.hamiltonian_;
 		const auto& tree = state.tree_;
 
 		IntegratorVariables ivar(0., 100., 0.1, 20., 1e-4,
-			1e-6, Psi, H, tree, "out.mctdh", "in.mctdh", true);
+			1e-6, Psi, H, tree, tree, "out.mctdh", "in.mctdh", true);
 		complex<double> phase(0., -1.);
 		CMFIntegrator cmf(H, tree, phase);
 //		cmf.Integrate(ivar, cout);
@@ -97,17 +98,17 @@ SUITE (IntegratorInterface) {
 
 	TEST(NOCl_Integrator) {
 
-		string yaml_filename("../examples/nocl.yaml");
+		string yaml_filename("../examples/nocl3.yaml");
 		auto state = parser::run(yaml_filename);
 		auto& Psi = state.wavefunctions_["Psi"];
 		const auto& H = *state.hamiltonian_;
 		const auto& tree = state.tree_;
 
 		IntegratorVariables ivar(0., 1985.38, 0.1, 41.362, 1e-4,
-			1e-4, Psi, H, tree, "out.mctdh", "in.mctdh", true);
+			1e-4, Psi, H, tree, tree, "out.mctdh", "in.mctdh", true);
 		complex<double> phase(1., 0.);
 		CMFIntegrator cmf(H, tree, phase);
-//		cmf.Integrate(ivar, cout);
+		cmf.Integrate(ivar, cout);
 	}
 }
 

@@ -114,7 +114,9 @@ Tensorcd CDVR::Apply(Tensorcd Phi, const Matrixcd& sqrho, const Node& node) cons
 	}
 	/// adjust size
 	const Node& lnode = ltree_.GetNode(node.Address());
-	Phi = Phi.AdjustDimensions(lnode.shape());
+	if (lnode.shape() != Phi.shape()) {
+		Phi = Phi.AdjustDimensions(lnode.shape());
+	}
 
 	tddvr_.NodeTransformation(Phi, node, false);
 
@@ -123,7 +125,9 @@ Tensorcd CDVR::Apply(Tensorcd Phi, const Matrixcd& sqrho, const Node& node) cons
 	tddvr_.NodeTransformation(VXi, node, true);
 
 	/// adjust size
-	VXi = VXi.AdjustDimensions(node.shape());
+	if (node.shape() != VXi.shape()) {
+		VXi = VXi.AdjustDimensions(node.shape());
+	}
 
 	if (!node.isToplayer()) {
 //		VXi = TensorMatrix(VXi, sqrho, node.nChildren());

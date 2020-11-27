@@ -61,11 +61,6 @@ void LayerDerivative(Tensorcd& dPhi, double time, const Tensorcd& Phi,
 	}
 
 	dPhi *= -propagation_phase * QM::im;
-
-	Matrixcd A(5, 5);
-	auto eigenA = toEigen(A);
-	// ..
-	A = toQutree(eigenA);
 }
 
 void Derivative(Wavefunction& dPsi, HamiltonianRepresentation& hRep,

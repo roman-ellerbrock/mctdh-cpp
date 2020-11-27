@@ -18,7 +18,7 @@ public:
 		const Tree& cdvrtree)
 		: rho_(tree), rho_decomposition_(tree), rho_inverse_(tree), cdvr_(cdvrtree) {
 		for (const auto& M : H) {
-			hMats_.emplace_back(SparseMatrixTreecd(M, tree));
+			hMats_.emplace_back(SparseMatrixTreecd(M, tree, true));
 			hContractions_.emplace_back(SparseMatrixTreecd(M, tree));
 		}
 	}
