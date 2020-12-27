@@ -98,15 +98,15 @@ namespace parser {
 			auto tree_str = evaluate<string>(node, "tree");
 			stringstream ss(tree_str);
 			Tree tree(ss);
-//			tree.info();
-/*			cout << "checking tree.." << endl;
+			tree.info();
+			cout << "checking tree.." << endl;
 			if (!tree.IsWorking()) {
 				cerr << "Failed to read tree with .yaml parser in compact format.\n";
 				cerr << "Error caused by tree input string reading:\n";
 				cerr << tree_str << endl;
 				exit(2);
 			}
-			cout << "tree checked." << endl;*/
+			cout << "tree checked." << endl;
 			return tree;
 		} else {
 			cerr << "No valid tree type." << endl;

@@ -2,8 +2,8 @@
 add_library(mctdh_lib SHARED)
 target_compile_features(mctdh_lib PRIVATE cxx_std_14)
 
-set(mctdh_lib_DEBUG_FLAGS "-g")
-target_compile_options(mctdh_lib PUBLIC "$<$<CONFIG:DEBUG>:${mctdh_lib_DEBUG_FLAGS}>")
+target_compile_options(mctdh_lib PUBLIC "$<$<CONFIG:DEBUG>:${mctdh_DEBUG_FLAGS}>")
+target_compile_options(mctdh_lib PRIVATE "$<$<CONFIG:RELEASE>:${mctdh_RELEASE_FLAGS}>")
 
 target_sources(mctdh_lib PUBLIC
         Core/CMFIntegrator.h
@@ -44,7 +44,6 @@ target_sources(mctdh_lib PUBLIC
 target_include_directories(mctdh_lib PUBLIC
         ${CMAKE_CURRENT_SOURCE_DIR}
         )
-
 
 target_link_libraries(mctdh_lib
         Hamiltonians

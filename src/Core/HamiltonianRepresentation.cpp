@@ -8,11 +8,16 @@ Tensorcd Apply(const Hamiltonian& H, const Tensorcd& Phi,
 	const Node& node) {
 
 	Tensorcd dPhi(Phi.shape());
+	Tensorcd Psi(Phi.shape());
 	for (size_t l = 0; l < H.size(); l++) {
 		const auto& hmat = hRep.hMats_[l];
 		if (!hmat.Active(node)) { continue; }
+		for (size_t i = 0; i < Psi.shape().totalDimension(); ++i) {
+			Psi[i] = H.Coeff(l) * Phi[i];
+		}
 
-		Tensorcd Psi(Phi, H.Coeff(l));
+//		Psi = H.Coeff(l) * Phi;
+//		Tensorcd Psi(Phi, H.Coeff(l));
 		Psi = TreeFunctions::Apply(hmat, Psi, H[l], node);
 
 		// Multiply with hole-matrix
@@ -20,6 +25,9 @@ Tensorcd Apply(const Hamiltonian& H, const Tensorcd& Phi,
 		if (!node.isToplayer() && hhole.Active(node)) {
 			multStateAB(dPhi, hhole[node], Psi, false);
 		} else {
+//			for (size_t i = 0; i < Psi.shape().totalDimension(); ++i) {
+//				dPhi[i] += Psi[i];
+//			}
 			dPhi += Psi;
 		}
 	}
@@ -47,6 +55,7 @@ void LayerDerivative(Tensorcd& dPhi, double time, const Tensorcd& Phi,
 	const Hamiltonian& H, const HamiltonianRepresentation& hRep,
 	const Node& node, complex<double> propagation_phase) {
 
+	// dPhi = -i*rho^-1 * (1-P) * <Phi|H|Phi>
 	// Apply Hamiltonian
 	dPhi = Apply(H, Phi, hRep, node);
 
