@@ -18,6 +18,9 @@ Wavefunction Regularize(Wavefunction Psi, const Tree& tree, double eps) {
 	return Psi;
 }
 
+//a.) introduce scale factors
+//b.) Use explicit edge representation
+
 SOPcd Xsop(const Tree& tree) {
 	LeafFuncd x = &LeafInterface::applyX;
 	LeafFuncd I = &LeafInterface::Identity;
@@ -65,14 +68,30 @@ Wavefunction XMatrixTrees::Optimize(Wavefunction Psi,
 Matrixcd XMatrixTrees::BuildX(const Tensorcd& Phi, const Matrixcd& rho,
 	const Node& node) const {
 
-	const Leaf& leaf = node.getLeaf();
-	const LeafInterface& grid = leaf.PrimitiveGrid();
-	auto w = 1. / abs(rho.Trace()) * rho;
-	w = Regularize(w, 1e-5);
-	Tensorcd xPhi(Phi.shape());
-	grid.applyX(xPhi, Phi);
-	auto wxPhi = MatrixTensor(w, xPhi, node.parentIdx());
-	return Tensor_Extension::OuterProduct(wxPhi, xPhi);
+	if (node.isBottomlayer()) {
+		const Leaf& leaf = node.getLeaf();
+		const LeafInterface& grid = leaf.PrimitiveGrid();
+		auto w = 1. / abs(rho.Trace()) * rho;
+		w = Regularize(w, 1e-5);
+		Tensorcd xPhi(Phi.shape());
+		grid.applyX(xPhi, Phi);
+		auto wxPhi = MatrixTensor(w, xPhi, node.parentIdx());
+		return Tensor_Extension::OuterProduct(wxPhi, xPhi);
+	} else {
+		size_t bef = node.shape().lastBefore();
+		Matrixcd X(bef, bef);
+		for (size_t k = 0; k < node.nChildren(); ++k) {
+			const Node& child = node.child(k);
+			for (const SparseMatrixTreecd& x : mats_) {
+				if (x.Active(child)) {
+					Tensorcd xPhi = MatrixTensor(x[child], Phi, k);
+					// Build needed Tensors
+					Tensor_Extension::WeightedOuterProductAdd(X, xPhi, xPhi, rho);
+				}
+			}
+		}
+		return X;
+	}
 }
 
 Matrixcd UnProject(size_t n_occupied, const Matrixcd& X,
@@ -146,4 +165,8 @@ Tensorcd Occupy(const Tensorcd& Phi, const Matrixcd& trafo,
 //	GramSchmidt(oPhi);
 	return oPhi;
 }
+
+////////////////////////////////////////////////////////////////////////
+///
+////////////////////////////////////////////////////////////////////////
 

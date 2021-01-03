@@ -23,7 +23,8 @@ public:
 		const Tree& smalltree, size_t part = 0,
 		bool out = false, ostream& os = cout);
 
-	Tensorcd Apply(Tensorcd Phi, const Matrixcd& invsq_rho, const Node& node) const;
+//	Tensorcd Apply(Tensorcd Phi, const Matrixcd& invsq_rho, const Node& node) const;
+	Tensorcd Apply(Tensorcd Phi, const SpectralDecompositioncd& rho_x, const Node& node) const;
 
 	TDDVR tddvr_;
 

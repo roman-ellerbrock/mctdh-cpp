@@ -32,7 +32,6 @@ public:
 
 };
 
-
 bool IsWorking_bottomup(const ExplicitEdgeWavefunction& Psi, const Tree& tree, double eps);
 bool IsWorking_topdown(const ExplicitEdgeWavefunction& Psi, const Tree& tree, double eps);
 bool IsWorking(const ExplicitEdgeWavefunction& Psi, const Tree& tree, double eps = 1e-7);

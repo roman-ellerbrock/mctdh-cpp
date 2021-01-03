@@ -24,7 +24,7 @@ run:
       28.29           3.141592633             3.141592633             28.29
 
   - job: hamiltonian
-    name: ch3_quasiexact
+    name: ch3_meanfield
 
   - job: potential
     name: ch3

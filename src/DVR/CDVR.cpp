@@ -33,8 +33,10 @@ void UpdateNodeDVRLocal(Tensorcd& dvr, const TreeGrids& grids,
 	}
 
 	Vectord X(grids.size());
+	vector<size_t> idxs(shape.order());
 	for (size_t I = 0; I < shape.totalDimension(); ++I) {
-		auto idxs = indexMapping(I, shape);
+//		auto idxs = indexMapping(I, shape);
+		indexMapping(idxs, I, shape);
 		fillXNode(X, idxs, grids, holegrids, node);
 		dvr(I) = V.Evaluate(X, part);
 
@@ -60,8 +62,10 @@ void UpdateEdgeDVRLocal(Matrixd& edgedvr, const TreeGrids& grids, const TreeGrid
 	size_t ngrid = shape.lastDimension();
 	Vectord X(grids.size());
 	TensorShape gridshape({ngrid, ngrid});
+	vector<size_t> idxs(gridshape.order());
 	for (size_t I = 0; I < gridshape.totalDimension(); ++I) {
-		auto idxs = indexMapping(I, gridshape);
+//		auto idxs = indexMapping(I, gridshape);
+		indexMapping(idxs, I, gridshape);
 		fillXEdge(X, idxs, grids, holegrids, node);
 		edgedvr(idxs.front(), idxs.back()) = V.Evaluate(X, part);
 		if (out) {
@@ -107,7 +111,12 @@ void CDVR::Update(const Wavefunction& Psi, const PotentialOperator& V,
 	cdvr_functions::CalculateDeltaVs(deltaV_, Chi_, Vnode_, Vedge_, tree);
 }
 
-Tensorcd CDVR::Apply(Tensorcd Phi, const Matrixcd& sqrho, const Node& node) const {
+//Tensorcd CDVR::Apply(Tensorcd Phi, const Matrixcd& sqrho, const Node& node) const {
+Tensorcd CDVR::Apply(Tensorcd Phi, const SpectralDecompositioncd& rho_x, const Node& node) const {
+
+	auto x_sqrt_rho = sqrt(rho_x);
+	x_sqrt_rho.second = Regularize(x_sqrt_rho.second, 1e-6);
+	auto sqrho = toMatrix(x_sqrt_rho);
 
 	if (!node.isToplayer()) {
 		Phi = MatrixTensor(sqrho, Phi, node.nChildren());

@@ -15,9 +15,11 @@ cmake_policy(SET "CMP0042" NEW)
 # For debugging CMake
 #set(CMAKE_VERBOSE_MAKEFILE ON)
 
+include(vectorization.cmake)
 set(mctdh_DEBUG_FLAGS "-g")
-set(FLAGS_VECTORIZE "-fopenmp-simd -march=native -Rpass='loop|vect' -Rpass-missed='loop|vect' -Rpass-analysis='loop|vect'")
-set(mctdh_RELEASE_FLAGS "${FLAGS_VECTORIZE} -O3 -ffast-math")
+#set(FLAGS_VECTORIZE "-fopenmp-simd -march=native -Rpass='loop|vect' -Rpass-missed='loop|vect' -Rpass-analysis='loop|vect'")
+#set(mctdh_RELEASE_FLAGS "${FLAGS_VECTORIZE} -O3 -ffast-math")
+set(mctdh_RELEASE_FLAGS "-O3 -ffast-math")
 
 if (APPLE)
     message("On OSX")

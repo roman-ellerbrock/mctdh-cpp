@@ -25,19 +25,12 @@ Tensorcd Apply(const Hamiltonian& H, const Tensorcd& Phi,
 		if (!node.isToplayer() && hhole.Active(node)) {
 			multStateAB(dPhi, hhole[node], Psi, false);
 		} else {
-//			for (size_t i = 0; i < Psi.shape().totalDimension(); ++i) {
-//				dPhi[i] += Psi[i];
-//			}
 			dPhi += Psi;
 		}
 	}
 
 	if (H.hasV) {
-		auto x_sqrt_rho = sqrt(hRep.rho_decomposition_[node]);
-		x_sqrt_rho.second = Regularize(x_sqrt_rho.second, 1e-6);
-		auto sqrt_rho = toMatrix(x_sqrt_rho);
-		auto VPhi = hRep.cdvr_.Apply(Phi, sqrt_rho, node);
-		dPhi += VPhi;
+		dPhi += hRep.cdvr_.Apply(Phi, hRep.rho_decomposition_[node], node);
 	}
 
 	return dPhi;

@@ -34,6 +34,8 @@ target_sources(mctdh_lib PUBLIC
         DVR/DeltaVTree.cpp
         DVR/cdvr_functions.h
         DVR/cdvr_functions.cpp
+#        DVR/GridRepresentation.cpp
+#        DVR/GridRepresentation.h
         DVR/XMatrixTrees.cpp
         DVR/XMatrixTrees.h
 

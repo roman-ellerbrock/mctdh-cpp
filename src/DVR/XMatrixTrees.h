@@ -15,6 +15,8 @@ SOPcd Xsop(const Tree& tree);
 
 Wavefunction Regularize(Wavefunction Psi, const Tree& tree, double eps);
 
+typedef pair<Matrixcd, size_t> MatrixIdx;
+
 class XMatrixTrees {
 public:
 	explicit XMatrixTrees(const Tree& tree)
@@ -83,6 +85,8 @@ public:
 		const MatrixTreecd& rho, const Tree& tree, const Tree& tree_small);
 
 	Matrixcd BuildX(const Tensorcd& Phi, const Matrixcd& rho, const Node& node) const;
+
+	vector<MatrixIdx> GatherSublyingXs(const Node& node) const;
 
 	void print() const {
 		cout << "Xs:\n";
