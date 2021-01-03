@@ -2,7 +2,7 @@
 // Created by Roman Ellerbrock on 1/2/21.
 //
 #include "GridRepresentation.h"
-#include "ExplicitEdgeWavefunction.h"
+#include "MatrixTensorTree.h"
 
 namespace OptimizeGrid{
 	typedef pair<Matrixcd, size_t> MatrixIdx;

@@ -202,7 +202,7 @@ void TDDVR::EdgeTransformation(MatrixTreecd& B_inv, const Tree& tree, bool inver
 	}
 }
 
-void TDDVR::GridTransformation(ExplicitEdgeWavefunction& Psi, const Tree& tree, bool inverse) const {
+void TDDVR::GridTransformation(MatrixTensorTree& Psi, const Tree& tree, bool inverse) const {
 	NodeTransformation(Psi.nodes(), tree, inverse);
 	EdgeTransformation(Psi.edges(), tree, inverse);
 }

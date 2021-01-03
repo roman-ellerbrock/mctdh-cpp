@@ -7,7 +7,7 @@
 #include "Core/Wavefunction.h"
 #include "TreeClasses/MatrixTree.h"
 #include "DVR/DeltaVTree.h"
-#include "ExplicitEdgeWavefunction.h"
+#include "MatrixTensorTree.h"
 #include "TreeGrids.h"
 
 namespace cdvr_functions {
@@ -18,7 +18,7 @@ namespace cdvr_functions {
 	void fillXEdge(Vectord& X, vector<size_t> idx, const TreeGrids& grids, const TreeGrids& holegrids,
 		const Node& node);
 
-	void CalculateDeltaVs(DeltaVTree& deltaVTree, const ExplicitEdgeWavefunction& Chi,
+	void CalculateDeltaVs(DeltaVTree& deltaVTree, const MatrixTensorTree& Chi,
 		const TensorTreecd& Vnodes, const MatrixTreed& Vedges, const Tree& tree);
 
 	TensorTreecd Apply(const Wavefunction& Psio, const TensorTreecd& Cdown,

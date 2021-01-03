@@ -152,7 +152,7 @@ namespace cdvr_functions {
 		}
 	}
 
-	void CalculateDeltaVs(DeltaVTree& deltaVs, const ExplicitEdgeWavefunction& Chi,
+	void CalculateDeltaVs(DeltaVTree& deltaVs, const MatrixTensorTree& Chi,
 		const TensorTreecd& Vnodes, const MatrixTreed& Vedges,
 		const Tree& tree) {
 

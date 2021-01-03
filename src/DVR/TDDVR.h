@@ -8,7 +8,7 @@
 #include "Core/Wavefunction.h"
 #include "DVR/XMatrixTrees.h"
 #include "TreeClasses/MatrixTree.h"
-#include "DVR/ExplicitEdgeWavefunction.h"
+#include "DVR/MatrixTensorTree.h"
 
 class TDDVR {
 public:
@@ -24,7 +24,7 @@ public:
 
 	~TDDVR() = default;
 
-	void GridTransformation(ExplicitEdgeWavefunction& Psi, const Tree& tree, bool inverse = false) const;
+	void GridTransformation(MatrixTensorTree& Psi, const Tree& tree, bool inverse = false) const;
 
 	void Update(const Wavefunction& Psi, const Tree& tree);
 

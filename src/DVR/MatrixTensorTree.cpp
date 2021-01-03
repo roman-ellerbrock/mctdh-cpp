@@ -2,15 +2,15 @@
 // Created by Roman Ellerbrock on 4/3/20.
 //
 
-#include "ExplicitEdgeWavefunction.h"
+#include "MatrixTensorTree.h"
 #include "TreeClasses/SpectralDecompositionTree.h"
 
-ExplicitEdgeWavefunction::ExplicitEdgeWavefunction(const Wavefunction& Psi,
+MatrixTensorTree::MatrixTensorTree(const Wavefunction& Psi,
 	const Tree& tree, bool orthogonal) {
 	Initialize(Psi, tree, orthogonal);
 }
 
-void ExplicitEdgeWavefunction::Initialize(const Wavefunction& Psi,
+void MatrixTensorTree::Initialize(const Wavefunction& Psi,
 	const Tree& tree, bool orthogonal) {
 
 	/// Note: Requires orthogonal wavefunction representation (typically given)
@@ -34,7 +34,7 @@ void ExplicitEdgeWavefunction::Initialize(const Wavefunction& Psi,
 	edges_ = inverse(B, tree);
 }
 
-TensorTreecd ExplicitEdgeWavefunction::TopDownNormalized(const Tree& tree) const {
+TensorTreecd MatrixTensorTree::TopDownNormalized(const Tree& tree) const {
 	/// Contraction-normalized representation
 	/// Build A^{(p\circ k) p}
 	/// Note: Tensors get moved one layer down!
@@ -48,7 +48,7 @@ TensorTreecd ExplicitEdgeWavefunction::TopDownNormalized(const Tree& tree) const
 	return Psi;
 }
 
-TensorTreecd ExplicitEdgeWavefunction::BottomUpNormalized(const Tree& tree) const {
+TensorTreecd MatrixTensorTree::BottomUpNormalized(const Tree& tree) const {
 	/// Dot-Product normalized reperesentation
 	/// Build A^{p\circ k (p)}
 	/// This is the conventional wavefunction representation.
@@ -62,7 +62,7 @@ TensorTreecd ExplicitEdgeWavefunction::BottomUpNormalized(const Tree& tree) cons
 	return Psi;
 }
 
-bool IsWorking_bottomup(const ExplicitEdgeWavefunction& Psi, const Tree& tree, double eps) {
+bool IsWorking_bottomup(const MatrixTensorTree& Psi, const Tree& tree, double eps) {
 	auto bottomup = Psi.BottomUpNormalized(tree);
 	for (const Node& node : tree) {
 		auto x = Contraction(bottomup[node], bottomup[node], node.nChildren());
@@ -75,7 +75,7 @@ bool IsWorking_bottomup(const ExplicitEdgeWavefunction& Psi, const Tree& tree, d
 	return true;
 }
 
-bool IsWorking_topdown(const ExplicitEdgeWavefunction& Psi, const Tree& tree, double eps) {
+bool IsWorking_topdown(const MatrixTensorTree& Psi, const Tree& tree, double eps) {
 	auto topdown = Psi.TopDownNormalized(tree);
 	for (const Edge& e : tree.Edges()) {
 		const Node& node = e.down();
@@ -89,6 +89,6 @@ bool IsWorking_topdown(const ExplicitEdgeWavefunction& Psi, const Tree& tree, do
 	return true;
 }
 
-bool IsWorking(const ExplicitEdgeWavefunction& Psi, const Tree& tree, double eps) {
+bool IsWorking(const MatrixTensorTree& Psi, const Tree& tree, double eps) {
 	return (IsWorking_bottomup(Psi, tree, eps) && IsWorking_topdown(Psi, tree, eps));
 }

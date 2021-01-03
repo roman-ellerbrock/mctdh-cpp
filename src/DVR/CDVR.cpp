@@ -91,7 +91,7 @@ void CDVR::Update(const Wavefunction& Psi, const PotentialOperator& V,
 	const Tree& tree, size_t part, bool out, ostream& os) {
 
 	/// Get Edge wavefunction
-	Chi_ = ExplicitEdgeWavefunction(Psi, tree, true);
+	Chi_ = MatrixTensorTree(Psi, tree, true);
 
 	/// Build X-matrices, diagonalize them simultaneously
 	tddvr_.Update(Psi, tree);
@@ -159,7 +159,7 @@ void CDVR::Update2(Wavefunction Psi, const PotentialOperator& V,
 	tddvr_.Update(Psi, ltree_);
 
 	/// Get Edge wavefunction
-	Chi_ = ExplicitEdgeWavefunction(Psi, ltree_, true);
+	Chi_ = MatrixTensorTree(Psi, ltree_, true);
 
 	/// Transform to grid
 	tddvr_.GridTransformation(Chi_, ltree_);

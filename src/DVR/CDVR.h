@@ -34,7 +34,7 @@ private:
 
 	DeltaVTree deltaV_;
 
-	ExplicitEdgeWavefunction Chi_;
+	MatrixTensorTree Chi_;
 	TensorTreecd Cdown_;
 
 	Tree ltree_;

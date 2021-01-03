@@ -3,7 +3,7 @@
 //
 
 #include "UnitTest++/UnitTest++.h"
-#include "DVR/ExplicitEdgeWavefunction.h"
+#include "DVR/MatrixTensorTree.h"
 #include "Parser/yaml_parser.h"
 
 SUITE (ExplicitEdgeWavefunction) {
@@ -16,7 +16,7 @@ SUITE (ExplicitEdgeWavefunction) {
 		const auto& tree = state.tree_;
 		/// Transform to canonical representation
 
-		ExplicitEdgeWavefunction Chi(Psi, tree, true);
+		MatrixTensorTree Chi(Psi, tree, true);
 
 		/// Check bottom-up
 		{
