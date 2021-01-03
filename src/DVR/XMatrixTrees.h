@@ -86,8 +86,6 @@ public:
 
 	Matrixcd BuildX(const Tensorcd& Phi, const Matrixcd& rho, const Node& node) const;
 
-	vector<MatrixIdx> GatherSublyingXs(const Node& node) const;
-
 	void print() const {
 		cout << "Xs:\n";
 		for (const auto& x : mats_) {
