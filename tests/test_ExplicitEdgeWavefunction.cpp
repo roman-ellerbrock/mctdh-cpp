@@ -21,11 +21,11 @@ SUITE (ExplicitEdgeWavefunction) {
 		/// Check bottom-up
 		{
 			const TensorTreecd& Atilde = Chi.nodes();
-			auto rho = TreeFunctions::Contraction(Psi, tree, true);
+			auto rho = TreeFunctions::contraction(Psi, tree, true);
 			for (const Node& node : tree) {
 				if (!node.isToplayer()) {
-					auto x = Contraction(Atilde[node], Atilde[node], node.nChildren());
-					auto r = Residual(x, rho[node]);
+					auto x = contraction(Atilde[node], Atilde[node], node.nChildren());
+					auto r = residual(x, rho[node]);
 						CHECK_CLOSE(0., r, eps);
 				}
 			}
@@ -35,8 +35,8 @@ SUITE (ExplicitEdgeWavefunction) {
 				if (!node.isBottomlayer()) {
 					for (size_t k = 0; k < node.nChildren(); ++k) {
 						const Node& child = node.child(k);
-						auto x = Contraction(Atilde[node], Atilde[node], k);
-						auto r = Residual(x, rho[child]);
+						auto x = contraction(Atilde[node], Atilde[node], k);
+						auto r = residual(x, rho[child]);
 							CHECK_CLOSE(0., r, eps);
 					}
 				}

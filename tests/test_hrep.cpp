@@ -11,7 +11,7 @@ SUITE (HamiltonianRepresentation) {
 
 	TEST (Build) {
 		mt19937 gen;
-		Tree tree = TreeFactory::BalancedTree(4, 6, 4);
+		Tree tree = TreeFactory::balancedTree(4, 6, 4);
 		Hamiltonian H;
 		H = CoupledHO(tree);
 		HamiltonianRepresentation hrep(H, tree);
@@ -36,18 +36,18 @@ SUITE (HamiltonianRepresentation) {
 		for (size_t n = 0; n < 8; ++n) {
 			auto& mattree = hrep.hMats_[n];
 
-			auto MPsi = H[n].Apply(Psi, tree);
-			auto hmat = TreeFunctions::DotProduct(Psi, MPsi, tree);
-			const auto& stree = mattree.Active();
+			auto MPsi = H[n].apply(Psi, tree);
+			auto hmat = TreeFunctions::dotProduct(Psi, MPsi, tree);
+			const auto& stree = mattree.sparseTree();
 			for (const Node& node : tree) {
-				if (!mattree.Active(node)) { continue; }
-				TreeFunctions::RepresentLayer(mattree, Psi[node], Psi[node], H[n], node);
-				auto residual = Residual(mattree[node], hmat[node]);
-					CHECK_CLOSE(0., residual, 1e-7);
+				if (!mattree.isActive(node)) { continue; }
+				TreeFunctions::representLayer(mattree, Psi[node], Psi[node], H[n], node);
+				auto res = residual(mattree[node], hmat[node]);
+					CHECK_CLOSE(0., res, 1e-7);
 			}
 
 			// Check separately
-			auto Hexpectation = mattree[tree.TopNode()];
+			auto Hexpectation = mattree[tree.topNode()];
 			double value = abs(Hexpectation(0, 0));
 			if (n % 2) {
 					CHECK_CLOSE(0.5 / 0.018, value, 1e-7);
@@ -58,12 +58,12 @@ SUITE (HamiltonianRepresentation) {
 
 		for (size_t n = 8; n < 12; ++n) {
 			const auto& mattree = hrep.hMats_[n];
-			auto MPsi = H[n].Apply(Psi, tree);
-			auto hmat = TreeFunctions::DotProduct(Psi, MPsi, tree);
+			auto MPsi = H[n].apply(Psi, tree);
+			auto hmat = TreeFunctions::dotProduct(Psi, MPsi, tree);
 			for (const Node& node : tree) {
-				if (!mattree.Active(node)) { continue; }
-				auto residual = Residual(mattree[node], hmat[node]);
-					CHECK_CLOSE(0., residual, 1e-7);
+				if (!mattree.isActive(node)) { continue; }
+				auto res = residual(mattree[node], hmat[node]);
+					CHECK_CLOSE(0., res, 1e-7);
 			}
 		}
 	}
@@ -79,26 +79,26 @@ SUITE (HamiltonianRepresentation) {
 
 		for (size_t n = 0; n < 8; ++n) {
 			const auto& sparse_hcon = hrep.hContractions_[n];
-			auto MPsi = H[n].Apply(Psi, tree);
-			auto hmat = TreeFunctions::DotProduct(Psi, MPsi, tree);
-			auto hcon = TreeFunctions::Contraction(Psi, MPsi, hmat, tree);
+			auto MPsi = H[n].apply(Psi, tree);
+			auto hmat = TreeFunctions::dotProduct(Psi, MPsi, tree);
+			auto hcon = TreeFunctions::contraction(Psi, MPsi, hmat, tree);
 			for (const Node& node : tree) {
-				if (!sparse_hcon.Active(node)) { continue; }
-				auto residual = Residual(sparse_hcon[node], hcon[node]);
-					CHECK_CLOSE(0., residual, 1e-7);
+				if (!sparse_hcon.isActive(node)) { continue; }
+				auto res = residual(sparse_hcon[node], hcon[node]);
+					CHECK_CLOSE(0., res, 1e-7);
 			}
 		}
 
 		for (size_t n = 8; n < 12; ++n) {
 			const auto& sparsehcon = hrep.hContractions_[n];
-			auto MPsi = H[n].Apply(Psi, tree);
+			auto MPsi = H[n].apply(Psi, tree);
 
-			auto hmat = TreeFunctions::DotProduct(Psi, MPsi, tree);
-			auto hcon = TreeFunctions::Contraction(Psi, MPsi, hmat, tree);
+			auto hmat = TreeFunctions::dotProduct(Psi, MPsi, tree);
+			auto hcon = TreeFunctions::contraction(Psi, MPsi, hmat, tree);
 			for (const Node& node : tree) {
-				if (!sparsehcon.Active(node)) { continue; }
-				auto residual = Residual(sparsehcon[node], hcon[node]);
-					CHECK_CLOSE(0., residual, 1e-7);
+				if (!sparsehcon.isActive(node)) { continue; }
+				auto res = residual(sparsehcon[node], hcon[node]);
+					CHECK_CLOSE(0., res, 1e-7);
 			}
 		}
 
@@ -130,7 +130,7 @@ SUITE (HamiltonianRepresentation) {
 
 		auto Hval = Expectation(hRep, Psi, H, tree);
 		Hval *= 219475.;
-		auto spec = Diagonalize(Hval);
+		auto spec = diagonalize(Hval);
 			CHECK_CLOSE(8000., spec.second(0), 5.);
 	}
 }
