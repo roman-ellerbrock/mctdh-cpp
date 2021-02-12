@@ -11,15 +11,26 @@
 #include "TreeClasses/SpectralDecompositionTree.h"
 #include "Util/QMConstants.h"
 #include "DVR/CDVR.h"
+#include "DVR/MatrixTensorTreeFunctions.h"
 
 class HamiltonianRepresentation {
 public:
 	HamiltonianRepresentation(const Hamiltonian& H, const Tree& tree,
 		const Tree& cdvrtree)
 		: rho_(tree), rho_decomposition_(tree), rho_inverse_(tree), cdvr_(cdvrtree) {
+		hMats_.clear();
+		hContractions_.clear();
 		for (const auto& M : H) {
 			hMats_.emplace_back(SparseMatrixTreecd(M, tree, true));
 			hContractions_.emplace_back(SparseMatrixTreecd(M, tree));
+		}
+
+		hMatSets_.clear();
+		for (const auto& M : H) {
+			auto x1 = SparseMatrixTreecd(M, tree, false);
+			auto x2 = SparseMatrixTreecd(M, tree);
+			SparseMatrixTreePaircd y({x1, x2});
+			hMatSets_.emplace_back(y);
 		}
 	}
 
@@ -50,6 +61,14 @@ public:
 		if (H.hasV) { cdvr_.Update2(Psi, H.V_, tree); }
 	}
 
+	void symbuild(const Hamiltonian& H, MatrixTensorTree Psi,
+		const Tree& tree) {
+
+		Psi.buildFromWeighted(tree);
+
+		TreeFunctions::Represent(hMatSets_, Psi, H, tree);
+	}
+
 	void print(const Tree& tree, ostream& os = cout) {
 		os << "Rho:" << endl;
 		rho_.print(tree, os);
@@ -69,6 +88,8 @@ public:
 	SparseMatrixTreescd hMats_;
 	SparseMatrixTreescd hContractions_;
 
+	SparseMatrixTreePairscd hMatSets_;
+
 	CDVR cdvr_;
 };
 
@@ -86,5 +107,8 @@ void Derivative(Wavefunction& dPsi, HamiltonianRepresentation& hRep,
 	double time, const Wavefunction& Psi, const Hamiltonian& H,
 	const Tree& tree, complex<double> propagation_phase = 1.);
 
+void symDerivative(MatrixTensorTree& dPsi, HamiltonianRepresentation& hRep,
+	double time, const MatrixTensorTree& Psi, const Hamiltonian& H,
+	const Tree& tree, complex<double> propagation_phase = 1.);
 
 #endif //HAMILTONIANREPRESENTATION_H

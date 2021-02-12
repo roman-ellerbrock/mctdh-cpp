@@ -131,7 +131,7 @@ void CMFIntegrator::Integrate(IntegratorVariables& job, ostream& os) {
 		steptime += duration_cast<microseconds>(t2 - t1);
 
 		// Check if step is accepted
-		double err = Error(Psi, Psi2, tree);
+		double err = Error(Psi, Psi2, matrices_.rho_, tree);
 		err *= 0.25;
 
 		// Step refused
@@ -200,10 +200,16 @@ void CMFIntegrator::CMFstep(Wavefunction& Psi, double time, double timeend,
 	Orthogonal(Psi, tree);
 }
 
-double CMFIntegrator::Error(const Wavefunction& Psi,
-	const Wavefunction& Chi, const Tree& tree) const {
+double
+CMFIntegrator::Error(const Wavefunction& Psi, const Wavefunction& Chi,
+	const MatrixTreecd& rho, const Tree& tree) const {
 	function<double(const LayerInterface&, const Tensorcd&, const Tensorcd&)>
 		Delta = &LayerInterface::Error;
+
+	/// The node-local error is not invariant under transformation
+	/// between nodes. Therefore, e.g. QR-Orthogonal does not work with CMF
+	/// in its current form.
+	/// @OTODO: build in a non-local error measure ||Psi-Chi||=|Psi|+|Chi|-2Re(<Psi|Chi>).
 
 	double result = 0.0;
 	double number = 0.0;

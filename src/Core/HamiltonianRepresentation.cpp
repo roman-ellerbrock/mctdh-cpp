@@ -74,3 +74,25 @@ void Derivative(Wavefunction& dPsi, HamiltonianRepresentation& hRep,
 	}
 }
 
+////////////////////////////////////////////////////////////////////////
+///
+////////////////////////////////////////////////////////////////////////
+
+void symLayerDerivative(Tensorcd& dPhi, double time, const Tensorcd& Phi,
+	const Hamiltonian& H, const HamiltonianRepresentation& hRep,
+	const Node& node, complex<double> propagation_phase) {
+
+	dPhi = TreeFunctions::symApply(Phi, hRep.hMatSets_, H, node);
+	dPhi *= -propagation_phase * QM::im;
+}
+
+void symDerivative(MatrixTensorTree& dPsi, HamiltonianRepresentation& hRep,
+	double time, const MatrixTensorTree& Psi, const Hamiltonian& H,
+	const Tree& tree, complex<double> propagation_phase) {
+
+	for (const Node& node : tree) {
+		symLayerDerivative(dPsi.first[node], time, Psi.first[node],
+			H, hRep, node, propagation_phase);
+	}
+
+}

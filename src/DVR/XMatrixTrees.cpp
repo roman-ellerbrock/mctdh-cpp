@@ -42,7 +42,7 @@ Tensorcd XMatrixTrees::Optimize(const Tensorcd& Phi, const Matrixcd& rho,
 
 	size_t n_occ = node_small.shape().lastDimension();
 
-	auto X = BuildX(Phi, rho, node);
+	auto X = BuildX(Phi, rho, mats_, node);
 	X = UnProject(n_occ, X, Phi);
 	auto xspec = Diagonalize(X);
 	auto oPhi = Occupy(Phi, xspec.first, n_occ, node);
@@ -65,8 +65,8 @@ Wavefunction XMatrixTrees::Optimize(Wavefunction Psi,
 	return Chi;
 }
 
-Matrixcd XMatrixTrees::BuildX(const Tensorcd& Phi, const Matrixcd& rho,
-	const Node& node) const {
+Matrixcd BuildX(const Tensorcd& Phi, const Matrixcd& rho,
+	const SparseMatrixTreescd& xmats, const Node& node) {
 
 	if (node.isBottomlayer()) {
 		const Leaf& leaf = node.getLeaf();
@@ -82,7 +82,7 @@ Matrixcd XMatrixTrees::BuildX(const Tensorcd& Phi, const Matrixcd& rho,
 		Matrixcd X(bef, bef);
 		for (size_t k = 0; k < node.nChildren(); ++k) {
 			const Node& child = node.child(k);
-			for (const SparseMatrixTreecd& x : mats_) {
+			for (const SparseMatrixTreecd& x : xmats) {
 				if (x.Active(child)) {
 					Tensorcd xPhi = MatrixTensor(x[child], Phi, k);
 					// Build needed Tensors

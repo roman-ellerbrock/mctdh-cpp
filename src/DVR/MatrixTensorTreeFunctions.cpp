@@ -3,7 +3,6 @@
 //
 
 #include "MatrixTensorTreeFunctions.h"
-#include "TreeClasses/SparseMatrixTreeFunctions.h"
 
 namespace TreeFunctions {
 
@@ -41,13 +40,47 @@ namespace TreeFunctions {
 
 	}
 
-	typedef pair<SparseMatrixTreecd, SparseMatrixTreecd> SparseMatrixTreePaircd;
 	void Represent(SparseMatrixTreePaircd& mats,
 		const MatrixTensorTree& Psi, const MLOcd& M,
-		const SparseTree& stree, const Tree& tree) {
+		const Tree& tree) {
 
 		Represent(mats.first, Psi, M, tree);
-		Contraction(mats.second, Psi, mats.first, stree, tree);
+		Contraction(mats.second, Psi, mats.first, mats.second.Active(), tree);
 
 	}
+
+	void Represent(SparseMatrixTreePairscd& matset, const MatrixTensorTree& Psi,
+		const SOPcd& H, const Tree& tree) {
+
+		for (size_t l = 0; l < H.size(); ++l) {
+			Represent(matset[l], Psi, H[l], tree);
+		}
+
+	}
+
+	Tensorcd symApplyDown(const Tensorcd& Phi, const SparseMatrixTreecd& hHole,
+		const Node& node) {
+		if (node.isToplayer() || !hHole.Active(node)) { return Phi; }
+		return TensorMatrix(Phi, hHole[node], node.parentIdx());
+	}
+
+	Tensorcd symApply(const Tensorcd& Phi,
+		const SparseMatrixTreePaircd& mats, const MLOcd& M, const Node& node) {
+		Tensorcd hPhi = TreeFunctions::Apply(mats.first, Phi, M, node);
+		return symApplyDown(hPhi, mats.second, node);
+	}
+
+	Tensorcd symApply(Tensorcd Phi,
+		const SparseMatrixTreePairscd& hMatSet,
+		const SOPcd& H, const Node& node) {
+
+		Tensorcd hPhi(Phi.shape());
+		for (size_t l = 0; l < H.size(); ++l) {
+			Tensorcd Psi = H.Coeff(l) * Phi;
+			hPhi += symApply(Psi, hMatSet[l], H[l], node);
+		}
+		return hPhi;
+	}
+
 }
+

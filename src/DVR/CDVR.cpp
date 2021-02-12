@@ -150,6 +150,10 @@ void CDVR::Update2(Wavefunction Psi, const PotentialOperator& V,
 
 	/// Inflate wavefunction basis
 	TreeFunctions::Adjust(Psi, ltree_);
+
+	/// Get Edge wavefunction
+	Chi_ = MatrixTensorTree(Psi, ltree_, true);
+
 //	tddvr_.Update(Psi, ltree_);
 	tddvr_.Xs_.Update(Psi, ltree_);
 	auto rho = TreeFunctions::Contraction(Psi, ltree_, true);
@@ -157,9 +161,6 @@ void CDVR::Update2(Wavefunction Psi, const PotentialOperator& V,
 
 	/// Build X-matrices, diagonalize them simultaneously
 	tddvr_.Update(Psi, ltree_);
-
-	/// Get Edge wavefunction
-	Chi_ = MatrixTensorTree(Psi, ltree_, true);
 
 	/// Transform to grid
 	tddvr_.GridTransformation(Chi_, ltree_);

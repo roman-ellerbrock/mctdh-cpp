@@ -15,9 +15,33 @@ void MatrixTensorTree::Initialize(const Wavefunction& Psi,
 
 	/// Note: Requires orthogonal wavefunction representation (typically given)
 	assert(orthogonal);
+
+	buildNodes(Psi, tree);
+
+	buildEdges(tree);
+//	/// Get edge matrices (B's)
+//	MatrixTreecd rho = TreeFunctions::Contraction(nodes_, tree, true);
+//	auto B = sqrt(rho, tree);
+//
+//	/// Build node representation (A^\tilde's)
+//	for (const Edge& e : tree.Edges()) {
+//		const Node& node = e.down();
+//		Tensorcd& A = nodes_[node];
+//		/// Basically like multiplying with sqrt(rho)'s
+//		A = MatrixTensor(B[e], A, node.nChildren());
+//	}
+//
+//	edges_ = inverse(B, tree);
+}
+
+void MatrixTensorTree::buildNodes(TensorTreecd Psi, const Tree& tree) {
+	Orthogonal(Psi, tree);
+	nodes() = Psi;
+}
+
+void MatrixTensorTree::buildEdges(const Tree& tree) {
 	Wavefunction& nodes_ = first;
 	MatrixTreecd& edges_ = second;
-	nodes_ = Psi;
 
 	/// Get edge matrices (B's)
 	MatrixTreecd rho = TreeFunctions::Contraction(nodes_, tree, true);
@@ -32,6 +56,13 @@ void MatrixTensorTree::Initialize(const Wavefunction& Psi,
 	}
 
 	edges_ = inverse(B, tree);
+}
+
+void MatrixTensorTree::buildFromWeighted(const Tree& tree) {
+	/// Re-orthonormalize bottom-up
+	buildNodes(BottomUpNormalized(tree), tree);
+	/// TopDown Orthonormal
+	buildEdges(tree);
 }
 
 TensorTreecd MatrixTensorTree::TopDownNormalized(const Tree& tree) const {

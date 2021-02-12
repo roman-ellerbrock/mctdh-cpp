@@ -27,6 +27,8 @@ target_sources(mctdh_lib PUBLIC
         DVR/MatrixTensorTree.h
         DVR/MatrixTensorTreeFunctions.h
         DVR/MatrixTensorTreeFunctions.cpp
+        DVR/SymXMatrixTrees.cpp
+        DVR/SymXMatrixTrees.h
         DVR/TreeGrids.h
         DVR/TDDVR.cpp
         DVR/TDDVR.h

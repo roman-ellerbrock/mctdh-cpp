@@ -42,8 +42,7 @@ public:
 
 	void Integrate(IntegratorVariables& ivars, ostream& os = cout);
 
-	double Error(const Wavefunction& Psi,
-		const Wavefunction& Chi, const Tree& tree) const;
+	double Error(const Wavefunction& Psi, const Wavefunction& Chi, const MatrixTreecd& rho, const Tree& tree) const;
 
 	void Output(double time, const Wavefunction& Psi,
 		const Wavefunction& Psistart, const Hamiltonian& H,

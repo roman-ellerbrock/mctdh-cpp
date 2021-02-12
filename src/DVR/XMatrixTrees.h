@@ -84,8 +84,6 @@ public:
 	Wavefunction Optimize(Wavefunction Psi,
 		const MatrixTreecd& rho, const Tree& tree, const Tree& tree_small);
 
-	Matrixcd BuildX(const Tensorcd& Phi, const Matrixcd& rho, const Node& node) const;
-
 	void print() const {
 		cout << "Xs:\n";
 		for (const auto& x : mats_) {
@@ -115,5 +113,8 @@ Matrixcd UnProject(size_t n_occupied, const Matrixcd& X,
 
 Tensorcd Occupy(const Tensorcd& Phi, const Matrixcd& trafo,
 	size_t n_occupied, const Node& node);
+
+Matrixcd BuildX(const Tensorcd& Phi, const Matrixcd& rho,
+	const SparseMatrixTreescd& xmats, const Node& node);
 
 #endif //XMATRIXTREES_H
