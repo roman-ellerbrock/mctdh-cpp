@@ -23,9 +23,9 @@ namespace cdvr_functions {
 
 	void fillX(Vectord& X, size_t idx, const TreeGrids& grids, const Node& node) {
 		/// Fill full-dimensional grid points from all neighboring node-grids
-		for (size_t k = 0; k < X.Dim(); ++k) {
+		for (size_t k = 0; k < X.dim(); ++k) {
 			const SparseVectorTreed& grid = grids[k];
-			if (grid.Active(node)) {
+			if (grid.isActive(node)) {
 				const Vectord& localgrid = grid[node];
 				X(k) = localgrid(idx);
 			}
@@ -39,10 +39,10 @@ namespace cdvr_functions {
 		assert(X.Dim() == grids.size());
 		if (node.isBottomlayer()) {
 			const Leaf& leaf = node.getLeaf();
-			const auto& g = leaf.PrimitiveGrid();
+			const auto& g = leaf.interface();
 			assert(g.HasDVR());
-			const Vectord& x = g.GetX();
-			X(leaf.Mode()) = x(idx.front());
+			const Vectord& x = g.getX();
+			X(leaf.mode()) = x(idx.front());
 		} else {
 			for (size_t k = 0; k < node.nChildren(); ++k) {
 				const Node& child = node.child(k);
@@ -75,8 +75,8 @@ namespace cdvr_functions {
 			size_t dimc = shape[k];
 			size_t dimn = shape[node.nChildren()];
 
-			auto D = Tensor_Extension::DoubleHoleContraction(Cdown[child], Cup, k, node.nChildren());
-			auto F = Tensor_Extension::DoubleHoleContraction(Cup, Cdown[child], k, node.nChildren());
+			auto D = Tensor_Extension::doubleHoleContraction(Cdown[child], Cup, k, node.nChildren());
+			auto F = Tensor_Extension::doubleHoleContraction(Cup, Cdown[child], k, node.nChildren());
 
 			TensorShape eshape({dimc, dimc, dimn, dimn});
 			Tensorcd E(eshape);
@@ -129,7 +129,7 @@ namespace cdvr_functions {
 		assert(!node.isToplayer());
 		assert(deltaV.shape().totalDimension() == pow(shape.lastDimension(), 4));
 
-		deltaV.Zero();
+		deltaV.zero();
 		for (size_t l1 = 0; l1 < dim; ++l1) {
 			for (size_t i0 = 0; i0 < dim; ++i0) {
 				for (size_t m1 = 0; m1 < dim; ++m1) {
@@ -181,11 +181,11 @@ namespace cdvr_functions {
 		assert(C.shape().totalDimension() == Phi.shape().totalDimension());
 		size_t dim = Phi.shape()[k];
 
-		Matrixcd X = Contraction(C, Phi, k);
+		Matrixcd X = contraction(C, Phi, k);
 		assert(X.Dim1() == dim);
 		assert(X.Dim2() == dim);
 
-		/// II: Apply DeltaV
+		/// II: apply DeltaV
 		Matrixcd Y(dim, dim);
 		for (size_t L = 0; L < shape.totalDimension(); ++L) {
 			const auto l = indexMapping(L, shape);
@@ -193,7 +193,7 @@ namespace cdvr_functions {
 		}
 
 		/// III: M * C
-		return MatrixTensor(Y, C, k);
+		return matrixTensor(Y, C, k);
 	}
 
 	Tensorcd Apply(const Tensorcd& Xi, const Tensorcd& V,

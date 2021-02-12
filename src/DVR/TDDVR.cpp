@@ -10,7 +10,7 @@
 vector<Matrixcd> getXs(const vector<SparseMatrixTreecd>& Xs, const Node& node) {
 	vector<Matrixcd> xs;
 	for (const auto& xtree : Xs) {
-		if (xtree.Active(node)) {
+		if (xtree.isActive(node)) {
 			xs.push_back(xtree[node]);
 		}
 	}
@@ -20,7 +20,7 @@ vector<Matrixcd> getXs(const vector<SparseMatrixTreecd>& Xs, const Node& node) {
 void setGrids(TreeGrids& gridtrees, vector<Vectord> grids, const Node& node) {
 	size_t k = 0;
 	for (auto& grid : gridtrees) {
-		if (grid.Active(node)) {
+		if (grid.isActive(node)) {
 			grid[node] = grids[k];
 			k++;
 		}
@@ -28,14 +28,14 @@ void setGrids(TreeGrids& gridtrees, vector<Vectord> grids, const Node& node) {
 }
 
 Matrixcd Regularize(Matrixcd w) {
-	double norm = abs(w.Trace());
+	double norm = abs(w.trace());
 	w = (1. / norm) * w;
 	double eps = 1e-6;
-	for (size_t i = 0; i < w.Dim1(); ++i) {
+	for (size_t i = 0; i < w.dim1(); ++i) {
 		w(i, i) += eps * exp(-w(i, i) / eps);
 	}
 	// Normalize the weight matrix
-	norm = abs(w.Trace());
+	norm = abs(w.trace());
 	w = (1. / norm) * w;
 	return w;
 }
@@ -43,7 +43,7 @@ Matrixcd Regularize(Matrixcd w) {
 vector<double> CalculateShift(const vector<Matrixcd>& xs, const Matrixcd& w) {
 	vector<double> shifts;
 	for (const auto& x : xs) {
-		double s = abs(x.Trace());
+		double s = abs(x.trace());
 		shifts.push_back(s);
 	}
 	return shifts;
@@ -54,7 +54,7 @@ void shift(vector<Matrixcd>& xs, const vector<double>& shift) {
 	for (size_t i = 0; i < xs.size(); ++i) {
 		double s = shift[i];
 		Matrixcd& x = xs[i];
-		for (size_t j = 0; j < x.Dim1(); ++j) {
+		for (size_t j = 0; j < x.dim1(); ++j) {
 			x(j, j) -= s;
 		}
 	}
@@ -65,7 +65,7 @@ void shift(vector<Vectord>& xs, const vector<double>& shift) {
 	for (size_t i = 0; i < xs.size(); ++i) {
 		double s = shift[i];
 		Vectord& x = xs[i];
-		for (size_t j = 0; j < x.Dim(); ++j) {
+		for (size_t j = 0; j < x.dim(); ++j) {
 			x(j) += s;
 		}
 	}
@@ -79,9 +79,9 @@ void LayerGrid(TreeGrids& grids, Matrixcd& trafo,
 	Matrixcd w;
 	if (w_ptr != nullptr) {
 		w = *w_ptr;
-		w = Regularize(w, 1e-8);
+		w = regularize(w, 1e-8);
 	} else {
-		w = IdentityMatrix<complex<double>>(trafo.Dim1());
+		w = identityMatrix<complex<double>>(trafo.dim1());
 	}
 
 	assert(!xs.empty());
@@ -94,11 +94,11 @@ void LayerGrid(TreeGrids& grids, Matrixcd& trafo,
 		cout << s << "\t";
 	}
 	cout << endl;*/
-	auto diags = WeightedSimultaneousDiagonalization::Calculate(xs, w, 1e-9);
+	auto diags = WeightedSimultaneousDiagonalization::calculate(xs, w, 1e-9);
 	shift(diags.second, shifts);
 	setGrids(grids, diags.second, node);
 	trafo = diags.first;
-	trafo = trafo.Adjoint();
+	trafo = trafo.adjoint();
 }
 
 void UpdateGrids(TreeGrids& grids, MatrixTreecd& trafo, const vector<SparseMatrixTreecd>& Xs,
@@ -117,7 +117,7 @@ void UpdateGrids(TreeGrids& grids, MatrixTreecd& trafo, const vector<SparseMatri
 
 void TDDVR::Update(const Wavefunction& Psi, const Tree& tree) {
 	/// Calculate density matrix
-	TreeFunctions::Contraction(rho_, Psi, tree, true);
+	TreeFunctions::contraction(rho_, Psi, tree, true);
 
 	/// Calculate X-Matrices
 	Xs_.Update(Psi, tree);
@@ -135,7 +135,7 @@ void TDDVR::GridTransformationLocal(Tensorcd& Phi, const Node& node, bool invers
 	for (size_t k = 0; k < node.nChildren(); ++k) {
 		const Node& child = node.child(k);
 		if (!inverse) {
-			Phi = MatrixTensor(trafo_[child], Phi, k);
+			Phi = matrixTensor(trafo_[child], Phi, k);
 		} else {
 			Phi = multATB(trafo_[child], Phi, k);
 		}
@@ -145,7 +145,7 @@ void TDDVR::GridTransformationLocal(Tensorcd& Phi, const Node& node, bool invers
 	if (!inverse) {
 		Phi = multStateArTB(hole_trafo_[node], Phi);
 	} else {
-		auto m = hole_trafo_[node].Adjoint();
+		auto m = hole_trafo_[node].adjoint();
 		Phi = multStateArTB(m, Phi);
 	}
 }
@@ -163,7 +163,7 @@ void TDDVR::NodeTransformation(Tensorcd& Phi, const Node& node, bool inverse) co
 		for (size_t k = 0; k < node.nChildren(); ++k) {
 			const Node& child = node.child(k);
 			if (!inverse) {
-				Phi = MatrixTensor(trafo_[child], Phi, k);
+				Phi = matrixTensor(trafo_[child], Phi, k);
 			} else {
 				Phi = multATB(trafo_[child], Phi, k);
 			}
@@ -173,7 +173,7 @@ void TDDVR::NodeTransformation(Tensorcd& Phi, const Node& node, bool inverse) co
 	/// Transform state
 	if (!node.isToplayer()) {
 		if (!inverse) {
-			Phi = MatrixTensor(hole_trafo_[node], Phi, node.nChildren());
+			Phi = matrixTensor(hole_trafo_[node], Phi, node.nChildren());
 		} else {
 			Phi = multATB(hole_trafo_[node], Phi, node.nChildren());
 		}
@@ -182,10 +182,10 @@ void TDDVR::NodeTransformation(Tensorcd& Phi, const Node& node, bool inverse) co
 
 void TDDVR::EdgeTransformation(Matrixcd& B_inv, const Edge& edge, bool inverse) const {
 	if (!inverse) {
-		B_inv = trafo_[edge].Transpose().Adjoint() * B_inv;
-		B_inv = B_inv * hole_trafo_[edge].Adjoint();
+		B_inv = trafo_[edge].transpose().adjoint() * B_inv;
+		B_inv = B_inv * hole_trafo_[edge].adjoint();
 	} else {
-		B_inv = trafo_[edge].Transpose() * B_inv;
+		B_inv = trafo_[edge].transpose() * B_inv;
 		B_inv = B_inv * hole_trafo_[edge];
 	}
 }
@@ -197,7 +197,7 @@ void TDDVR::NodeTransformation(Wavefunction& Psi, const Tree& tree, bool inverse
 }
 
 void TDDVR::EdgeTransformation(MatrixTreecd& B_inv, const Tree& tree, bool inverse) const {
-	for (const Edge& edge : tree.Edges()) {
+	for (const Edge& edge : tree.edges()) {
 		EdgeTransformation(B_inv[edge], edge, inverse);
 	}
 }
@@ -212,11 +212,11 @@ void TDDVR::print(const Tree& tree) const {
 	cout << "Grids:" << endl;
 	for (const Node& node : tree) {
 		if (!node.isToplayer() && !node.isBottomlayer()) {
-			size_t dim = trafo_[node].Dim1();
+			size_t dim = trafo_[node].dim1();
 			node.info();
 			for (size_t i = 0; i < dim; ++i) {
 				for (const SparseVectorTreed& grid : grids_) {
-					if (grid.Active(node)) {
+					if (grid.isActive(node)) {
 						const Vectord& g = grid[node];
 						cout << g(i) << "\t";
 					}
@@ -228,11 +228,11 @@ void TDDVR::print(const Tree& tree) const {
 	cout << "Hole grids:" << endl;
 	for (const Node& node : tree) {
 		if (!node.isToplayer() && !node.isBottomlayer()) {
-			size_t dim = trafo_[node].Dim1();
+			size_t dim = trafo_[node].dim1();
 			node.info();
 			for (size_t i = 0; i < dim; ++i) {
 				for (const SparseVectorTreed& grid : hole_grids_) {
-					if (grid.Active(node)) {
+					if (grid.isActive(node)) {
 						const Vectord& g = grid[node];
 						cout << g(i) << "\t";
 					}

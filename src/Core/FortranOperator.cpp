@@ -12,7 +12,7 @@ void FortranOperator::Initialize(int part_, int mode_, int dim_, FortranSystemH 
 	SystemH = SystemH_;
 }
 
-void FortranOperator::Apply(const LeafInterface& grid, Tensorcd& hAcoeff, const Tensorcd& Acoeff)const {
+void FortranOperator::apply(const LeafInterface& grid, Tensorcd& hAcoeff, const Tensorcd& Acoeff)const {
 	// Call the Fortran-Hamiltonian (using functional programming)
 	// Intructions:
 	// 1. Trafo and Matrix may NOT be used in the hamiltonian directly. So the routine SystemH (aka h)
@@ -23,7 +23,7 @@ void FortranOperator::Apply(const LeafInterface& grid, Tensorcd& hAcoeff, const 
 	// Maybe also other operators! So dont change it, 
 	// unless you know what you are doing.
 	// 3. x, Psi, HPsi can be directly accessed in SystemH.
-	Vectord x = grid.GetX();
+	Vectord x = grid.getX();
 	for (int n = 0; n < Acoeff.shape().lastDimension(); n++) {
 		SystemH((int*)&mode, (int*)&part, (double*)&hAcoeff(n*dim),
 			(double*)&Acoeff(n*dim), (int*)&dim, (double*)&grid, NULL, &x(0));

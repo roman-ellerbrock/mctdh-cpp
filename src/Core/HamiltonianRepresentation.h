@@ -42,19 +42,19 @@ public:
 
 	void build(const Hamiltonian& H, const Wavefunction& Psi, const Tree& tree) {
 		/// Calculate density matrix tree
-		TreeFunctions::Contraction(rho_, Psi, tree, true);
+		TreeFunctions::contraction(rho_, Psi, tree, true);
 
 		/// Density matrix tree decomposition
-		rho_decomposition_.Calculate(rho_, tree);
+		rho_decomposition_.calculate(rho_, tree);
 
 		/// Calculate inverse density matrix tree
-		rho_inverse_ = rho_decomposition_.Invert(tree);
+		rho_inverse_ = rho_decomposition_.invert(tree);
 
 		/// Calculate h-matrix trees
-		TreeFunctions::Represent(hMats_, H, Psi, Psi, tree);
+		TreeFunctions::represent(hMats_, H, Psi, Psi, tree);
 
 		/// Calculate h-matrix tree contractions
-		TreeFunctions::Contraction(hContractions_, hMats_, Psi, Psi, tree);
+		TreeFunctions::contraction(hContractions_, hMats_, Psi, Psi, tree);
 
 		/// Calculate CDVR
 //		if (H.hasV) { cdvr_.Update(Psi, H.V_, tree); }

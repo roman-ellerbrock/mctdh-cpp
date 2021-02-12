@@ -18,8 +18,8 @@ public:
 
 		clear();
 		for (size_t l = 0; l < tree.nLeaves(); ++l) {
-			const Leaf& leaf = tree.GetLeaf(l);
-			size_t mode = leaf.Mode();
+			const Leaf& leaf = tree.getLeaf(l);
+			size_t mode = leaf.mode();
 			MLOcd M(x, mode);
 
 			auto x1 = SparseMatrixTreecd(M, tree);

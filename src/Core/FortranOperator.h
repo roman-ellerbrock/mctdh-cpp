@@ -15,7 +15,7 @@ public:
 
 	void Initialize(int part_, int mode_, int dim_, FortranSystemH SystemH_);
 
-	void Apply(const LeafInterface& grid, Tensorcd & hAcoeff, const Tensorcd & Acoeff) const override;
+	void apply(const LeafInterface& grid, Tensorcd & hAcoeff, const Tensorcd & Acoeff) const override;
 
 protected:
 	int part, mode, dim;

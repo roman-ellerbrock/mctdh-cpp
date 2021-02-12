@@ -13,7 +13,7 @@ Wavefunction Regularize(Wavefunction Psi, const Tree& tree, double eps) {
 		for (size_t i = 0; i < A.shape().totalDimension(); ++i) {
 			A(i) += eps * dist(gen);
 		}
-		GramSchmidt(A);
+		gramSchmidt(A);
 	}
 	return Psi;
 }
@@ -23,11 +23,11 @@ Wavefunction Regularize(Wavefunction Psi, const Tree& tree, double eps) {
 
 SOPcd Xsop(const Tree& tree) {
 	LeafFuncd x = &LeafInterface::applyX;
-	LeafFuncd I = &LeafInterface::Identity;
+	LeafFuncd I = &LeafInterface::identity;
 	SOPcd xops;
 	for (size_t l = 0; l < tree.nLeaves(); ++l) {
-		const Leaf& leaf = tree.GetLeaf(l);
-		size_t mode = leaf.Mode();
+		const Leaf& leaf = tree.getLeaf(l);
+		size_t mode = leaf.mode();
 		MLOcd M(x, mode);
 		for (size_t i = 0; i < tree.nLeaves(); ++i) {
 			M.push_back(I, i);
@@ -44,7 +44,7 @@ Tensorcd XMatrixTrees::Optimize(const Tensorcd& Phi, const Matrixcd& rho,
 
 	auto X = BuildX(Phi, rho, mats_, node);
 	X = UnProject(n_occ, X, Phi);
-	auto xspec = Diagonalize(X);
+	auto xspec = diagonalize(X);
 	auto oPhi = Occupy(Phi, xspec.first, n_occ, node);
 
 	return oPhi;
@@ -55,7 +55,7 @@ Wavefunction XMatrixTrees::Optimize(Wavefunction Psi,
 
 	Wavefunction Chi(Psi);
 	for (const Node& node : tree) {
-		const Node& node2 = tree_small.GetNode(node.Address());
+		const Node& node2 = tree_small.getNode(node.address());
 		if (!node.isToplayer() && (node.shape() != node2.shape())) {
 			Chi[node] = Optimize(Psi[node], rho[node],
 				node, node2);
@@ -70,23 +70,23 @@ Matrixcd BuildX(const Tensorcd& Phi, const Matrixcd& rho,
 
 	if (node.isBottomlayer()) {
 		const Leaf& leaf = node.getLeaf();
-		const LeafInterface& grid = leaf.PrimitiveGrid();
-		auto w = 1. / abs(rho.Trace()) * rho;
-		w = Regularize(w, 1e-5);
+		const LeafInterface& grid = leaf.interface();
+		auto w = 1. / abs(rho.trace()) * rho;
+		w = regularize(w, 1e-5);
 		Tensorcd xPhi(Phi.shape());
 		grid.applyX(xPhi, Phi);
-		auto wxPhi = MatrixTensor(w, xPhi, node.parentIdx());
-		return Tensor_Extension::OuterProduct(wxPhi, xPhi);
+		auto wxPhi = matrixTensor(w, xPhi, node.parentIdx());
+		return Tensor_Extension::outerProduct(wxPhi, xPhi);
 	} else {
 		size_t bef = node.shape().lastBefore();
 		Matrixcd X(bef, bef);
 		for (size_t k = 0; k < node.nChildren(); ++k) {
 			const Node& child = node.child(k);
 			for (const SparseMatrixTreecd& x : xmats) {
-				if (x.Active(child)) {
-					Tensorcd xPhi = MatrixTensor(x[child], Phi, k);
+				if (x.isActive(child)) {
+					Tensorcd xPhi = matrixTensor(x[child], Phi, k);
 					// Build needed Tensors
-					Tensor_Extension::WeightedOuterProductAdd(X, xPhi, xPhi, rho);
+					Tensor_Extension::weightedOuterProductAdd(X, xPhi, xPhi, rho);
 				}
 			}
 		}

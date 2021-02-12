@@ -11,18 +11,18 @@ Tensorcd Apply(const Hamiltonian& H, const Tensorcd& Phi,
 	Tensorcd Psi(Phi.shape());
 	for (size_t l = 0; l < H.size(); l++) {
 		const auto& hmat = hRep.hMats_[l];
-		if (!hmat.Active(node)) { continue; }
+		if (!hmat.isActive(node)) { continue; }
 		for (size_t i = 0; i < Psi.shape().totalDimension(); ++i) {
-			Psi[i] = H.Coeff(l) * Phi[i];
+			Psi[i] = H.coeff(l) * Phi[i];
 		}
 
 //		Psi = H.Coeff(l) * Phi;
 //		Tensorcd Psi(Phi, H.Coeff(l));
-		Psi = TreeFunctions::Apply(hmat, Psi, H[l], node);
+		Psi = TreeFunctions::apply(hmat, Psi, H[l], node);
 
 		// Multiply with hole-matrix
 		const auto& hhole = hRep.hContractions_[l];
-		if (!node.isToplayer() && hhole.Active(node)) {
+		if (!node.isToplayer() && hhole.isActive(node)) {
 			multStateAB(dPhi, hhole[node], Psi, false);
 		} else {
 			dPhi += Psi;
@@ -39,9 +39,9 @@ Tensorcd Apply(const Hamiltonian& H, const Tensorcd& Phi,
 Matrixcd Expectation(const HamiltonianRepresentation& hRep,
 	const Wavefunction& Psi, const Hamiltonian& H, const Tree& tree) {
 
-	const Node& top = tree.TopNode();
+	const Node& top = tree.topNode();
 	auto HPhi = Apply(H, Psi[top], hRep, top);
-	return Psi[top].DotProduct(HPhi);
+	return Psi[top].dotProduct(HPhi);
 }
 
 void LayerDerivative(Tensorcd& dPhi, double time, const Tensorcd& Phi,
@@ -55,7 +55,7 @@ void LayerDerivative(Tensorcd& dPhi, double time, const Tensorcd& Phi,
 	// Inverse Densitymatrix and (1-P) projector for SPF-type EOM
 	if (!node.isToplayer()) {
 		// (1-P) projector
-		dPhi = ProjectOut(dPhi, Phi);
+		dPhi = projectOut(dPhi, Phi);
 
 		// Multiply with inverse single-particle density matrix
 		const auto& rhoinv = hRep.rho_inverse_[node];

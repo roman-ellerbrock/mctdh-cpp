@@ -8,7 +8,7 @@ void inttocartch3qe_(double *q, double *x);
 TrafoCH3Quasiexact::TrafoCH3Quasiexact(Vectord mass_)
 		: mass(mass_) {}
 
-Vectord TrafoCH3Quasiexact::Transform(const Vectord& q) const {
+Vectord TrafoCH3Quasiexact::transform(const Vectord& q) const {
 	assert(q.Dim() == 6);
 	Vectord qq(q);
 	Vectord Xv(12);

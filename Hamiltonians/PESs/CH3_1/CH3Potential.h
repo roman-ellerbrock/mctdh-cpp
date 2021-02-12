@@ -8,6 +8,6 @@ public:
 	CH3Potential() = default;
 	~CH3Potential() = default;
 
-	double Evaluate(const Vectord& Xv, size_t part) const override;
+	double evaluate(const Vectord& Xv, size_t part) const override;
 };
 

@@ -4,7 +4,7 @@ CDVRModelV::CDVRModelV(size_t f_, bool coupling)
 :f(f_), coupling_(coupling)
 {}
 
-double CDVRModelV::Evaluate(const Vectord & Xv, size_t part)const
+double CDVRModelV::evaluate(const Vectord & Xv, size_t part)const
 {
 	constexpr double cm = 219474.6313705;
 	constexpr double lambda = 2000. / cm;

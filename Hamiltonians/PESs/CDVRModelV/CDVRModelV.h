@@ -8,7 +8,7 @@ public:
 	CDVRModelV(size_t f_ = 4, bool coupling = true);
 	~CDVRModelV() = default;
 
-	double Evaluate(const Vectord& Xv, size_t part)const;
+	double evaluate(const Vectord& Xv, size_t part)const;
 
 protected:
 	size_t f;

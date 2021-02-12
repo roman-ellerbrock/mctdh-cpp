@@ -44,7 +44,7 @@ void CMFIntegrator::Integrate(IntegratorVariables& job, ostream& os) {
 	Wavefunction& Psi = *job.psi;
 	const Hamiltonian& H = *job.h;
 
-	Psi.Write(job.ofname);
+	Psi.write(job.ofname);
 
 	// Reinitiate initia; steps
 	double timepart = 0.25;
@@ -146,12 +146,12 @@ void CMFIntegrator::Integrate(IntegratorVariables& job, ostream& os) {
 			time += dt;
 
 			// call orthogonal
-			Orthogonal(Psi, tree);
+			orthogonal(Psi, tree);
 
 			// Datout
 			if (time + 1E-10 >= t_next) {
 //				Psi.Write(files.PsiFile(), savepsi);
-				Psi.Write(job.ofname);
+				Psi.write(job.ofname);
 //				opsi << Psi;
 				Output(time, Psi, Psistart, H, tree, os);
 				double time_tot = mattime.count() + steptime.count();
@@ -189,15 +189,15 @@ void CMFIntegrator::CMFstep(Wavefunction& Psi, double time, double timeend,
 	// Integrate on every layer_ with constant matrices
 	for (const Node& node : tree) {
 		if (node.isToplayer() || eom_spf) {
-			LayerInterface I = interfaces_[node.Address()];
-			bs_integrator& layer_bs = bs_integrators_[node.Address()];
+			LayerInterface I = interfaces_[node.address()];
+			bs_integrator& layer_bs = bs_integrators_[node.address()];
 			Tensorcd& Phi = Psi[node];
 			double layertime = time;
-			layer_bs.Integrate(Phi, layertime, timeend, dt_bs_[node.Address()],
+			layer_bs.Integrate(Phi, layertime, timeend, dt_bs_[node.address()],
 				accuracy_leaf, ddt, Delta, I);
 		}
 	}
-	Orthogonal(Psi, tree);
+	orthogonal(Psi, tree);
 }
 
 double
@@ -214,7 +214,7 @@ CMFIntegrator::Error(const Wavefunction& Psi, const Wavefunction& Chi,
 	double result = 0.0;
 	double number = 0.0;
 	for (const Node& node : tree) {
-		const LayerInterface& layer = interfaces_[node.Address()];
+		const LayerInterface& layer = interfaces_[node.address()];
 
 		const Tensorcd& Phi = Psi[node];
 		const Tensorcd& xi = Chi[node];
@@ -242,17 +242,17 @@ void CMFIntegrator::Output(double time, const Wavefunction& Psi,
 
 	cout << "Energies:\n";
 	auto h_matrix = Expectation(matrices_, Psi, H, tree);
-	auto S = TreeFunctions::DotProduct(Psi, Psi, tree);
-	auto s_top = S[tree.TopNode()];
-	for (size_t i = 0; i < h_matrix.Dim1(); ++i) {
+	auto S = TreeFunctions::dotProduct(Psi, Psi, tree);
+	auto s_top = S[tree.topNode()];
+	for (size_t i = 0; i < h_matrix.dim1(); ++i) {
 		double e = real(h_matrix(i, i) / s_top(i, i));
 		cout << i << ":\t" << e * QM::cm << " 1/cm\t" << e << " a.u." << endl;
 	}
 
 	// Calculate Autocorrelation function
-	auto autocorrelation = TreeFunctions::DotProduct(Psistart, Psi, tree);
-	cout << "<Psi_0(0)|Psi_0(t)>=" << autocorrelation[tree.TopNode()](0, 0) << endl;
+	auto autocorrelation = TreeFunctions::dotProduct(Psistart, Psi, tree);
+	cout << "<Psi_0(0)|Psi_0(t)>=" << autocorrelation[tree.topNode()](0, 0) << endl;
 
 	// Calculate Datout
-	TreeIO::Output(Psi, tree, os);
+	TreeIO::output(Psi, tree, os);
 }

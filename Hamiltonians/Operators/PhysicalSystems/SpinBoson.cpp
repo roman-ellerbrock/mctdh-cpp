@@ -9,8 +9,8 @@ namespace Operator {
 		size_t n_fragment = tree.nLeaves();
 		size_t dim = 0;
 		for (size_t n = 0; n < n_fragment; ++n) {
-			const Leaf& leaf = tree.GetLeaf(n);
-			size_t n_states = leaf.Dim();
+			const Leaf& leaf = tree.getLeaf(n);
+			size_t n_states = leaf.dim();
 			dim += n_states;
 		}
 		Matrixd C(dim, dim);
@@ -29,21 +29,21 @@ namespace Operator {
 		/// Copy Matrix from supermatrix
 		size_t n_fragment = tree.nLeaves();
 		assert(n < n_fragment && m < n_fragment);
-		const Leaf& leaf1 = tree.GetLeaf(m);
-		const Leaf& leaf2 = tree.GetLeaf(n);
-		size_t dim1 = leaf1.Dim();
-		size_t dim2 = leaf2.Dim();
+		const Leaf& leaf1 = tree.getLeaf(m);
+		const Leaf& leaf2 = tree.getLeaf(n);
+		size_t dim1 = leaf1.dim();
+		size_t dim2 = leaf2.dim();
 
 		size_t start1 = 0;
 		for (size_t l = 0; l < m; ++l) {
-			const Leaf& leaf = tree.GetLeaf(l);
-			size_t dim = leaf.Dim();
+			const Leaf& leaf = tree.getLeaf(l);
+			size_t dim = leaf.dim();
 			start1 += dim;
 		}
 		size_t start2 = 0;
 		for (size_t l = 0; l < n; ++l) {
-			const Leaf& leaf = tree.GetLeaf(l);
-			size_t dim = leaf.Dim();
+			const Leaf& leaf = tree.getLeaf(l);
+			size_t dim = leaf.dim();
 			start2 += dim;
 		}
 
@@ -63,7 +63,7 @@ namespace Operator {
 
 		/// Get coefficients from file
 		Matrixd C = Coefficients(filename, tree);
-		auto x = Diagonalize(C);
+		auto x = diagonalize(C);
 		cout << "Eigenvalues (Singles approx.): " << endl;
 		x.second *= 27.2114;
 		x.second.print();
@@ -151,7 +151,7 @@ namespace Operator {
 					*/
 				} else {
 
-					for (size_t i = 0; i < lambda.Dim1(); ++i) {
+					for (size_t i = 0; i < lambda.dim1(); ++i) {
 						shared_ptr<LeafOperatorcd> Xi = make_shared<Excite>(i, 0);
 						Vectord alpha = lambda.col(i);
 						shared_ptr<LeafOperatorcd> Xjs = make_shared<VectorExcite>(0, alpha);
@@ -161,7 +161,7 @@ namespace Operator {
 						H.push_back(M, 1.);
 					}
 
-					for (size_t j = 0; j < lambda.Dim2(); ++j) {
+					for (size_t j = 0; j < lambda.dim2(); ++j) {
 						shared_ptr<LeafOperatorcd> Xj = make_shared<Excite>(j, 0);
 						Vectord beta = lambda.row(j);
 						shared_ptr<LeafOperatorcd> Xis = make_shared<VectorExcite>(0, beta);

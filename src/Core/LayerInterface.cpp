@@ -9,7 +9,7 @@ double LayerInterface::Error(const Tensorcd& Phi, const Tensorcd& Chi)const {
 		// Density weighted Error
 		const MatrixTreecd& rho = hRep_->rho_;
 		const Matrixcd& rhomat = rho[*node_];
-		double norm = real(rhomat.Trace());
+		double norm = real(rhomat.trace());
 		Tensorcd C = Phi - Chi;
 		C = multStateAB(rhomat, C);
 		for (size_t j = 0; j < C.shape().totalDimension(); j++)
@@ -18,8 +18,8 @@ double LayerInterface::Error(const Tensorcd& Phi, const Tensorcd& Chi)const {
 	} else {
 		// @TODO: Check if this is ok:
 		// Incorporating norm
-		Matrixcd S = Phi.DotProduct(Phi);
-		double norm = real(S.Trace());
+		Matrixcd S = Phi.dotProduct(Phi);
+		double norm = real(S.trace());
 		for (size_t j = 0; j < Phi.shape().totalDimension(); j++) {
 			// Primitive Error without density matrix stuff
 			Delta += pow(abs(Phi(j) - Chi(j)), 2);

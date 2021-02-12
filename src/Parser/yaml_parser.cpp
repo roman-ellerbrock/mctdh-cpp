@@ -66,21 +66,21 @@ namespace parser {
 	void read_leaf_parameters(Tree& tree, const YAML::Node& node) {
 		for (const auto& child : node["leaves"]) {
 			auto mode = evaluate<size_t>(child, "mode");
-			auto& leaf = tree.GetLeaf(mode);
+			auto& leaf = tree.getLeaf(mode);
 			auto r0 = evaluate<double>(child, "r0");
 			auto wfr0 = evaluate<double>(child, "wfr0");
 			auto omega = evaluate<double>(child, "omega");
 			auto wfomega = evaluate<double>(child, "wfomega");
-			auto& grid = leaf.PrimitiveGrid();
-			grid.Initialize(omega, r0, wfr0, wfomega);
+			auto& grid = leaf.interface();
+			grid.initialize(omega, r0, wfr0, wfomega);
 		}
 	}
 
 	Tree create_tree(const YAML::Node& node) {
 		Tree tree;
 		Node root = create_node(node["tree"]);
-		tree.SetRoot(root);
-		tree.Update();
+		tree.setRoot(root);
+		tree.update();
 		read_leaf_parameters(tree, node);
 		return tree;
 	}
@@ -91,7 +91,7 @@ namespace parser {
 			auto num_leaves = evaluate<size_t>(node, "number_leaves");
 			auto dim_leaves = evaluate<size_t>(node, "dimension_leaves");
 			auto dim_nodes = evaluate<size_t>(node, "dimension_nodes");
-			return TreeFactory::BalancedTree(num_leaves, dim_leaves, dim_nodes);
+			return TreeFactory::balancedTree(num_leaves, dim_leaves, dim_nodes);
 		} else if (type == "manual") {
 			return create_tree(node);
 		} else if (type == "compact") {
@@ -100,7 +100,7 @@ namespace parser {
 			Tree tree(ss);
 			tree.info();
 			cout << "checking tree.." << endl;
-			if (!tree.IsWorking()) {
+			if (!tree.isWorking()) {
 				cerr << "Failed to read tree with .yaml parser in compact format.\n";
 				cerr << "Error caused by tree input string reading:\n";
 				cerr << tree_str << endl;

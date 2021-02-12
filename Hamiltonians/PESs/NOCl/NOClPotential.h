@@ -6,11 +6,11 @@ class NOClPotential
 public:
 	explicit NOClPotential(bool dissociation = true);
 	~NOClPotential() override = default;
-	double Evaluate(const Vectord& Xv, size_t part) const override;
+	double evaluate(const Vectord& Xv, size_t part) const override;
 
 private:
-	double EvaluateGS(const Vectord& Xv, size_t part) const;
-	double EvaluateS1(const Vectord& Xv, size_t part) const;
+	double evaluateGS(const Vectord& Xv, size_t part) const;
+	double evaluateS1(const Vectord& Xv, size_t part) const;
 	bool dissociation;
 };
 

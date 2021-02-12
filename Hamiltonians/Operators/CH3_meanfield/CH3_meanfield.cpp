@@ -48,33 +48,33 @@ namespace Operator {
 
 	void divx2(const LeafInterface& grid, Tensorcd& HPsi, const Tensorcd& Psi) {
 		auto f = [](double x) { return 1. / (x * x); };
-		ApplyG(HPsi, Psi, grid.GetX(), f);
+		ApplyG(HPsi, Psi, grid.getX(), f);
 	}
 
 	void a_sin(const LeafInterface& grid, Tensorcd& HPsi, const Tensorcd& Psi) {
 		auto f = [](double x) { return sin(x); };
-		ApplyG(HPsi, Psi, grid.GetX(), f);
+		ApplyG(HPsi, Psi, grid.getX(), f);
 	}
 
 	void a_sin3(const LeafInterface& grid, Tensorcd& HPsi, const Tensorcd& Psi) {
 		auto f = [](double x) { return pow(sin(x), 3); };
-		ApplyG(HPsi, Psi, grid.GetX(), f);
+		ApplyG(HPsi, Psi, grid.getX(), f);
 	}
 
 	void a_divsin2(const LeafInterface& grid, Tensorcd& HPsi, const Tensorcd& Psi) {
 		auto f = [](double x) { return 1. / (sin(x) * sin(x)); };
-		ApplyG(HPsi, Psi, grid.GetX(), f);
+		ApplyG(HPsi, Psi, grid.getX(), f);
 	}
 
 	// V - rho
 	void vol_rho(const LeafInterface& grid, Tensorcd& HPsi, const Tensorcd& Psi) {
 		auto f = [](double x) { return x * x; };
-		ApplyG(HPsi, Psi, grid.GetX(), f);
+		ApplyG(HPsi, Psi, grid.getX(), f);
 	}
 
 	void divvol_rho(const LeafInterface& grid, Tensorcd& HPsi, const Tensorcd& Psi) {
 		auto f = [](double x) { return x * x; };
-		ApplyV(HPsi, Psi, grid.GetX(), v_divsqrt, f);
+		ApplyV(HPsi, Psi, grid.getX(), v_divsqrt, f);
 	}
 
 	// V - theta_rho
@@ -84,7 +84,7 @@ namespace Operator {
 
 	void divvol_thetarho(const LeafInterface& grid, Tensorcd& HPsi, const Tensorcd& Psi) {
 		auto f = [](double x) { return sin(x); };
-		ApplyV(HPsi, Psi, grid.GetX(), v_divsqrt, f);
+		ApplyV(HPsi, Psi, grid.getX(), v_divsqrt, f);
 	}
 
 	// V - theta
@@ -94,12 +94,12 @@ namespace Operator {
 
 	void sqrtvol_theta(const LeafInterface& grid, Tensorcd& HPsi, const Tensorcd& Psi) {
 		auto f = [](double x) { return pow(sin(x), 3); };
-		ApplyV(HPsi, Psi, grid.GetX(), v_sqrt, f);
+		ApplyV(HPsi, Psi, grid.getX(), v_sqrt, f);
 	}
 
 	void divvol_theta(const LeafInterface& grid, Tensorcd& HPsi, const Tensorcd& Psi) {
 		auto f = [](double x) { return pow(sin(x), 3); };
-		ApplyV(HPsi, Psi, grid.GetX(), v_divsqrt, f);
+		ApplyV(HPsi, Psi, grid.getX(), v_divsqrt, f);
 	}
 
 	// V - phi
@@ -108,7 +108,7 @@ namespace Operator {
 		auto f = [=](double x) {
 			return 1. / (1. + pow(x - pi3, 2) - pow(x - pi3, 3) / (3. * sqrt(3.)) + pow(x - pi3, 4) * 3. / 4.);
 		};
-		ApplyG(HPsi, Psi, grid.GetX(), f);
+		ApplyG(HPsi, Psi, grid.getX(), f);
 	}
 
 	void sqrtvol_phi(const LeafInterface& grid, Tensorcd& HPsi, const Tensorcd& Psi) {
@@ -116,7 +116,7 @@ namespace Operator {
 		auto f = [=](double x) {
 			return 1. / (1. + pow(x - pi3, 2) - pow(x - pi3, 3) / (3. * sqrt(3.)) + pow(x - pi3, 4) * 3. / 4.);
 		};
-		ApplyV(HPsi, Psi, grid.GetX(), v_sqrt, f);
+		ApplyV(HPsi, Psi, grid.getX(), v_sqrt, f);
 	}
 
 	void divvol_phi(const LeafInterface& grid, Tensorcd& HPsi, const Tensorcd& Psi) {
@@ -124,7 +124,7 @@ namespace Operator {
 		auto f = [=](double x) {
 			return 1. / (1. + pow(x - pi3, 2) - pow(x - pi3, 3) / (3. * sqrt(3.)) + pow(x - pi3, 4) * 3. / 4.);
 		};
-		ApplyV(HPsi, Psi, grid.GetX(), v_divsqrt, f);
+		ApplyV(HPsi, Psi, grid.getX(), v_divsqrt, f);
 	}
 
 	// V - chi
@@ -133,7 +133,7 @@ namespace Operator {
 			double fun = 1. / (1. + pow(x - pi, 2) / 3. + pow(x - pi, 4) / 12.);
 			return fun;
 		};
-		ApplyG(HPsi, Psi, grid.GetX(), f);
+		ApplyG(HPsi, Psi, grid.getX(), f);
 	}
 
 	void divvol_chi(const LeafInterface& grid, Tensorcd& HPsi, const Tensorcd& Psi) {
@@ -141,13 +141,13 @@ namespace Operator {
 			double fun = 1. / (1. + pow(x - pi, 2) / 3. + pow(x - pi, 4) / 12.);
 			return fun;
 		};
-		ApplyV(HPsi, Psi, grid.GetX(), v_divsqrt, f);
+		ApplyV(HPsi, Psi, grid.getX(), v_divsqrt, f);
 	}
 
 	// G
 	void G91(const LeafInterface& grid, Tensorcd& HPsi, const Tensorcd& Psi) {
 		auto f = [=](double x) { return (1. + 2. * dphr2 + 4. / 3. * dthr2 + dph2 / 3. + dch2 / 9.); };
-		ApplyG(HPsi, Psi, grid.GetX(), f);
+		ApplyG(HPsi, Psi, grid.getX(), f);
 	}
 
 	void G92(const LeafInterface& grid, Tensorcd& HPsi, const Tensorcd& Psi) {
@@ -155,7 +155,7 @@ namespace Operator {
 			return 1. / (pow(tan(x), 2) * 4. * sqrt(3.)) *
 				(-9. * dphr2 + 8. * dthr2 + 7. * dph2 - 7. / 3. * dch2);
 		};
-		ApplyG(HPsi, Psi, grid.GetX(), f);
+		ApplyG(HPsi, Psi, grid.getX(), f);
 	}
 
 	void G93(const LeafInterface& grid, Tensorcd& HPsi, const Tensorcd& Psi) {
@@ -166,7 +166,7 @@ namespace Operator {
 				+ 3. / 2. / pow(tan(x), 2) * dph2
 				+ 5. / 6. / pow(tan(x), 2) * dch2);
 		};
-		ApplyG(HPsi, Psi, grid.GetX(), f);
+		ApplyG(HPsi, Psi, grid.getX(), f);
 	}
 
 	void G94(const LeafInterface& grid, Tensorcd& HPsi, const Tensorcd& Psi) {
@@ -179,7 +179,7 @@ namespace Operator {
 					+ 3. / 2. / pow(tan(x), 2) * dch2);
 			return g;
 		};
-		ApplyG(HPsi, Psi, grid.GetX(), f);
+		ApplyG(HPsi, Psi, grid.getX(), f);
 	}
 
 	SOPcd CH3_meanfield() {

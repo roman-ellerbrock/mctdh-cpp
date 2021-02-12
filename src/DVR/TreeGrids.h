@@ -10,17 +10,17 @@ class SparseVectorTreed: public SparseNodeAttribute<Vectord> {
 public:
 	SparseVectorTreed(const MLOcd& M, const Tree& tree, bool tail = true, bool inverse_tree = false)
 		: SparseNodeAttribute<Vectord>(M.targetLeaves(), tree, tail, inverse_tree) {
-		SparseVectorTreed::Initialize(tree);
+		SparseVectorTreed::initialize(tree);
 	}
 
 	SparseVectorTreed(const SparseTree& stree, const Tree& tree)
 		: SparseNodeAttribute<Vectord>(stree, tree) {
-		SparseVectorTreed::Initialize(tree);
+		SparseVectorTreed::initialize(tree);
 	}
 
-	void Initialize(const Tree& tree) override {
+	void initialize(const Tree& tree) override {
 		attributes_.clear();
-		for (const Node *node_ptr : Active()) {
+		for (const Node *node_ptr : sparseTree()) {
 			const Node& node = *node_ptr;
 			const TensorShape& shape = node.shape();
 			attributes_.emplace_back(Vectord(shape.lastDimension()));
@@ -37,8 +37,8 @@ public:
 		LeafFuncd x = &LeafInterface::applyX;
 
 		for (size_t l = 0; l < tree.nLeaves(); ++l) {
-			const Leaf& leaf = tree.GetLeaf(l);
-			size_t mode = leaf.Mode();
+			const Leaf& leaf = tree.getLeaf(l);
+			size_t mode = leaf.mode();
 			MLOcd M(x, mode);
 			emplace_back(SparseVectorTreed(M, tree, true, inverse_tree));
 		}
@@ -48,7 +48,7 @@ public:
 		for (const Node& node : tree) {
 			node.info();
 			for (const auto& grid : *this) {
-				if (grid.Active(node)) {
+				if (grid.isActive(node)) {
 					grid[node].print();
 				}
 			}

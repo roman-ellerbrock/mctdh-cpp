@@ -112,9 +112,9 @@ void FortranSOP::SpecialInitialize(const Tree& tree) {
 		for (int k = 0; k < nmodes; k++) {
 			if (diag(k, i) != 1) {
 				FortranOperator* F = new FortranOperator();
-				const Leaf& phys = tree.GetLeaf(k);
-				int dim = phys.Dim();
-				int mode = phys.Mode() + 1;
+				const Leaf& phys = tree.getLeaf(k);
+				int dim = phys.dim();
+				int mode = phys.mode() + 1;
 				F->Initialize(i + 1, mode, dim, SystemH);
 				shared_ptr<LeafOperatorcd> F_shared(F);
 				M.push_back(F_shared, k);
@@ -135,8 +135,8 @@ void FortranSOP::SpecialInitialize(const Tree& tree) {
 		for (int k = 0; k < nmodes; k++)
 		{
 			FortranOperator* F = new FortranOperator;
-			const Leaf& phys = tree.GetLeaf(k);
-			int dim = phys.Dim();
+			const Leaf& phys = tree.getLeaf(k);
+			int dim = phys.dim();
 			F->Initialize(-1, k + 1, dim, SystemH);
 			shared_ptr<LeafOperatorcd> F_shared(F);
 			M.push_back(F_shared, k);
@@ -149,8 +149,8 @@ void FortranSOP::SpecialInitialize(const Tree& tree) {
 		for (int k = 0; k < nmodes; k++)
 		{
 			FortranOperator* F = new FortranOperator;
-			const Leaf& phys = tree.GetLeaf(k);
-			int dim = phys.Dim();
+			const Leaf& phys = tree.getLeaf(k);
+			int dim = phys.dim();
 			F->Initialize(-2, k + 1, dim, SystemH);
 			shared_ptr<LeafOperatorcd> F_shared(F);
 			M.push_back(F_shared, k);
@@ -170,13 +170,13 @@ void FortranSOP::InitOperator()
 
 Wavefunction FortranSOP::ApplyFlux(const Wavefunction& Psi, const Tree& basis) {
 	// Apply the Flux operator F = [h, H]
-	return FluxOperator.Apply(Psi, basis);
+	return FluxOperator.apply(Psi, basis);
 }
 
 Wavefunction FortranSOP::ApplyDividingSurface(const Wavefunction& Psi, const Tree& basis)
 {
 	// Apply the dividing surface oeprator h
-	return DividingSurface.Apply(Psi, basis);
+	return DividingSurface.apply(Psi, basis);
 }
 
 void FortranSOP::InitializeFortranPara(const Tree& basis)
@@ -186,12 +186,12 @@ void FortranSOP::InitializeFortranPara(const Tree& basis)
 	Matrixd para(4, f);
 	for (int k = 0; k < f; k++)
 	{
-		const Leaf& phy = basis.GetLeaf(k);
-		const PhysPar par = phy.Par();
-		para(0, k) = par.Omega();
-		para(1, k) = par.R0();
-		para(2, k) = par.WFR0();
-		para(3, k) = par.WFOmega();
+		const Leaf& phy = basis.getLeaf(k);
+		const PhysPar par = phy.par();
+		para(0, k) = par.omega();
+		para(1, k) = par.r0();
+		para(2, k) = par.wfr0();
+		para(3, k) = par.wfOmega();
 	}
 
 	fillpara_(&f, &para(0, 0));

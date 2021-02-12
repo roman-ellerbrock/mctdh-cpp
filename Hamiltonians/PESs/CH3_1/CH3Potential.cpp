@@ -10,7 +10,7 @@ void potentialch3_(double *v, double *q, int *part);
 #endif
 }
 
-double CH3Potential::Evaluate(const Vectord& Xv, size_t part) const {
+double CH3Potential::evaluate(const Vectord& Xv, size_t part) const {
 	double v = 0;
 	Vectord Xv2(Xv);
 	assert(Xv2.Dim() == 12);

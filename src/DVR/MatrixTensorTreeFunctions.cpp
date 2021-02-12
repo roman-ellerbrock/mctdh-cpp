@@ -10,7 +10,7 @@ namespace TreeFunctions {
 		const Tree& tree) {
 
 		const TensorTreecd& Psi_up = Psi.BottomUpNormalized(tree);
-		TreeFunctions::Represent(mat, M, Psi_up, tree);
+		TreeFunctions::represent(mat, M, Psi_up, tree);
 	}
 
 	void ContractionLocal(SparseMatrixTreecd& hole, const Tensorcd& Phi,
@@ -18,12 +18,12 @@ namespace TreeFunctions {
 		assert(!hchild.isToplayer());
 		const Node& parent = hchild.parent();
 
-		Tensorcd hPhi = TreeFunctions::ApplyHole(hole, Phi, hchild);
+		Tensorcd hPhi = TreeFunctions::applyHole(hole, Phi, hchild);
 
 		if (!parent.isToplayer()) {
-			hPhi = TensorMatrix(hPhi, hole[parent], parent.childIdx());
+			hPhi = tensorMatrix(hPhi, hole[parent], parent.childIdx());
 		}
-		hole[hchild] = Contraction(Phi, hPhi, hchild.childIdx());
+		hole[hchild] = contraction(Phi, hPhi, hchild.childIdx());
 	}
 
 	void Contraction(SparseMatrixTreecd& hole, const MatrixTensorTree& Psi,
@@ -32,7 +32,7 @@ namespace TreeFunctions {
 		const TensorTreecd& Psi_down = Psi.TopDownNormalized(tree);
 		int sub_topnode = marker.size() - 1;
 		for (int n = sub_topnode; n >= 0; --n) {
-			const Node& node = marker.MCTDHNode(n);
+			const Node& node = marker.node(n);
 			if (!node.isToplayer()) {
 				ContractionLocal(hole, Psi_down[node], mat, node);
 			}
@@ -45,7 +45,7 @@ namespace TreeFunctions {
 		const Tree& tree) {
 
 		Represent(mats.first, Psi, M, tree);
-		Contraction(mats.second, Psi, mats.first, mats.second.Active(), tree);
+		Contraction(mats.second, Psi, mats.first, mats.second.sparseTree(), tree);
 
 	}
 
@@ -60,13 +60,13 @@ namespace TreeFunctions {
 
 	Tensorcd symApplyDown(const Tensorcd& Phi, const SparseMatrixTreecd& hHole,
 		const Node& node) {
-		if (node.isToplayer() || !hHole.Active(node)) { return Phi; }
-		return TensorMatrix(Phi, hHole[node], node.parentIdx());
+		if (node.isToplayer() || !hHole.isActive(node)) { return Phi; }
+		return tensorMatrix(Phi, hHole[node], node.parentIdx());
 	}
 
 	Tensorcd symApply(const Tensorcd& Phi,
 		const SparseMatrixTreePaircd& mats, const MLOcd& M, const Node& node) {
-		Tensorcd hPhi = TreeFunctions::Apply(mats.first, Phi, M, node);
+		Tensorcd hPhi = TreeFunctions::apply(mats.first, Phi, M, node);
 		return symApplyDown(hPhi, mats.second, node);
 	}
 
@@ -76,7 +76,7 @@ namespace TreeFunctions {
 
 		Tensorcd hPhi(Phi.shape());
 		for (size_t l = 0; l < H.size(); ++l) {
-			Tensorcd Psi = H.Coeff(l) * Phi;
+			Tensorcd Psi = H.coeff(l) * Phi;
 			hPhi += symApply(Psi, hMatSet[l], H[l], node);
 		}
 		return hPhi;

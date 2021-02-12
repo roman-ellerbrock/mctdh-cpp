@@ -20,9 +20,9 @@ Tensorcd SymXMatrixTrees::OptimizeUp(const Tensorcd& Phi, const Matrixcd& rho,
 MatrixTensorTree SymXMatrixTrees::OptimizeUp(const MatrixTensorTree& Psi,
 	const Tree& tree, const Tree& tree_small) const {
 	TensorTreecd PsiUp = Psi.BottomUpNormalized(tree);
-	MatrixTreecd rho = TreeFunctions::Contraction(PsiUp, tree, true);
+	MatrixTreecd rho = TreeFunctions::contraction(PsiUp, tree, true);
 	for (const Node& node : tree) {
-		const Node& node_small = tree_small.GetNode(node.Address());
+		const Node& node_small = tree_small.getNode(node.address());
 		PsiUp[node] = OptimizeUp(PsiUp[node], rho[node], node, node_small);
 	}
 	return MatrixTensorTree(PsiUp, tree, true);

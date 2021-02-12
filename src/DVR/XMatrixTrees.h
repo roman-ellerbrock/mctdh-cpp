@@ -24,8 +24,8 @@ public:
 		LeafFuncd x = &LeafInterface::applyX;
 
 		for (size_t l = 0; l < tree.nLeaves(); ++l) {
-			const Leaf& leaf = tree.GetLeaf(l);
-			size_t mode = leaf.Mode();
+			const Leaf& leaf = tree.getLeaf(l);
+			size_t mode = leaf.mode();
 			MLOcd M(x, mode);
 
 			mats_.emplace_back(SparseMatrixTreecd(M, tree));
@@ -48,21 +48,21 @@ public:
 		 * - Calculate full mean-field x-matrices (dense tree)
 		 *
 		 */
-		Represent(mats_, xops_, Psi, Psi, tree);
+		represent(mats_, xops_, Psi, Psi, tree);
 		Wavefunction Chi = Regularize(Psi, tree, 1e-3);
-		auto rho = TreeFunctions::Contraction(Chi, tree, true);
-		Contraction(holes_, Chi, Chi, mats_, rho, tree);
+		auto rho = TreeFunctions::contraction(Chi, tree, true);
+		contraction(holes_, Chi, Chi, mats_, rho, tree);
 		UnweightContractions(holes_, Chi, tree);
 	}
 
 	void UnweightContractions(vector<SparseMatrixTreecd>& holes,
 		const Wavefunction& Psi, const Tree& tree) const {
-		auto rho = TreeFunctions::Contraction(Psi, tree, true);
+		auto rho = TreeFunctions::contraction(Psi, tree, true);
 		auto rho_sqrt = sqrt(rho, tree);
 		auto isqrt_rho = inverse(rho_sqrt, tree, 1e-5);
 
 		for (auto& xhole : holes) {
-			const auto& stree = xhole.Active();
+			const auto& stree = xhole.sparseTree();
 			for (const Node *node_ptr : stree) {
 				const Node& node = *node_ptr;
 				if (!node.isToplayer()) {

@@ -7,7 +7,7 @@ class TrafoCH3Quasiexact:
 public:
 	TrafoCH3Quasiexact(Vectord mass_);
 
-	Vectord Transform(const Vectord& q) const override;
+	Vectord transform(const Vectord& q) const override;
 
 private:
 	Vectord mass;

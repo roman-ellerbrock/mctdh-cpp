@@ -17,11 +17,11 @@ namespace Operator {
 			: from_(from), to_(to) {}
 		~Excite() = default;
 
-		void Apply(const LeafInterface& grid, Tensorcd& PPhi,
+		void apply(const LeafInterface& grid, Tensorcd& PPhi,
 			const Tensorcd& Phi) const override {
 
 			const TensorShape& tdim = Phi.shape();
-			PPhi.Zero();
+			PPhi.zero();
 			for (size_t n = 0; n < tdim.lastDimension(); ++n) {
 				PPhi(to_, n) = Phi(from_, n);
 			}
@@ -38,11 +38,11 @@ namespace Operator {
 			: a_(a), from_(from) {}
 		~VectorExcite() {}
 
-		void Apply(const LeafInterface& grid, Tensorcd& PPhi,
+		void apply(const LeafInterface& grid, Tensorcd& PPhi,
 			const Tensorcd& Phi) const override {
 
 			const TensorShape& tdim = Phi.shape();
-			PPhi.Zero();
+			PPhi.zero();
 			for (size_t n = 0; n < tdim.lastDimension(); ++n) {
 				for (size_t i = 0; i < tdim.lastBefore(); ++i) {
 					PPhi(i, n) = a_(i) * Phi(from_, n);
@@ -61,11 +61,11 @@ namespace Operator {
 			: idx1_(idx1), idx2_(idx2) {}
 		~ExtendedX() = default;
 
-		void Apply(const LeafInterface& grid, Tensorcd& PPhi,
+		void apply(const LeafInterface& grid, Tensorcd& PPhi,
 			const Tensorcd& Phi) const override {
 
 			const TensorShape& tdim = Phi.shape();
-			PPhi.Zero();
+			PPhi.zero();
 			for (size_t n = 0; n < tdim.lastDimension(); ++n) {
 				PPhi(idx1_, n) = Phi(idx2_, n);
 				PPhi(idx2_, n) = Phi(idx1_, n);
@@ -83,11 +83,11 @@ namespace Operator {
 			: idx_(idx) {}
 		~Projector() = default;
 
-		void Apply(const LeafInterface& grid, Tensorcd& PPhi,
+		void apply(const LeafInterface& grid, Tensorcd& PPhi,
 			const Tensorcd& Phi) const override {
 
 			const TensorShape& tdim = Phi.shape();
-			PPhi.Zero();
+			PPhi.zero();
 			assert(idx_ < tdim.lastBefore());
 			for (size_t n = 0; n < tdim.lastDimension(); ++n) {
 				PPhi(idx_, n) = Phi(idx_, n);
@@ -103,7 +103,7 @@ namespace Operator {
 		explicit VectorProjector(const Vectord& U) : U_(U) {
 		}
 
-		void Apply(const LeafInterface& grid, Tensorcd& PPhi,
+		void apply(const LeafInterface& grid, Tensorcd& PPhi,
 			const Tensorcd& Phi) const override {
 			const TensorShape& tdim = Phi.shape();
 
