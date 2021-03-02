@@ -19,7 +19,7 @@ SOPcd CoupledHO(const Tree& tree) {
 	size_t f = tree.nLeaves();
 
 	SOPcd H;
-// Kinetic energy
+// Kinetic energy and uncoupled HO
 	for (size_t k = 0; k < f; ++k) {
 		{
 			MLOcd M;
@@ -33,6 +33,7 @@ SOPcd CoupledHO(const Tree& tree) {
 		}
 	}
 
+// coupling
 	for (size_t k = 0; k < f; ++k) {
 		size_t kn = (k + 1) % f;
 		MLOcd M;

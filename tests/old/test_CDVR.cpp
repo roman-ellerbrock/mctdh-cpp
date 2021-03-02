@@ -5,7 +5,7 @@
 #include "DVR/CDVR.h"
 #include "Parser/yaml_parser.h"
 #include "UnitTest++/UnitTest++.h"
-#include "../Hamiltonians/PESs/PESs.h"
+#include "PESs/PESs.h"
 #include "Core/HamiltonianRepresentation.h"
 #include "Core/Eigenstates.h"
 
@@ -26,7 +26,7 @@ SUITE (CDVR) {
 	}
 
 	TEST (CDVRHamiltonianRep) {
-		string yaml_filename("../examples/cdvr_sl.yaml");
+		string yaml_filename("../examples/cdvr_sl2.yaml");
 		auto state = parser::run(yaml_filename);
 		auto Psi = state.wavefunctions_["Psi"];
 		const auto& tree = state.tree_;
@@ -47,7 +47,7 @@ SUITE (CDVR) {
 	}
 
 	TEST (CDVREigenstate) {
-		string yaml_filename("../examples/cdvr_sl.yaml");
+		string yaml_filename("../examples/cdvr_sl2.yaml");
 		auto state = parser::run(yaml_filename);
 		auto Psi = state.wavefunctions_["Psi"];
 		const auto& tree = state.tree_;

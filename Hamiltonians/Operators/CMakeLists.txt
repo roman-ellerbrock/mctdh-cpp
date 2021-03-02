@@ -31,6 +31,7 @@ add_library(Operators Operators.h
 target_include_directories(Operators PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/../../src)
 
 target_compile_features(Operators PRIVATE cxx_std_14)
+target_compile_options(Operators PRIVATE "-Ofast")
 target_link_libraries(Operators QuTree::QuTree)
 
 #target_link_libraries(Operators LINK_PUBLIC
