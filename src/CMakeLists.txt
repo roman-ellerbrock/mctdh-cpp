@@ -1,5 +1,5 @@
 
-add_library(mctdh_lib SHARED)
+add_library(mctdh_lib STATIC)
 target_compile_features(mctdh_lib PRIVATE cxx_std_14)
 
 target_compile_options(mctdh_lib PUBLIC "$<$<CONFIG:DEBUG>:${mctdh_DEBUG_FLAGS}>")

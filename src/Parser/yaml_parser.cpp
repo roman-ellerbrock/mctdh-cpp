@@ -2,6 +2,7 @@
 // Created by Roman Ellerbrock on 2/27/20.
 //
 
+#include <string>
 #include "Parser/yaml_parser.h"
 #include "yaml-cpp/yaml.h"
 #include "TreeShape/TreeFactory.h"
@@ -133,9 +134,34 @@ namespace parser {
 		} else if (name == "exciton") {
 			H = Operator::Exciton("matrix.out", tree);
 		} else if (name == "ch3_quasiexact") {
-			CH3_quasiexact Hch3(tree);
-			H = Hch3;
-			cout << "YAML H size: " << H.size() << endl;
+            CH3_quasiexact Hch3(tree);
+            H = Hch3;
+            cout << "YAML H size: " << H.size() << endl;
+/*        }else if (name == "schaepers") {
+		    // find the masses supplied for this hamiltonian
+            auto masses = evaluate<string>(node, "masses");
+            stringstream masses_ss(masses);
+            vector<double> massvec;
+            while(masses_ss.good()){
+                string substr;
+                getline(masses_ss, substr, ',');
+                massvec.push_back(stod(substr));
+            }
+
+            // find the coupling construction for this hamiltonian
+            auto coupling = evaluate<string>(node, "coupling");
+            stringstream coupling_ss(coupling);
+            vector<int> couplingvec;
+            while(coupling_ss.good()){
+                string substr;
+                getline(coupling_ss, substr, ',');
+                couplingvec.push_back(stoi(substr));
+            }
+
+            // init schaepers vector
+            H = Operator::schaepers(tree, couplingvec, massvec, true, false);
+            //H = CoupledHO(tree);
+*/
 		} else {
 			cout << "No valid Hamiltonian name." << endl;
 			cout << "Chosen name: " << name << endl;
@@ -167,7 +193,31 @@ namespace parser {
 			PotentialOperator Vop(V, 0, 0);
 			Vop.Q_ = make_shared<TrafoCH3Quasiexact>(mass);
 			return Vop;
-		} else {
+/*		} else if(name == "liupipnn") {
+            // find the masses supplied for this potential
+            auto masses = evaluate<string>(node, "masses");
+            stringstream masses_ss(masses);
+            vector<double> massvec;
+            while(masses_ss.good()){
+                string substr;
+                getline(masses_ss, substr, ',');
+                massvec.push_back(stod(substr));
+            }
+            // find the coupling construction for this potential
+            auto coupling = evaluate<string>(node, "coupling");
+            stringstream coupling_ss(coupling);
+            vector<int> couplingvec;
+            while(coupling_ss.good()){
+                string substr;
+                getline(coupling_ss, substr, ',');
+                couplingvec.push_back(stoi(substr));
+            }
+
+            auto V = make_shared<liupipnn>(massvec,couplingvec);
+            PotentialOperator Vop(V, 0, 0);
+		    return Vop;
+*/
+        } else {
 			cerr << "Did not recognise potential energy operator name\n";
 			exit(1);
 		}
@@ -178,21 +228,39 @@ namespace parser {
 		auto name = evaluate<string>(node, "name");
 		auto type = evaluate<string>(node, "type");
 		if (type == "read") {
-			auto filename = evaluate<string>(node, "filename");
+            if(evaluate<string>(node, "filename").empty()){
+                cerr << "supply filename to save and read directive" << endl;
+                exit(1);
+            }
+            auto filename = evaluate<string>(node, "filename");
 			Wavefunction Psi(state.tree_);
 			ifstream is(filename);
-			is >> Psi;
+			Psi.Read(is);
 			state.wavefunctions_[name] = Psi;
+			is.close();
 		} else if (type == "create") {
 			state.wavefunctions_[name] = Wavefunction(state.rng_, state.tree_);
+		} else if (type == "save") {
+		    if(evaluate<string>(node, "filename").empty()){
+		        cerr << "supply filename to save and read directive" << endl;
+		        exit(1);
+		    }
+		    auto filename = evaluate<string>(node, "filename");
+		    Wavefunction Psi(state.tree_);
+		    Psi = state.wavefunctions_[name];
+		    ofstream of(filename);
+		    Psi.Write(of);
+		    of.close();
 		} else {
 			cerr << "No valid Wavefunction initialization type." << endl;
-			cerr << "Choices: (read, create)" << endl;
+			cerr << "Choices: (read, create, save)" << endl;
 			exit(1);
 		}
 	}
 
 	IntegratorVariables new_ivar(const YAML::Node& node, mctdh_state& state) {
+	    // TODO: this routine does not use the 'save'-directive
+	    // TODO: also, it does not save the wavefunction and only works with a wavefunction called "Psi"
 		auto t_end = evaluate<double>(node, "t_end", 100*41.362);
 		auto t = evaluate<double>(node, "t", 0.);
 		auto out = evaluate<double>(node, "out", 41.362);
@@ -221,30 +289,30 @@ namespace parser {
 		YAML::Node config = YAML::LoadFile(yaml_filename);
 		mctdh_state state;
 		for (const auto& node : config["run"]) {
-			const auto& name = node["job"].as<string>();
-			if (name == "tree") {
+			const auto& job = node["job"].as<string>();
+			if (job == "tree") {
 				state.tree_ = read_tree(node);
 				state.cdvrtree_ = state.tree_;
 //				if (state.cdvrtree_.nNodes() == 0) { state.cdvrtree_ = state.tree_; }
-			} else if (name  == "hamiltonian") {
+			} else if (job == "hamiltonian") {
 				state.hamiltonian_ = read_hamiltonian(node, state.tree_);
-			} else if (name == "potential") {
+			} else if (job == "potential") {
 				PotentialOperator V = set_potential(node, state.tree_);
 				state.hamiltonian_->V_ = V;
 				state.hamiltonian_->hasV = true;
-			} else if (name == "wavefunction") {
+			} else if (job == "wavefunction") {
 				new_wavefunction(state, node);
-			} else if (name == "eigenstates") {
+			} else if (job == "eigenstates") {
 				auto ivar = new_ivar(node, state);
 				Eigenstates(ivar);
-			} else if (name == "cmf") {
+			} else if (job == "cmf") {
 				auto ivar = new_ivar(node, state);
 				const Hamiltonian& H = *ivar.h;
 				const Tree& tree = *ivar.tree;
 				const Tree& cdvrtree = *ivar.cdvrtree;
 				CMFIntegrator cmf(H, tree, cdvrtree, 1.);
 				cmf.Integrate(ivar);
-			} else if (name == "cdvrtree") {
+			} else if (job == "cdvrtree") {
 				state.cdvrtree_ = read_tree(node);
 			}
 		}

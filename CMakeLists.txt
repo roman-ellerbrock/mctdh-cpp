@@ -53,6 +53,7 @@ target_compile_features(mctdh PRIVATE cxx_std_14)
 target_compile_options(mctdh PUBLIC "$<$<CONFIG:DEBUG>:${mctdh_DEBUG_FLAGS}>")
 target_compile_options(mctdh PRIVATE "$<$<CONFIG:RELEASE>:${mctdh_RELEASE_FLAGS}>")
 target_include_directories(mctdh PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src)
+target_compile_options(mctdh PUBLIC "-ffast-math" "-O3")
 target_link_libraries(mctdh mctdh_lib QuTree::QuTree)
 
 # build unit tests

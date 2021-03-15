@@ -16,6 +16,7 @@ add_library(PESs PESs.h
 #        )
 
 target_include_directories(PESs PUBLIC ${CMAKE_CURRENT_SOURCE_DIR} ${PROJECT_SOURCE_DIR}/src)
+target_compile_options(PESs PUBLIC "-Ofast")
 target_link_libraries(PESs LINK_PUBLIC QuTree::QuTree)
 
 ######################################################
