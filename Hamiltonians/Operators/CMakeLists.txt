@@ -26,7 +26,10 @@ add_library(Operators Operators.h
         PhysicalSystems/SpinBoson.cpp
         PhysicalSystems/SpinBoson.h
         CWrapper.f
-        )
+
+        schaepers/fortran/schaepers.f
+        schaepers/schaepers.cpp
+        schaepers/schaepers.h)
 
 target_include_directories(Operators PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/../../src)
 

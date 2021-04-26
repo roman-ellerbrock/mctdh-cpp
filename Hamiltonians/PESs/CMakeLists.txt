@@ -8,7 +8,10 @@ add_library(PESs PESs.h
         CH3_1/CH3Potential.f
         NOCl/NOClPotential.h
         NOCl/NOClPotential.cpp
-        )
+        liu_ch4cl/pipNN/potential.f
+        liu_ch4cl/pipNN/ch4cl-pipnn.f
+        liu_ch4cl/liuch4cl.cpp
+        liu_ch4cl/liuch4cl.h)
 
 #add_subdirectory("CDVRModelV")
 #target_link_libraries(PESs LINK_PUBLIC

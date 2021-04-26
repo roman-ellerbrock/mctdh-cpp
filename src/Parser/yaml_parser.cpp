@@ -137,7 +137,7 @@ namespace parser {
             CH3_quasiexact Hch3(tree);
             H = Hch3;
             cout << "YAML H size: " << H.size() << endl;
-/*        }else if (name == "schaepers") {
+        }else if (name == "schaepers") {
 		    // find the masses supplied for this hamiltonian
             auto masses = evaluate<string>(node, "masses");
             stringstream masses_ss(masses);
@@ -159,9 +159,8 @@ namespace parser {
             }
 
             // init schaepers vector
-            H = Operator::schaepers(tree, couplingvec, massvec, true, false);
-            //H = CoupledHO(tree);
-*/
+            H = Operator::schaepers(tree, massvec, couplingvec);
+
 		} else {
 			cout << "No valid Hamiltonian name." << endl;
 			cout << "Chosen name: " << name << endl;
@@ -193,7 +192,7 @@ namespace parser {
 			PotentialOperator Vop(V, 0, 0);
 			Vop.Q_ = make_shared<TrafoCH3Quasiexact>(mass);
 			return Vop;
-/*		} else if(name == "liupipnn") {
+		} else if(name == "liuch4cl") {
             // find the masses supplied for this potential
             auto masses = evaluate<string>(node, "masses");
             stringstream masses_ss(masses);
@@ -213,10 +212,10 @@ namespace parser {
                 couplingvec.push_back(stoi(substr));
             }
 
-            auto V = make_shared<liupipnn>(massvec,couplingvec);
+            auto V = make_shared<liuch4cl>(massvec,couplingvec);
             PotentialOperator Vop(V, 0, 0);
 		    return Vop;
-*/
+
         } else {
 			cerr << "Did not recognise potential energy operator name\n";
 			exit(1);
