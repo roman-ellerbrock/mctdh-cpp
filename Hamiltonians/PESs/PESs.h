@@ -1,6 +1,7 @@
 #include "NOCl/NOClPotential.h"
 #include "CDVRModelV/CDVRModelV.h"
 #include "CH3_1/CH3Potential.h"
+#include "liu_ch4cl/liuch4cl.h"
 
 /*#include "CH3_1/CH3Potential.h"
 #include "CH4_schwenke/PES_CH4.h"
