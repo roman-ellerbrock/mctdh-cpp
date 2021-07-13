@@ -15,7 +15,7 @@ public:
 
     ~liuch4cl() = default;
 
-    double Evaluate(const Vectord& Xv, size_t part) const override;
+    double evaluate(const Vectord& Xv, size_t part) const override;
 
 private:
     vector<double> massvec_;

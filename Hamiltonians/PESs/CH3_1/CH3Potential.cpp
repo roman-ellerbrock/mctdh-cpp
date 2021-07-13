@@ -13,7 +13,7 @@ void potentialch3_(double *v, double *q, int *part);
 double CH3Potential::evaluate(const Vectord& Xv, size_t part) const {
 	double v = 0;
 	Vectord Xv2(Xv);
-	assert(Xv2.Dim() == 12);
+	assert(Xv2.dim() == 12);
 	int fpart = (int) part;
 
 	// @TODO: Use cmake and ensure it works on all relevant platforms

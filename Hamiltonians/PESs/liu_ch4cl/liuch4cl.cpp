@@ -16,7 +16,7 @@ liuch4cl::liuch4cl(vector<double> massvec, vector<int> coupling) {
     coupling_ = coupling;
 }
 
-double liuch4cl::Evaluate(const Vectord &Xv, size_t part) const {
+double liuch4cl::evaluate(const Vectord &Xv, size_t part) const {
 
     double* v = new double;
     double* q = new double[12];

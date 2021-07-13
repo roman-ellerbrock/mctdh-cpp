@@ -234,7 +234,7 @@ namespace parser {
             auto filename = evaluate<string>(node, "filename");
 			Wavefunction Psi(state.tree_);
 			ifstream is(filename);
-			Psi.Read(is);
+			Psi.read(is);
 			state.wavefunctions_[name] = Psi;
 			is.close();
 		} else if (type == "create") {
@@ -248,7 +248,7 @@ namespace parser {
 		    Wavefunction Psi(state.tree_);
 		    Psi = state.wavefunctions_[name];
 		    ofstream of(filename);
-		    Psi.Write(of);
+		    Psi.write(of);
 		    of.close();
 		} else {
 			cerr << "No valid Wavefunction initialization type." << endl;

@@ -34,11 +34,11 @@ SUITE(Parser){
         // dot product is tested by qutree, <x|x> is real and >= 0 for all |x> in the hilbert space
         // therefore abs(<diff|diff>) = <diff|diff>
         const Tree& tree = testsys.state_.tree_;
-        auto dotp = TreeFunctions::DotProduct(diff,diff,tree);
+        auto dotp = TreeFunctions::dotProduct(diff,diff,tree);
 
         double res = 0;
-        for(size_t i = 0; i < tree.TopNode().shape().size(); i++){
-            res += abs(dotp[tree.TopNode()](i,i));
+        for(size_t i = 0; i < tree.topNode().shape().size(); i++){
+            res += abs(dotp[tree.topNode()](i,i));
         }
 
         CHECK_CLOSE(res,0,epsilon);
@@ -66,11 +66,11 @@ SUITE(Parser){
         // dot product is tested by qutree, <x|x> is real and >= 0 for all |x> in the hilbert space
         // therefore abs(<diff|diff>) = <diff|diff>
         const Tree& tree = testsys.state_.tree_;
-        auto dotp = TreeFunctions::DotProduct(diff,diff,tree);
+        auto dotp = TreeFunctions::dotProduct(diff,diff,tree);
 
         double res = 0;
-        for(size_t i = 0; i < tree.TopNode().shape().size(); i++){
-            res += abs(dotp[tree.TopNode()](i,i));
+        for(size_t i = 0; i < tree.topNode().shape().size(); i++){
+            res += abs(dotp[tree.topNode()](i,i));
         }
 
         CHECK_CLOSE(res,0,epsilon);

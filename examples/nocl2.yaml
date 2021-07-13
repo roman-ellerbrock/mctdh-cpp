@@ -16,10 +16,10 @@ run:
 
   - job: hamiltonian
     name: nocl
-    V: false
+    V: true
 
-  - job: potential
-    name: nocl
+#  - job: potential
+#    name: nocl
 
   - job: wavefunction
     name: Psi

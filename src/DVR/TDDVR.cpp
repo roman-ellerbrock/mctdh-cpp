@@ -137,7 +137,8 @@ void TDDVR::GridTransformationLocal(Tensorcd& Phi, const Node& node, bool invers
 		if (!inverse) {
 			Phi = matrixTensor(trafo_[child], Phi, k);
 		} else {
-			Phi = multATB(trafo_[child], Phi, k);
+		//	Phi = multATB(trafo_[child], Phi, k);
+			Phi = matrixTensor(trafo_[child].adjoint(), Phi, k);
 		}
 	}
 
@@ -165,7 +166,8 @@ void TDDVR::NodeTransformation(Tensorcd& Phi, const Node& node, bool inverse) co
 			if (!inverse) {
 				Phi = matrixTensor(trafo_[child], Phi, k);
 			} else {
-				Phi = multATB(trafo_[child], Phi, k);
+//				Phi = multATB(trafo_[child], Phi, k);
+				Phi = matrixTensor(trafo_[child].adjoint(), Phi, k);
 			}
 		}
 	}
@@ -175,7 +177,8 @@ void TDDVR::NodeTransformation(Tensorcd& Phi, const Node& node, bool inverse) co
 		if (!inverse) {
 			Phi = matrixTensor(hole_trafo_[node], Phi, node.nChildren());
 		} else {
-			Phi = multATB(hole_trafo_[node], Phi, node.nChildren());
+			Phi = matrixTensor(hole_trafo_[node].adjoint(), Phi, node.nChildren());
+//			Phi = multATB(hole_trafo_[node], Phi, node.nChildren());
 		}
 	}
 }
