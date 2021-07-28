@@ -9,8 +9,7 @@
 add_library(Operators Operators.h
         CoupledHO/CoupledHO.cpp
         CoupledHO/CoupledHO.h
-        Molecules/NOCl.cpp
-        Molecules/NOCl.h
+
         CH3_meanfield/CH3_meanfield.cpp
         CH3_meanfield/CH3_meanfield.h
 
@@ -20,6 +19,14 @@ add_library(Operators Operators.h
         CH3_quasiexact/CH3_quasiexact.h
         CH3_quasiexact/TrafoCH3Quasiexact.cpp
         CH3_quasiexact/TrafoCH3Quasiexact.h
+
+        ElectronicStructure/ElectronicStructure.cpp
+        ElectronicStructure/ElectronicStructure.h
+        ElectronicStructure/JordanWigner.cpp
+        ElectronicStructure/JordanWigner.h
+
+        Molecules/NOCl.cpp
+        Molecules/NOCl.h
 
         PhysicalSystems/StandardOperatorLibrary.cpp
         PhysicalSystems/StandardOperatorLibrary.h

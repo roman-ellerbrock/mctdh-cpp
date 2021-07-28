@@ -21,7 +21,7 @@ namespace Operator {
 		function<double(double)> g,
 		function<double(double)> f) {
 		assert(HPsi.shape() == Psi.shape());
-		assert(HPsi.shape().lastBefore() == x.Dim());
+		assert(HPsi.shape().lastBefore() == x.dim());
 		for (int n = 0; n < Psi.shape().lastDimension(); n++)
 			for (int i = 0; i < Psi.shape().lastBefore(); i++)
 				HPsi(i, n) = Psi(i, n) * g(f(x(i)));
@@ -39,7 +39,7 @@ namespace Operator {
 
 	void ApplyG(Tensorcd& HPsi, const Tensorcd& Psi, const Vectord& x, function<double(double)> f) {
 		assert(HPsi.shape() == Psi.shape());
-		assert(HPsi.shape().lastBefore() == x.Dim());
+		assert(HPsi.shape().lastBefore() == x.dim());
 		for (size_t n = 0; n < Psi.shape().lastDimension(); n++)
 			for (size_t i = 0; i < Psi.shape().lastBefore(); i++)
 				HPsi(i, n) = Psi(i, n) * f(x(i));

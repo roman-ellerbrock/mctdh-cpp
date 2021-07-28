@@ -29,7 +29,7 @@ void UpdateNodeDVRLocal(Tensorcd& dvr, const TreeGrids& grids,
 	for (size_t k = 0; k < grids.size(); ++k) {
 		const SparseVectorTreed& grid = grids[k];
 		const SparseVectorTreed& holegrid = holegrids[k];
-		assert(grid.Active(node) != holegrid.Active(node));
+		assert(grid.isActive(node) != holegrid.isActive(node));
 	}
 
 	Vectord X(grids.size());

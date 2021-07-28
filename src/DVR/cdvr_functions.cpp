@@ -36,11 +36,11 @@ namespace cdvr_functions {
 		const TreeGrids& holegrids, const Node& node) {
 		/// \brief Fill X for a node-grid
 		assert(grids.size() == holegrids.size());
-		assert(X.Dim() == grids.size());
+		assert(X.dim() == grids.size());
 		if (node.isBottomlayer()) {
 			const Leaf& leaf = node.getLeaf();
 			const auto& g = leaf.interface();
-			assert(g.HasDVR());
+			assert(g.hasDVR());
 			const Vectord& x = g.getX();
 			X(leaf.mode()) = x(idx.front());
 		} else {
@@ -57,7 +57,7 @@ namespace cdvr_functions {
 		const TreeGrids& holegrids, const Node& node) {
 		/// \brief Fill X for an edge-grid
 		assert(grids.size() == holegrids.size());
-		assert(X.Dim() == grids.size());
+		assert(X.dim() == grids.size());
 		assert(idx.size() == 2);
 		fillX(X, idx.front(), grids, node);
 		fillX(X, idx.back(), holegrids, node);
@@ -182,8 +182,8 @@ namespace cdvr_functions {
 		size_t dim = Phi.shape()[k];
 
 		Matrixcd X = contraction(C, Phi, k);
-		assert(X.Dim1() == dim);
-		assert(X.Dim2() == dim);
+		assert(X.dim1() == dim);
+		assert(X.dim2() == dim);
 
 		/// II: apply DeltaV
 		Matrixcd Y(dim, dim);

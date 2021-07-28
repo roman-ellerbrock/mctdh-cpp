@@ -49,6 +49,7 @@ public:
 
 		/// Calculate inverse density matrix tree
 		rho_inverse_ = rho_decomposition_.invert(tree);
+//		rho_inverse_ = inverse(rho_, tree);
 
 		/// Calculate h-matrix trees
 		TreeFunctions::represent(hMats_, H, Psi, Psi, tree);
@@ -57,8 +58,8 @@ public:
 		TreeFunctions::contraction(hContractions_, hMats_, Psi, Psi, tree);
 
 		/// Calculate CDVR
-//		if (H.hasV) { cdvr_.Update(Psi, H.V_, tree); }
-		if (H.hasV) { cdvr_.Update2(Psi, H.V_, tree); }
+		if (H.hasV) { cdvr_.Update(Psi, H.V_, tree); }
+//		if (H.hasV) { cdvr_.Update2(Psi, H.V_, tree); }
 	}
 
 	void symbuild(const Hamiltonian& H, MatrixTensorTree Psi,

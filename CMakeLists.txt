@@ -38,6 +38,8 @@ separate_arguments(mctdh_RELEASE_FLAGS UNIX_COMMAND "${mctdh_RELEASE_FLAGS}")
 find_package(QuTree REQUIRED)
 find_package(yaml-cpp REQUIRED)
 
+# Install yaml-cpp/QuTree if it cannot find it
+
 include_directories(${YAML_CPP_INCLUDE_DIR})
 add_library(Yaml INTERFACE IMPORTED)
 
