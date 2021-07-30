@@ -65,16 +65,16 @@ namespace JordanWigner {
 			Matrixcd op = identityMatrixcd(2);
 
 			if (i < q) {
-//				op = sigmaZ() * op;
-//				cout << "z^q_" << i << " ";
+				op = sigmaZ() * op;
+				cout << "z^q_" << i << " ";
 			} else if (i == q) {
 				op = sigmaMinus() * op;
 				cout << "a^q_" << i << " ";
 			}
 
 			if (i < p) {
-//				op = sigmaZ() * op;
-//				cout << "z^p_" << i << " ";
+				op = sigmaZ() * op;
+				cout << "z^p_" << i << " ";
 			} else if (i == p) {
 				op = sigmaPlus() * op;
 				cout << "a^p+_" << i << " ";
