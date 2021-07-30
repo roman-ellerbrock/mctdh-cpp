@@ -5,14 +5,16 @@
 #ifndef ELECTRONICSTRUCTURE_H
 #define ELECTRONICSTRUCTURE_H
 #include "TreeOperators/SumOfProductsOperator.h"
+#include "JordanWigner.h"
 
-class ElectronicStructure
-	: public SOPcd {
-public:
+JordanWigner::TwoIndex readTwoIndexIntegral(const string& filename);
 
-private:
+JordanWigner::FourIndex readFourIndexIntegral(const string& filename);
 
-};
+Matrixd convertTwoIndex(const JordanWigner::TwoIndex& h);
 
+Tensord convertFourIndex(const JordanWigner::FourIndex& h);
+
+SOPcd electronicStructure(const string& twoindex, const string& fourindex);
 
 #endif //ELECTRONICHAMILTONIAN_H

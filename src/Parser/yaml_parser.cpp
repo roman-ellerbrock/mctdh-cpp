@@ -134,9 +134,13 @@ namespace parser {
 		} else if (name == "exciton") {
 			H = Operator::Exciton("matrix.out", tree);
 		} else if (name == "ch3_quasiexact") {
-            CH3_quasiexact Hch3(tree);
-            H = Hch3;
-            cout << "YAML H size: " << H.size() << endl;
+			CH3_quasiexact Hch3(tree);
+			H = Hch3;
+			cout << "YAML H size: " << H.size() << endl;
+		} else if (name == "electronicstructure") {
+			auto hpq = evaluate<string>(node, "hpq");
+			auto hpqrs = evaluate<string>(node, "hpqrs");
+			H = electronicStructure(hpq, hpqrs);
         }else if (name == "schaepers") {
 		    // find the masses supplied for this hamiltonian
             auto masses = evaluate<string>(node, "masses");
@@ -238,7 +242,8 @@ namespace parser {
 			state.wavefunctions_[name] = Psi;
 			is.close();
 		} else if (type == "create") {
-			state.wavefunctions_[name] = Wavefunction(state.rng_, state.tree_);
+			bool Hartree = evaluate<bool>(node, "Hartree", true);
+			state.wavefunctions_[name] = Wavefunction(state.rng_, state.tree_, Hartree);
 		} else if (type == "save") {
 		    if(evaluate<string>(node, "filename").empty()){
 		        cerr << "supply filename to save and read directive" << endl;

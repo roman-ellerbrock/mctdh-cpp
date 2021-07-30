@@ -3,8 +3,6 @@
 //
 
 #include "JordanWigner.h"
-#include "TreeOperators/LeafMatrix.h"
-#include "TreeOperators/SumOfProductsOperator.h"
 #include "Util/QMConstants.h"
 
 namespace JordanWigner {
@@ -58,90 +56,125 @@ namespace JordanWigner {
 	}
 
 	MLOcd twoIndexOperator(size_t p, size_t q, double eps) {
-		size_t max = p;
-		if (q > max) max = q;
+		size_t max = p + 1;
+		if (q >= max) max = q + 1;
 
 		MLOcd A; /// A = (a_p^+) (a_q^+) (a_r) (a_s)
+		cout << p << " " << q << " | ";
 		for (size_t i = 0; i < max; ++i) {
 			Matrixcd op = identityMatrixcd(2);
 
 			if (i < q) {
-				op = sigmaZ() * op;
+//				op = sigmaZ() * op;
+//				cout << "z^q_" << i << " ";
 			} else if (i == q) {
 				op = sigmaMinus() * op;
+				cout << "a^q_" << i << " ";
 			}
 
 			if (i < p) {
-				op = sigmaZ() * op;
+//				op = sigmaZ() * op;
+//				cout << "z^p_" << i << " ";
 			} else if (i == p) {
 				op = sigmaPlus() * op;
+				cout << "a^p+_" << i << " ";
 			}
-			if (residual(op, identityMatrixcd(2)) > eps) {
+
+//			if ((residual(op, identityMatrixcd(2)) > eps) || (i == (max - 1))) {
 				A.push_back(op, i);
-			}
+//				cout << "! ";
+//			}
 		}
+		cout << "| size = " << A.size() << endl;
 		return A;
 	}
 
 	MLOcd fourIndexOperator(size_t p, size_t q, size_t r, size_t s, double eps) {
-		size_t max = p;
-		if (q > max) max = q;
-		if (r > max) max = r;
-		if (s > max) max = s;
+		size_t max = p + 1;
+		if (q >= max) max = q + 1;
+		if (r >= max) max = r + 1;
+		if (s >= max) max = s + 1;
 
+		cout << p << " " << q << " " << r << " " << s << " | ";
 		MLOcd A; /// A = (a_p^+) (a_q^+) (a_r) (a_s)
 		/// Rational: swipe over each
 		for (size_t i = 0; i < max; ++i) {
 			Matrixcd op = identityMatrixcd(2);
 			if (i < s) {
 				op = sigmaZ() * op;
+				cout << "z^s_" << i << " ";
 			} else if (i == s) {
 				op = sigmaMinus() * op;
+				cout << "a^s_" << i << " ";
 			}
 
 			if (i < r) {
 				op = sigmaZ() * op;
+				cout << "z^r_" << i << " ";
 			} else if (i == r) {
 				op = sigmaMinus() * op;
+				cout << "a^r_" << i << " ";
 			}
 
 			if (i < q) {
 				op = sigmaZ() * op;
+				cout << "z^q_" << i << " ";
 			} else if (i == q) {
 				op = sigmaPlus() * op;
+				cout << "a^q+_" << i << " ";
 			}
 
 			if (i < p) {
 				op = sigmaZ() * op;
+				cout << "z^p_" << i << " ";
 			} else if (i == p) {
 				op = sigmaPlus() * op;
+				cout << "a^p+_" << i << " ";
 			}
 
-			if (residual(op, identityMatrixcd(2)) > eps) {
-				A.push_back(op, i);
-			}
+//			if (op.frobeniusNorm() < eps) { cout << "SMALL!\n"; continue; }
+//			if ((residual(op, identityMatrixcd(2)) > eps) || (i == (max - 1))) {
+			A.push_back(op, i);
+//				cout << "! ";
+//			}
 		}
+		cout << " | size = " << A.size() << endl;
 		return A;
 	}
 
 	SOPcd electronicHamiltonian(const Matrixd& Hpq, const Tensord& Hpqrs) {
-		double eps = 1e-12;
+		double eps = 1e-10;
 		SOPcd H;
+		Hpq.print();
+		cout << "==== Hpq =================" << endl;
 		for (size_t q = 0; q < Hpq.dim2(); ++q) {
 			for (size_t p = 0; p < Hpq.dim1(); ++p) {
-				H.push_back(twoIndexOperator(p, q, eps), Hpq(p, q));
+				if (abs(Hpq(p, q)) < eps) { continue; }
+				auto M = twoIndexOperator(p, q, eps);
+				double h = Hpq(p, q);
+//				cout << p << " " << q << " | " << M.size() << endl;
+				if (M.size() == 0) { cerr << "M empty in Hpq!\n"; exit(1); }
+				H.push_back(M, h);
 			}
 		}
+		cout << "Electronic Hamiltonian size (Hpq): " << H.size() << endl;
 
+		cout << "==== Hpqrs =================" << endl;
 		const TensorShape& shape = Hpqrs.shape();
 		for (size_t I = 0; I < shape.totalDimension(); ++I) {
+			if (abs(Hpqrs(I)) < eps) { continue; }
 			auto idx = indexMapping(I, shape); /// I -> (p, q, r, s)
 			size_t p = idx[0];
 			size_t q = idx[1];
 			size_t r = idx[2];
 			size_t s = idx[3];
-			H.push_back(fourIndexOperator(p, q, r, s, eps), Hpqrs(I));
+			auto M = fourIndexOperator(p, q, r, s, eps);
+//			if (M.size() == 0) { cerr << "M empty in Hpqrs!\n"; exit(1); }
+			if (M.size() == 0) { continue; }
+			H.push_back(M, Hpqrs(I));
 		}
+		cout << "Electronic Hamiltonian size (total): " << H.size() << endl;
+		getchar();
 		return H;
 	}
 }

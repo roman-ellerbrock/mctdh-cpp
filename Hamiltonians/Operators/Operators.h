@@ -1,4 +1,5 @@
 #include "CoupledHO/CoupledHO.h"
+#include "ElectronicStructure/ElectronicStructure.h"
 #include "PhysicalSystems/StandardOperatorLibrary.h"
 #include "PhysicalSystems/SpinBoson.h"
 #include "Molecules/NOCl.h"
