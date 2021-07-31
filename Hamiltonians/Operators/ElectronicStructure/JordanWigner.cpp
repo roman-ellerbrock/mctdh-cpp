@@ -80,10 +80,10 @@ namespace JordanWigner {
 				cout << "a^p+_" << i << " ";
 			}
 
-//			if ((residual(op, identityMatrixcd(2)) > eps) || (i == (max - 1))) {
+			if ((residual(op, identityMatrixcd(2)) > eps) || (i == (max - 1))) {
 				A.push_back(op, i);
-//				cout << "! ";
-//			}
+				cout << "! ";
+			}
 		}
 		cout << "| size = " << A.size() << endl;
 		return A;
@@ -132,11 +132,11 @@ namespace JordanWigner {
 				cout << "a^p+_" << i << " ";
 			}
 
-//			if (op.frobeniusNorm() < eps) { cout << "SMALL!\n"; continue; }
-//			if ((residual(op, identityMatrixcd(2)) > eps) || (i == (max - 1))) {
+			if (op.frobeniusNorm() < eps) { cout << "SMALL!\n"; continue; }
+			if ((residual(op, identityMatrixcd(2)) > eps) || (i == (max - 1))) {
 			A.push_back(op, i);
-//				cout << "! ";
-//			}
+				cout << "! ";
+			}
 		}
 		cout << " | size = " << A.size() << endl;
 		return A;
@@ -152,8 +152,7 @@ namespace JordanWigner {
 				if (abs(Hpq(p, q)) < eps) { continue; }
 				auto M = twoIndexOperator(p, q, eps);
 				double h = Hpq(p, q);
-//				cout << p << " " << q << " | " << M.size() << endl;
-				if (M.size() == 0) { cerr << "M empty in Hpq!\n"; exit(1); }
+//				if (M.size() == 0) { cerr << "M empty in Hpq!\n"; exit(1); }
 				H.push_back(M, h);
 			}
 		}
@@ -171,10 +170,9 @@ namespace JordanWigner {
 			auto M = fourIndexOperator(p, q, r, s, eps);
 //			if (M.size() == 0) { cerr << "M empty in Hpqrs!\n"; exit(1); }
 			if (M.size() == 0) { continue; }
-			H.push_back(M, Hpqrs(I));
+			H.push_back(M, 0.5 * Hpqrs(I));
 		}
 		cout << "Electronic Hamiltonian size (total): " << H.size() << endl;
-		getchar();
 		return H;
 	}
 }
