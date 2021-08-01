@@ -7,23 +7,23 @@
 
 namespace JordanWigner {
 	Matrixcd sigmaX() {
-		Matrixcd x(2,2);
-		x(1,0)=1.;
-		x(0,1)=1.;
+		Matrixcd x(2, 2);
+		x(1, 0) = 1.;
+		x(0, 1) = 1.;
 		return x;
 	}
 
 	Matrixcd sigmaY() {
-		Matrixcd y(2,2);
-		y(1,0)=QM::im;
-		y(0,1)=-QM::im;
+		Matrixcd y(2, 2);
+		y(1, 0) = QM::im;
+		y(0, 1) = -QM::im;
 		return y;
 	}
 
 	Matrixcd sigmaZ() {
-		Matrixcd z(2,2);
-		z(0,0)=1.;
-		z(1,1)=1.;
+		Matrixcd z(2, 2);
+		z(0, 0) = 1.;
+		z(1, 1) = 1.;
 		return z;
 	}
 
@@ -132,9 +132,12 @@ namespace JordanWigner {
 				cout << "a^p+_" << i << " ";
 			}
 
-			if (op.frobeniusNorm() < eps) { cout << "SMALL!\n"; continue; }
+			if (op.frobeniusNorm() < eps) {
+			//	cout << "SMALL!\n";
+			//	continue;
+			}
 			if ((residual(op, identityMatrixcd(2)) > eps) || (i == (max - 1))) {
-			A.push_back(op, i);
+				A.push_back(op, i);
 				cout << "! ";
 			}
 		}
@@ -142,35 +145,37 @@ namespace JordanWigner {
 		return A;
 	}
 
-	SOPcd electronicHamiltonian(const Matrixd& Hpq, const Tensord& Hpqrs) {
+	SOPcd electronicHamiltonian(const TwoIndex& Hpq, const FourIndex& Hpqrs) {
 		double eps = 1e-10;
 		SOPcd H;
-		Hpq.print();
 		cout << "==== Hpq =================" << endl;
-		for (size_t q = 0; q < Hpq.dim2(); ++q) {
-			for (size_t p = 0; p < Hpq.dim1(); ++p) {
-				if (abs(Hpq(p, q)) < eps) { continue; }
-				auto M = twoIndexOperator(p, q, eps);
-				double h = Hpq(p, q);
-//				if (M.size() == 0) { cerr << "M empty in Hpq!\n"; exit(1); }
-				H.push_back(M, h);
-			}
+		for (const auto& hpq : Hpq) {
+			size_t p = get<0>(hpq);
+			size_t q = get<1>(hpq);
+			double h = get<2>(hpq);
+			if (abs(h) < eps) { continue; }
+
+			auto M = twoIndexOperator(p, q, eps);
+			if (M.size() == 0) { continue; }
+			if (M.size() == 0) { cerr << "M empty in Hpq!\n"; exit(1); }
+			H.push_back(M, h);
 		}
 		cout << "Electronic Hamiltonian size (Hpq): " << H.size() << endl;
 
 		cout << "==== Hpqrs =================" << endl;
-		const TensorShape& shape = Hpqrs.shape();
-		for (size_t I = 0; I < shape.totalDimension(); ++I) {
-			if (abs(Hpqrs(I)) < eps) { continue; }
-			auto idx = indexMapping(I, shape); /// I -> (p, q, r, s)
-			size_t p = idx[0];
-			size_t q = idx[1];
-			size_t r = idx[2];
-			size_t s = idx[3];
+		for (const auto& term : Hpqrs) {
+			size_t p = get<0>(term);
+			size_t q = get<1>(term);
+			size_t r = get<2>(term);
+			size_t s = get<3>(term);
+			double h = get<4>(term);
+			if (abs(h) < eps) { continue; }
+
+			if (p == q || r == s) { continue; } /// always evaluates to zero due to a_p+ a_p+=0 or a_r a_r=0
 			auto M = fourIndexOperator(p, q, r, s, eps);
-//			if (M.size() == 0) { cerr << "M empty in Hpqrs!\n"; exit(1); }
 			if (M.size() == 0) { continue; }
-			H.push_back(M, 0.5 * Hpqrs(I));
+			if (M.size() == 0) { cerr << "M empty in Hpqrs!\n"; exit(1); }
+			H.push_back(M, 0.5 * h);
 		}
 		cout << "Electronic Hamiltonian size (total): " << H.size() << endl;
 		return H;

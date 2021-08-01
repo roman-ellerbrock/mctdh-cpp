@@ -138,9 +138,8 @@ namespace parser {
 			H = Hch3;
 			cout << "YAML H size: " << H.size() << endl;
 		} else if (name == "electronicstructure") {
-			auto hpq = evaluate<string>(node, "hpq");
-			auto hpqrs = evaluate<string>(node, "hpqrs");
-			H = electronicStructure(hpq, hpqrs);
+			auto hfile = evaluate<string>(node, "hamiltonian");
+			H = electronicStructure(hfile);
         }else if (name == "schaepers") {
 		    // find the masses supplied for this hamiltonian
             auto masses = evaluate<string>(node, "masses");

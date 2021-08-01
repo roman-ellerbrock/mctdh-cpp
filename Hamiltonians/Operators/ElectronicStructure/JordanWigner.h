@@ -17,7 +17,7 @@ namespace JordanWigner {
 
 	MLOcd fourIndexOperator(size_t p, size_t q, size_t r, size_t s, double eps);
 
-	SOPcd electronicHamiltonian(const Matrixd& Hpq, const Tensord& Hpqrs);
+	SOPcd electronicHamiltonian(const TwoIndex& hpq, const FourIndex& Hpqrs);
 }
 
 #endif //JORDANWIGNER_H

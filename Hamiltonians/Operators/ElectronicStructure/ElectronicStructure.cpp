@@ -6,32 +6,74 @@
 
 using namespace JordanWigner;
 
-TwoIndex readTwoIndexIntegral(const string& filename) {
-	ifstream file(filename);
-
+TwoIndex readTwoIndexIntegral(ifstream& file, size_t nOrbital) {
 	TwoIndex hpq;
-	while (file.peek() != EOF) {
+	for (size_t i = 0; i < nOrbital * nOrbital; ++i) {
 		size_t p, q = 0;
 		double h = 0.;
 		file >> p >> q >> h;
-//		cout << p << " " << q << " " << h << endl;
+		cout << p << " " << q << " | " << h << endl;
 		hpq.push_back({p, q, h});
+		// check whether hpq ends here by looking for an equal '=' sign
+		auto pos = file.tellg();
+		string peek;
+		file >> peek;
+		if (peek == "=") { break; }
+		file.seekg(pos);
 	}
+	string t;
+	file >> t;
 	return hpq;
 }
 
-FourIndex readFourIndexIntegral(const string& filename) {
-	ifstream file(filename);
-
+FourIndex readFourIndexIntegral(ifstream& file, size_t nOrbital) {
 	FourIndex hpqrs;
-	while (file.peek() != EOF) {
+	for (size_t i = 0; i < pow(nOrbital, 4); ++i) {
 		size_t p, q, r, s = 0;
 		double h = 0.;
 		file >> p >> q >> r >> s >> h;
-//		cout << p << " " << q << " " << r << " " << s << " " << h << endl;
 		hpqrs.push_back({p, q, r, s, h});
+
+		cout << p << " " << q << " " << r << " " << s << " | " << h << endl;
+
+		auto pos = file.tellg();
+		string peek;
+		file >> peek;
+		if (peek == "CI") { break; }
+		file.seekg(pos);
 	}
 	return hpqrs;
+}
+
+SOPcd electronicStructure(const string& filename) {
+	ifstream file(filename);
+	if (file.bad()) {
+		cerr << "Error: Cannot open integral file for electronic structure calculation.\n";
+		exit(1);
+	}
+	string dump;
+	size_t nOrbitals = 0;
+	/// Read header, nElectrons, nOrbitals
+	file >> dump >> dump >> dump >> nOrbitals;
+	cout << "#Electrons = " << nOrbitals << endl;
+	file >> dump >> dump >> dump >> nOrbitals;
+	cout << "#Orbitals = " << nOrbitals << endl;
+
+	/// Read header, E_HF, E_core
+	double E = 0., Ecore = 0.;
+	file >> dump >> dump >> dump >> E;
+	file >> dump >> dump >> dump >> Ecore;
+	cout << "E = " << E << " | E_core = " << Ecore << " | E-Ecore" << E - Ecore << endl;
+
+	/// Read Hpq
+	TwoIndex hpq = readTwoIndexIntegral(file, nOrbitals);
+	cout << "#hpq = " << hpq.size() << endl;
+
+	/// Read Hpqrs
+	FourIndex hpqrs = readFourIndexIntegral(file, nOrbitals);
+	cout << "#hpqrs = " << hpqrs.size() << endl;
+
+	return JordanWigner::electronicHamiltonian(hpq, hpqrs);
 }
 
 Matrixd convertTwoIndex(const TwoIndex& h) {
@@ -68,16 +110,3 @@ Tensord convertFourIndex(const FourIndex& h) {
 	return ht;
 }
 
-SOPcd electronicStructure(const string& twoindex, const string& fourindex) {
-	auto hpq_sparse = readTwoIndexIntegral(twoindex);
-	Matrixd hpq = convertTwoIndex(hpq_sparse);
-	cout << "hpq:\n";
-	hpq.print();
-
-	auto hpqrs_sparse = readFourIndexIntegral(fourindex);
-	Tensord hpqrs = convertFourIndex(hpqrs_sparse);
-	cout << "hpqrs:\n";
-	hpqrs.print();
-
-	return JordanWigner::electronicHamiltonian(hpq, hpqrs);
-}
