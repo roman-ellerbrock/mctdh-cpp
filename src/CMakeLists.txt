@@ -6,8 +6,12 @@ target_compile_options(mctdh_lib PUBLIC "$<$<CONFIG:DEBUG>:${mctdh_DEBUG_FLAGS}>
 target_compile_options(mctdh_lib PRIVATE "$<$<CONFIG:RELEASE>:${mctdh_RELEASE_FLAGS}>")
 
 target_sources(mctdh_lib PUBLIC
+        Core/tCMFIntegrator.h
+        Core/tCMFIntegrator.cpp
         Core/CMFIntegrator.h
         Core/CMFIntegrator.cpp
+        Core/tEigenstates.h
+        Core/tEigenstates.cpp
         Core/Eigenstates.h
         Core/Eigenstates.cpp
 
@@ -18,9 +22,13 @@ target_sources(mctdh_lib PUBLIC
 
         Core/LayerInterface.h
         Core/LayerInterface.cpp
+        Core/tLayerInterface.h
+        Core/tLayerInterface.cpp
         Core/Hamiltonian.h
         Core/HamiltonianRepresentation.cpp
         Core/HamiltonianRepresentation.h
+        Core/tHamiltonianRepresentation.cpp
+        Core/tHamiltonianRepresentation.h
         Core/Wavefunction.h
 
         DVR/MatrixTensorTree.cpp
