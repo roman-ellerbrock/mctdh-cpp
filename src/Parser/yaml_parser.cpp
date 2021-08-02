@@ -268,8 +268,8 @@ namespace parser {
 		auto t = evaluate<double>(node, "t", 0.);
 		auto out = evaluate<double>(node, "out", 41.362);
 		auto dt = evaluate<double>(node, "dt", 1.);
-		auto cmf = evaluate<double>(node, "eps_cmf", 1e-4);
-		auto bs = evaluate<double>(node, "eps_bs", 1e-5);
+		auto cmf = evaluate<double>(node, "cmf", 1e-4);
+		auto bs = evaluate<double>(node, "bs", 1e-5);
 		auto file_in = evaluate<string>(node, "file_in", "in.dat");
 		auto file_out = evaluate<string>(node, "file_out", "out.dat");
 		auto save = evaluate<bool>(node, "save_psi", true);
