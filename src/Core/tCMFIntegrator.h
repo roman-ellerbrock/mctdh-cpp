@@ -2,12 +2,13 @@
 // Created by Roman Ellerbrock on 3/8/20.
 //
 
-#ifndef CMFINTEGRATOR_H
-#define CMFINTEGRATOR_H
+#ifndef TCMFINTEGRATOR_H
+#define TCMFINTEGRATOR_H
 #include "Core/tHamiltonianRepresentation.h"
 #include "Core/tLayerInterface.h"
-#include "Core/IntegratorVariables.h"
+#include "Core/tIntegratorVariables.h"
 #include "Util/BS_integrator.h"
+#include "Util/RungeKutta4.h"
 
 /**
  * \defgroup Integrator
@@ -28,7 +29,9 @@
  * */
 
 template <typename T>
-using bs_integrator = BS_integrator<tLayerInterface<T>&, Tensor<T>, T>;
+using tbs_integrator = BS_integrator<tLayerInterface<T>&, Tensor<T>, T>;
+template <typename T>
+using trk_integrator = RungeKutta4::RK_integrator<tLayerInterface<T>&, Tensor<T>, T>;
 
 template <typename T>
 class tCMFIntegrator {
@@ -38,7 +41,7 @@ public:
 
 	~tCMFIntegrator() = default;
 
-	void Integrate(IntegratorVariables& ivars, ostream& os = cout);
+	void Integrate(tIntegratorVariables<T>& ivars, ostream& os = cout);
 
 	double Error(const TensorTree<T>& Psi, const TensorTree<T>& Chi, const MatrixTree<T>& rho, const Tree& tree) const;
 
@@ -51,8 +54,8 @@ private:
 	void CMFstep(TensorTree<T>& Psi, double time, double timeend, double accuracy_leaf, const Tree& tree);
 
 	tHamiltonianRepresentation<T> matrices_;
-
-	vector<bs_integrator<T>> bs_integrators_;
+	vector<tbs_integrator<T>> bs_integrators_;
+	vector<trk_integrator<T>> rk_integrators_;
 	vector<double> dt_bs_;
 	vector<tLayerInterface<T>> interfaces_;
 
@@ -61,4 +64,4 @@ private:
 };
 
 
-#endif //CMFINTEGRATOR_H
+#endif //TCMFINTEGRATOR_H

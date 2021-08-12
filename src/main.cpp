@@ -1,28 +1,28 @@
 #include "Core/stdafx.h"
-#include "Parser/yaml_parser.h"
+#include "Parser/tyaml_parser.h"
 
-int main(int argc, char* argv[])
-{
+int main(int argc, char *argv[]) {
 
 	cout << "=================================================\n";
 	cout << "=====     mctdh++     ===========================\n";
 	cout << "=================================================\n";
 
-	if (argc != 2){
+	if (argc != 2) {
 		cerr << "Please provide a mctdh input as argument." << endl;
 		exit(1);
 	}
 
 	string filename(argv[1]);
-	ifstream ifs {filename};
+	ifstream ifs{filename};
 
-	if (ifs.fail()){
+	if (ifs.fail()) {
 		cerr << "Error opening the input file. Please make sure the Spelling\n"
-		     << "is correct." << endl;
+			 << "is correct." << endl;
 		exit(1);
 	}
 
-	mctdh_state state = parser::run(filename);
+//	mctdh_state state = parser::run(filename);
+	tmctdh_state<double> state = tparser::run<double>(filename);
 
 	return 0;
 }

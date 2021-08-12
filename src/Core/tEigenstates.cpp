@@ -44,6 +44,8 @@ void tStatus(const Vectord& eigenvalues, const Vectord& propergatorev,
 
 	// Write out Eigenvalues
 	int zero = propergatorev.dim() - 1;
+	std::streamsize prec = os.precision();
+	os.precision(12);
 	os << "Eigenvalues (Diagonalizing Hamiltonmatrix"
 	   << " / Propagatormatrix)" << endl;
 	os << "Ground state :\t" << eigenvalues(0) * energy.second << " " << energy.first;
@@ -57,12 +59,13 @@ void tStatus(const Vectord& eigenvalues, const Vectord& propergatorev,
 		os << "\t" << (eigenvalues(i) - eigenvalues(0)) << " a.u.";
 		os << "\t(" << (1.-s(i)) << ")" << endl;
 	}
+	os.precision(prec);
 }
 
 template<typename T>
-void tEigenstates(IntegratorVariables& ivar) {
+void tEigenstates(tIntegratorVariables<T>& ivar) {
 	auto& Psi = *ivar.psi;
-	const auto& H = *ivar.h;
+	const auto& H = *ivar.sop;
 	const Tree& tree = *ivar.tree;
 	size_t num_iterations = (ivar.time_end - ivar.time_now) / ivar.out;
 	auto eigenvar = ivar;
@@ -76,7 +79,7 @@ void tEigenstates(IntegratorVariables& ivar) {
 	auto energies = tEigenstate(Psi, H, tree);
 	Matrix<T> s(energies.dim(), energies.dim());
 	tStatus(energies, energies, s, cout);
-	TreeIO::output(Psi, tree);
+	TreeIO::output2(Psi, tree);
 
 	for (size_t iter = 0; iter < num_iterations; ++iter) {
 		TensorTree<T> lastPsi = Psi;
@@ -100,3 +103,5 @@ void tEigenstates(IntegratorVariables& ivar) {
 //		TreeIO::Output(Psi, tree);
 	}
 }
+
+template void tEigenstates(tIntegratorVariables<double>&);

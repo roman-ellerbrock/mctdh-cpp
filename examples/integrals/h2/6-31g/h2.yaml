@@ -31,9 +31,9 @@ run:
       0 0 0 0
       0 0 0 0
 
-  - job: hamiltonian
-    name: electronicstructure
-    hamiltonian: hamiltonian.dat
+#  - job: hamiltonian
+#    name: electronicstructure
+#    hamiltonian: hamiltonian.dat
 
   - job: wavefunction
     name: Psi
@@ -41,9 +41,10 @@ run:
     Hartree: true
 
   - job: eigenstates
+    hamiltonian: hamiltonian.dat
     t: 0.
     t_end: 50.
     dt: 0.01
     out: 5.
-    cmf: 1e-4
-    bs: 1e-5
+    cmf: 1e-1
+    bs: 1e-3

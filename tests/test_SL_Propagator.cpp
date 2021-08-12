@@ -9,22 +9,23 @@
 #include "Core/Eigenstates.h"
 #include <iomanip>
 
-SUITE(SingleLayer){
+SUITE (SingleLayer) {
 
-    double epsilon = 1.0e-8;
+	double epsilon = 1.0e-8;
 
-    class SOPParser {
-    public:
-        SOPParser() {
-            string yaml_filename("../tests/sl_tests/SOPPot.yaml");
-            state_ = parser::run(yaml_filename);
+	class SOPParser {
+	public:
+		SOPParser() {
+			string yaml_filename("../tests/sl_tests/SOPPot.yaml");
+			state_ = parser::run(yaml_filename);
 
-            // take care that tested WF is always the same
-            mt19937 gen(0);
-            state_.wavefunctions_["Psi"] = Wavefunction(gen, state_.tree_);
-        }
-        mctdh_state state_;
-    };
+			// take care that tested WF is always the same
+			mt19937 gen(0);
+			state_.wavefunctions_["Psi"] = Wavefunction(gen, state_.tree_);
+		}
+
+		mctdh_state state_;
+	};
 
 /*    TEST(SL_SOP_Imagtime){
 
@@ -153,19 +154,19 @@ SUITE(SingleLayer){
 
 */
 
-    class nonSOPParser {
-    public:
-        nonSOPParser() {
-            string yaml_filename("../tests/sl_tests/nonSOPPot.yaml");
-            state_ = parser::run(yaml_filename);
+	class nonSOPParser {
+	public:
+		nonSOPParser() {
+			string yaml_filename("../tests/sl_tests/nonSOPPot.yaml");
+			state_ = parser::run(yaml_filename);
 
-            // take care that tested WF is always the same
-            mt19937 gen(0);
-            state_.wavefunctions_["Psi"] = Wavefunction(gen, state_.tree_);
+			// take care that tested WF is always the same
+			mt19937 gen(0);
+			state_.wavefunctions_["Psi"] = Wavefunction(gen, state_.tree_);
+		}
 
-        }
-        mctdh_state state_;
-    };
+		mctdh_state state_;
+	};
 
 /*    TEST(SL_nonSOP_Imagtime) {
 

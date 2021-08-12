@@ -15,12 +15,13 @@ tCMFIntegrator<T>::tCMFIntegrator(const SOP<T>& H, const Tree& tree, T phase)
 		// create an empty object for the integrator
 		const TensorShape& shape = node.shape();
 		Tensor<T> empty(shape);
-		bs_integrators_.emplace_back(bs_integrator<T>(shape.totalDimension(), empty));
+		bs_integrators_.emplace_back(tbs_integrator<T>(shape.totalDimension(), empty));
+//		rk_integrators_.emplace_back(trk_integrator<T>(shape.totalDimension(), empty));
 	}
 }
 
 template<typename T>
-void tCMFIntegrator<T>::Integrate(IntegratorVariables& job, ostream& os) {
+void tCMFIntegrator<T>::Integrate(tIntegratorVariables<T>& job, ostream& os) {
 	using namespace chrono;
 	high_resolution_clock::time_point t1;
 	high_resolution_clock::time_point t2;
@@ -42,7 +43,8 @@ void tCMFIntegrator<T>::Integrate(IntegratorVariables& job, ostream& os) {
 
 	const Tree& tree = *job.tree;
 	TensorTree<T>& Psi = *job.psi;
-	const SOP<T>& H = *job.h;
+//	const Hamiltonian<T>& H = *job.h;
+	const SOP<T>& H = *job.sop;
 
 	Psi.write(job.ofname);
 
@@ -191,10 +193,12 @@ void tCMFIntegrator<T>::CMFstep(TensorTree<T>& Psi, double time, double timeend,
 	for (const Node& node : tree) {
 		if (node.isToplayer() || eom_spf) {
 			tLayerInterface<T> I = interfaces_[node.address()];
-			bs_integrator<T>& layer_bs = bs_integrators_[node.address()];
+			tbs_integrator<T>& layer_integrator = bs_integrators_[node.address()];
+//			trk_integrator<T>& layer_integrator = rk_integrators_[node.address()];
 			Tensor<T>& Phi = Psi[node];
 			double layertime = time;
-			layer_bs.Integrate(Phi, layertime, timeend, dt_bs_[node.address()],
+			double dt = (timeend - layertime) / 8.;
+			layer_integrator.Integrate(Phi, layertime, timeend, dt,
 				accuracy_leaf, ddt, Delta, I);
 		}
 	}
@@ -223,9 +227,21 @@ double tCMFIntegrator<T>::Error(const TensorTree<T>& Psi, const TensorTree<T>& C
 		result += pow(Delta(layer, Phi, xi), 2);
 		number += Phi.shape().totalDimension();
 	}
+	return sqrt(result / number);
+//	return sqrt(result);
 
-//	return sqrt(result / number);
-	return sqrt(result);
+/*	auto S11 = TreeFunctions::dotProduct(Psi, Psi, tree);
+	auto S12 = TreeFunctions::dotProduct(Psi, Chi, tree);
+	auto S21 = TreeFunctions::dotProduct(Chi, Psi, tree);
+	auto S22 = TreeFunctions::dotProduct(Chi, Chi, tree);
+	const Node& top = tree.topNode();
+	auto s11 = S11[top];
+	auto s12 = S12[top];
+	auto s21 = S21[top];
+	auto s22 = S22[top];
+	Matrix<T> delta = s11 + s22 - s12 - s21;
+	double number = top.shape().lastDimension();
+	return delta.frobeniusNorm() / number;*/
 }
 
 template<typename T>

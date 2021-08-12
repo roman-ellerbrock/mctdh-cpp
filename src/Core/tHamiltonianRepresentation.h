@@ -2,8 +2,8 @@
 // Created by Roman Ellerbrock on 3/1/20.
 //
 
-#ifndef HAMILTONIANREPRESENTATION_H
-#define HAMILTONIANREPRESENTATION_H
+#ifndef THAMILTONIANREPRESENTATION_H
+#define THAMILTONIANREPRESENTATION_H
 #include "Core/Hamiltonian.h"
 #include "Core/Wavefunction.h"
 #include "TreeClasses/SparseMatrixTreeFunctions.h"
@@ -67,11 +67,11 @@ public:
 };
 
 template<typename T>
-Tensorcd Apply(const SOP<T>& H, const Tensor<T>& Phi,
+Tensor<T> Apply(const SOP<T>& H, const Tensor<T>& Phi,
 	const tHamiltonianRepresentation<T>& hRep, const Node& node);
 
 template<typename T>
-Matrixcd Expectation(const tHamiltonianRepresentation<T>& hRep,
+Matrix<T> Expectation(const tHamiltonianRepresentation<T>& hRep,
 	const TensorTree<T>& Psi, const SOP<T>& H, const Tree& tree);
 
 template<typename T>
@@ -84,4 +84,4 @@ void Derivative(TensorTree<T>& dPsi, tHamiltonianRepresentation<T>& hRep,
 	double time, const TensorTree<T>& Psi, const SOP<T>& H,
 	const Tree& tree, T propagation_phase = 1.);
 
-#endif //HAMILTONIANREPRESENTATION_H
+#endif //THAMILTONIANREPRESENTATION_H

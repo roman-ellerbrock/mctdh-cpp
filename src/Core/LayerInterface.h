@@ -2,8 +2,8 @@
 // Created by Roman Ellerbrock on 3/8/20.
 //
 
-#ifndef LAYERINTERFACE_H
-#define LAYERINTERFACE_H
+#ifndef TLAYERINTERFACE_H
+#define TLAYERINTERFACE_H
 #include "Core/HamiltonianRepresentation.h"
 
 class LayerInterface {
@@ -27,4 +27,4 @@ private:
 	const Node* node_;
 };
 
-#endif //LAYERINTERFACE_H
+#endif //TLAYERINTERFACE_H

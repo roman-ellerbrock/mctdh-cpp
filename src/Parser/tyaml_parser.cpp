@@ -3,15 +3,18 @@
 //
 
 #include <string>
-#include "Parser/yaml_parser.h"
+#include "Parser/tyaml_parser.h"
 #include "yaml-cpp/yaml.h"
 #include "TreeShape/TreeFactory.h"
 #include "Hamiltonians.h"
 #include "Core/Eigenstates.h"
+#include "Core/tEigenstates.h"
+#include "Core/tIntegratorVariables.h"
+#include "Core/IntegratorVariables.h"
 
-namespace parser {
+namespace tparser {
 
-	template <typename T>
+	template<typename T>
 	T evaluate(const YAML::Node& node, const string& key) {
 		T val;
 		if (auto par = node[key]) {
@@ -22,7 +25,7 @@ namespace parser {
 		}
 	}
 
-	template <typename T>
+	template<typename T>
 	T evaluate(const YAML::Node& node, const string& key, T default_) {
 		T val;
 		if (auto par = node[key]) {
@@ -117,6 +120,7 @@ namespace parser {
 		return Tree();
 	}
 
+	/*
 	shared_ptr<Hamiltonian> read_hamiltonian(const YAML::Node& node, const Tree& tree) {
 		auto name = evaluate<string>(node, "name");
 		shared_ptr<Hamiltonian> H_ptr(new Hamiltonian);
@@ -137,9 +141,9 @@ namespace parser {
 			CH3_quasiexact Hch3(tree);
 			H = Hch3;
 			cout << "YAML H size: " << H.size() << endl;
-//		} else if (name == "electronicstructure") {
-//			auto hfile = evaluate<string>(node, "hamiltonian");
-//			H = electronicStructure(hfile);
+		} else if (name == "electronicstructure") {
+			auto hfile = evaluate<string>(node, "hamiltonian");
+			H = electronicStructure(hfile);
         }else if (name == "schaepers") {
 		    // find the masses supplied for this hamiltonian
             auto masses = evaluate<string>(node, "masses");
@@ -172,8 +176,9 @@ namespace parser {
 		}
 		assert(H_ptr->size() > 0);
 		return H_ptr;
-	}
+	}*/
 
+	/*
 	PotentialOperator set_potential(const YAML::Node& node, const Tree& tree) {
 		auto name = evaluate<string>(node, "name");
 		if (name == "coupled_ho") {
@@ -224,36 +229,37 @@ namespace parser {
 			exit(1);
 		}
 		return PotentialOperator();
-	}
+	}*/
 
-	void new_wavefunction(mctdh_state& state, const YAML::Node& node) {
+	template<typename T>
+	void new_wavefunction(tmctdh_state<T>& state, const YAML::Node& node) {
 		auto name = evaluate<string>(node, "name");
 		auto type = evaluate<string>(node, "type");
 		if (type == "read") {
-            if(evaluate<string>(node, "filename").empty()){
-                cerr << "supply filename to save and read directive" << endl;
-                exit(1);
-            }
-            auto filename = evaluate<string>(node, "filename");
-			Wavefunction Psi(state.tree_);
+			if (evaluate<string>(node, "filename").empty()) {
+				cerr << "supply filename to save and read directive" << endl;
+				exit(1);
+			}
+			auto filename = evaluate<string>(node, "filename");
+			TensorTree<T> Psi(state.tree_);
 			ifstream is(filename);
 			Psi.read(is);
 			state.wavefunctions_[name] = Psi;
 			is.close();
 		} else if (type == "create") {
 			bool Hartree = evaluate<bool>(node, "Hartree", true);
-			state.wavefunctions_[name] = Wavefunction(state.rng_, state.tree_, Hartree);
+			state.wavefunctions_[name] = TensorTree<T>(state.rng_, state.tree_, Hartree);
 		} else if (type == "save") {
-		    if(evaluate<string>(node, "filename").empty()){
-		        cerr << "supply filename to save and read directive" << endl;
-		        exit(1);
-		    }
-		    auto filename = evaluate<string>(node, "filename");
-		    Wavefunction Psi(state.tree_);
-		    Psi = state.wavefunctions_[name];
-		    ofstream of(filename);
-		    Psi.write(of);
-		    of.close();
+			if (evaluate<string>(node, "filename").empty()) {
+				cerr << "supply filename to save and read directive" << endl;
+				exit(1);
+			}
+			auto filename = evaluate<string>(node, "filename");
+			TensorTree<T> Psi(state.tree_);
+			Psi = state.wavefunctions_[name];
+			ofstream of(filename);
+			Psi.write(of);
+			of.close();
 		} else {
 			cerr << "No valid Wavefunction initialization type." << endl;
 			cerr << "Choices: (read, create, save)" << endl;
@@ -261,10 +267,11 @@ namespace parser {
 		}
 	}
 
-	IntegratorVariables new_ivar(const YAML::Node& node, mctdh_state& state) {
-	    // TODO: this routine does not use the 'save'-directive
-	    // TODO: also, it does not save the wavefunction and only works with a wavefunction called "Psi"
-		auto t_end = evaluate<double>(node, "t_end", 100*41.362);
+	template<typename T>
+	tIntegratorVariables<T> new_ivar(const YAML::Node& node, tmctdh_state<T>& state) {
+		// TODO: this routine does not use the 'save'-directive
+		// TODO: also, it does not save the wavefunction and only works with a wavefunction called "Psi"
+		auto t_end = evaluate<double>(node, "t_end", 100 * 41.362);
 		auto t = evaluate<double>(node, "t", 0.);
 		auto out = evaluate<double>(node, "out", 41.362);
 		auto dt = evaluate<double>(node, "dt", 1.);
@@ -273,39 +280,51 @@ namespace parser {
 		auto file_in = evaluate<string>(node, "file_in", "in.dat");
 		auto file_out = evaluate<string>(node, "file_out", "out.dat");
 		auto save = evaluate<bool>(node, "save_psi", true);
-		IntegratorVariables ivar(t, t_end, dt, out, cmf, bs,
-			state.wavefunctions_["Psi"], *state.hamiltonian_,
+		tIntegratorVariables<T> ivar(t, t_end, dt, out, cmf, bs,
+			state.wavefunctions_["Psi"], *state.hamiltonian_, *state.sop_,
 			state.tree_, state.cdvrtree_, file_out, file_in, false);
 		return ivar;
 	}
 
-	mctdh_state read(const string& yaml_filename) {
+/*	mctdh_state read(const string& yaml_filename) {
 		YAML::Node config = YAML::LoadFile(yaml_filename);
 		mctdh_state job;
 		job.tree_ = read_tree(config["tree"]);
 		job.hamiltonian_ = read_hamiltonian(config["hamiltonian"], job.tree_);
 		new_wavefunction(job, config["wavefunction"]);
 		return job;
-	}
+	}*/
 
-	mctdh_state run(const string& yaml_filename) {
+	template<typename T>
+	tmctdh_state<T> run(const string& yaml_filename) {
 		YAML::Node config = YAML::LoadFile(yaml_filename);
-		mctdh_state state;
+		tmctdh_state<T> state;
 		for (const auto& node : config["run"]) {
 			const auto& job = node["job"].as<string>();
 			if (job == "tree") {
 				state.tree_ = read_tree(node);
 				state.cdvrtree_ = state.tree_;
+			} else if (job == "eigenstates") {
+				auto ivar = new_ivar(node, state);
+				auto hfile = evaluate<string>(node, "hamiltonian");
+				shared_ptr<SOP<T>> H_ptr(new SOP<T>);
+				SOP<T>& H = *H_ptr;
+				H = electronicStructure(hfile);
+				state.sop_ = H_ptr;
+				ivar.sop = &H;
+				tEigenstates(ivar);
 //				if (state.cdvrtree_.nNodes() == 0) { state.cdvrtree_ = state.tree_; }
+/*
 			} else if (job == "hamiltonian") {
 				state.hamiltonian_ = read_hamiltonian(node, state.tree_);
 			} else if (job == "potential") {
 				PotentialOperator V = set_potential(node, state.tree_);
 				state.hamiltonian_->V_ = V;
 				state.hamiltonian_->hasV = true;
+*/
 			} else if (job == "wavefunction") {
 				new_wavefunction(state, node);
-			} else if (job == "eigenstates") {
+/*			} else if (job == "eigenstates") {
 				auto ivar = new_ivar(node, state);
 				Eigenstates(ivar);
 			} else if (job == "cmf") {
@@ -314,13 +333,13 @@ namespace parser {
 				const Tree& tree = *ivar.tree;
 				const Tree& cdvrtree = *ivar.cdvrtree;
 				CMFIntegrator cmf(H, tree, cdvrtree, 1.);
-				cmf.Integrate(ivar);
-			} else if (job == "cdvrtree") {
-				state.cdvrtree_ = read_tree(node);
+				cmf.Integrate(ivar);*/
+/*			} else if (job == "cdvrtree") {
+				state.cdvrtree_ = read_tree(node);*/
 			}
 		}
 		return state;
 	}
 }
 
-
+template tmctdh_state<double> tparser::run(const string& yaml_filename);

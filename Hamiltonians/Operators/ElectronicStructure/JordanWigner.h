@@ -13,11 +13,11 @@ namespace JordanWigner {
 
 	typedef vector<tuple<int, int, int, int, double>> FourIndex;
 
-	MLOcd twoIndexOperator(size_t p, size_t q, double eps);
+	MLOd twoIndexOperator(size_t p, size_t q, double eps);
 
-	MLOcd fourIndexOperator(size_t p, size_t q, size_t r, size_t s, double eps);
+	MLOd fourIndexOperator(size_t p, size_t q, size_t r, size_t s, double eps);
 
-	SOPcd electronicHamiltonian(const TwoIndex& hpq, const FourIndex& Hpqrs);
+	SOPd electronicHamiltonian(const TwoIndex& hpq, const FourIndex& Hpqrs);
 }
 
 #endif //JORDANWIGNER_H

@@ -30,9 +30,9 @@ Tensor<T> Apply(const SOP<T>& H, const Tensor<T>& Phi,
 		}
 	}
 
-	if (H.hasV) {
+/*	if (H.hasV) {
 		dPhi += hRep.cdvr_.Apply(Phi, hRep.rho_decomposition_[node], node);
-	}
+	}*/
 
 	return dPhi;
 }
@@ -80,3 +80,9 @@ void Derivative(TensorTree<T>& dPsi, tHamiltonianRepresentation<T>& hRep,
 
 template class tHamiltonianRepresentation<double>;
 
+template Matrix<double> Expectation(const tHamiltonianRepresentation<double>& hRep,
+	const TensorTree<double>& Psi, const SOP<double>& H, const Tree& tree);
+
+template void LayerDerivative(Tensor<double>& dPhi, double time, const Tensor<double>& Phi,
+	const SOP<double>& H, const tHamiltonianRepresentation<double>& hRep,
+	const Node& node, double propagation_phase = 1.);

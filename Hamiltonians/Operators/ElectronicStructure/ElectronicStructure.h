@@ -16,6 +16,6 @@ JordanWigner::FourIndex readFourIndexIntegral(ifstream& file, size_t nOrbital);
 Matrixd convertTwoIndex(const JordanWigner::TwoIndex& h);
 Tensord convertFourIndex(const JordanWigner::FourIndex& h);
 
-SOPcd electronicStructure(const string& filename);
+SOPd electronicStructure(const string& filename);
 
 #endif //ELECTRONICHAMILTONIAN_H

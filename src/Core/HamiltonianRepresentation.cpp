@@ -9,18 +9,20 @@ Tensorcd Apply(const Hamiltonian& H, const Tensorcd& Phi,
 
 	Tensorcd dPhi(Phi.shape());
 	Tensorcd Psi(Phi.shape());
+	/// For every term in the Hamiltonian
 	for (size_t l = 0; l < H.size(); l++) {
 		const auto& hmat = hRep.hMats_[l];
 		if (!hmat.isActive(node)) { continue; }
+
+		/// Initialize Psi via |Psi> = c_l * |Phi>
 		for (size_t i = 0; i < Psi.shape().totalDimension(); ++i) {
 			Psi[i] = H.coeff(l) * Phi[i];
 		}
 
-//		Psi = H.Coeff(l) * Phi;
-//		Tensorcd Psi(Phi, H.Coeff(l));
+		/// Apply matrix representation of H for every term l
 		Psi = TreeFunctions::apply(hmat, Psi, H[l], node);
 
-		// Multiply with hole-matrix
+		/// Multiply with Mean-field matrix
 		const auto& hhole = hRep.hContractions_[l];
 		if (!node.isToplayer() && hhole.isActive(node)) {
 			multStateAB(dPhi, hhole[node], Psi, false);
@@ -29,6 +31,7 @@ Tensorcd Apply(const Hamiltonian& H, const Tensorcd& Phi,
 		}
 	}
 
+	/// Add CDVR if potential energy surface is used
 	if (H.hasV) {
 		dPhi += hRep.cdvr_.Apply(Phi, hRep.rho_decomposition_[node], node);
 	}
@@ -47,21 +50,21 @@ Matrixcd Expectation(const HamiltonianRepresentation& hRep,
 void LayerDerivative(Tensorcd& dPhi, double time, const Tensorcd& Phi,
 	const Hamiltonian& H, const HamiltonianRepresentation& hRep,
 	const Node& node, complex<double> propagation_phase) {
+	/// \brief This routine evaluates derivative d/dt |Phi^p> = -i*rho^-1 * (1-P) * <Psi(p)|H|Psi(p)>|Phi^p>
 
-	// dPhi = -i*rho^-1 * (1-P) * <Phi|H|Phi>
-	// Apply Hamiltonian
+	/// 1.) Apply Hamiltonian, a.) H-matrices and b.) H-mean-field matrices
 	dPhi = Apply(H, Phi, hRep, node);
 
-	// Inverse Densitymatrix and (1-P) projector for SPF-type EOM
 	if (!node.isToplayer()) {
-		// (1-P) projector
+		/// 2.) Project out rotation in active space, |hPhi^p > = (1-P)|hPhi^p>
 		dPhi = projectOut(dPhi, Phi);
 
-		// Multiply with inverse single-particle density matrix
+		/// 3.) Multiply by inverse density matrix rho^{(p),-1}|hPhi^p>
 		const auto& rhoinv = hRep.rho_inverse_[node];
 		dPhi = multStateAB(rhoinv, dPhi);
 	}
 
+	/// 4.) Multiply with propagation phase (for real- or imaginary time propagation)
 	dPhi *= -propagation_phase * QM::im;
 }
 

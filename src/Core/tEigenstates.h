@@ -2,8 +2,8 @@
 // Created by Roman Ellerbrock on 3/3/20.
 //
 
-#ifndef EIGENSTATES_H
-#define EIGENSTATES_H
+#ifndef TEIGENSTATES_H
+#define TEIGENSTATES_H
 #include "Core/tHamiltonianRepresentation.h"
 #include "Core/tIntegratorInterface.h"
 #include "TreeClasses/TreeIO.h"
@@ -19,6 +19,6 @@ template<typename T>
 void tStatus(const Vectord& eigenvalues, const Vectord& propergatorev, const Matrix<T>& S, ostream& os);
 
 template<typename T>
-void tEigenstates(IntegratorVariables& ivar);
+void tEigenstates(tIntegratorVariables<T>& ivar);
 
-#endif //EIGENSTATES_H
+#endif //TEIGENSTATES_H

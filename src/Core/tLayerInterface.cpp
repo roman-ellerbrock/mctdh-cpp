@@ -11,11 +11,21 @@ double tLayerInterface<T>::Error(const Tensor<T>& Phi, const Tensor<T>& Chi)cons
 		const auto& rho = hRep_->rho_;
 		const auto& rhomat = rho[*node_];
 		double norm = real(rhomat.trace());
-		auto C = Phi - Chi;
+/*		auto C = Phi - Chi;
 		C = multStateAB(rhomat, C);
 		for (size_t j = 0; j < C.shape().totalDimension(); j++)
 			Delta += pow(abs(C(j)), 2);
 		Delta /= norm;
+		*/
+		size_t k = Phi.shape().lastIdx();
+		auto pPhi = matrixTensor(rhomat, Phi, k);
+		auto pChi = matrixTensor(rhomat, Phi, k);
+		auto scc = Chi.dotProduct(pChi);
+		auto spp = Phi.dotProduct(pPhi);
+		auto spc = Phi.dotProduct(pChi);
+		auto scp = Chi.dotProduct(pPhi);
+		Matrix<T> s = scc + spp - spc - scp;
+		Delta = s.frobeniusNorm() / norm;
 	} else {
 		// @TODO: Check if this is ok:
 		// Incorporating norm
@@ -31,3 +41,4 @@ double tLayerInterface<T>::Error(const Tensor<T>& Phi, const Tensor<T>& Chi)cons
 	return sqrt(Delta);
 }
 
+template class tLayerInterface<double>;

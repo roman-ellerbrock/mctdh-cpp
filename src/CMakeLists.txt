@@ -51,6 +51,8 @@ target_sources(mctdh_lib PUBLIC
         DVR/XMatrixTrees.cpp
         DVR/XMatrixTrees.h
 
+        Parser/tyaml_parser.cpp
+        Parser/tyaml_parser.h
         Parser/yaml_parser.cpp
         Parser/yaml_parser.h
         )
