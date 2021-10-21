@@ -4,6 +4,7 @@
 
 #include "cdvr_functions.h"
 #include "Core/Tensor_Extension.h"
+#include "Core/TensorBLAS.h"
 
 namespace cdvr_functions {
 
@@ -181,7 +182,7 @@ namespace cdvr_functions {
 		assert(C.shape().totalDimension() == Phi.shape().totalDimension());
 		size_t dim = Phi.shape()[k];
 
-		Matrixcd X = contraction(C, Phi, k);
+		Matrixcd X = contractionBLAS(C, Phi, k);
 		assert(X.dim1() == dim);
 		assert(X.dim2() == dim);
 
@@ -193,7 +194,7 @@ namespace cdvr_functions {
 		}
 
 		/// III: M * C
-		return matrixTensor(Y, C, k);
+		return matrixTensorBLAS(Y, C, k);
 	}
 
 	Tensorcd Apply(const Tensorcd& Xi, const Tensorcd& V,

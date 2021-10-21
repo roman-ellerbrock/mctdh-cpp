@@ -4,6 +4,7 @@
 
 #include "MatrixTensorTree.h"
 #include "TreeClasses/SpectralDecompositionTree.h"
+#include "Core/TensorBLAS.h"
 
 MatrixTensorTree::MatrixTensorTree(const Wavefunction& Psi,
 	const Tree& tree, bool orthogonal) {
@@ -52,7 +53,7 @@ void MatrixTensorTree::buildEdges(const Tree& tree) {
 		const Node& node = e.down();
 		Tensorcd& A = nodes_[node];
 		/// Basically like multiplying with sqrt(rho)'s
-		A = matrixTensor(B[e], A, node.nChildren());
+		A = matrixTensorBLAS(B[e], A, node.nChildren());
 	}
 
 	edges_ = inverse(B, tree);
@@ -73,7 +74,7 @@ TensorTreecd MatrixTensorTree::TopDownNormalized(const Tree& tree) const {
 	for (const Edge& e : tree.edges()) {
 		const Node& node = e.down();
 		const Node& parent = node.parent();
-		Psi[node] = matrixTensor(edges()[e].transpose(), Psi[parent], node.childIdx());
+		Psi[node] = matrixTensorBLAS(edges()[e].transpose(), Psi[parent], node.childIdx());
 	}
 
 	return Psi;
@@ -87,7 +88,7 @@ TensorTreecd MatrixTensorTree::BottomUpNormalized(const Tree& tree) const {
 
 	for (const Edge& e : tree.edges()) {
 		const Node& node = e.down();
-		Psi[node] = matrixTensor(edges()[e], Psi[node], node.nChildren());
+		Psi[node] = matrixTensorBLAS(edges()[e], Psi[node], node.nChildren());
 	}
 
 	return Psi;
