@@ -37,9 +37,6 @@ void CMFIntegrator::Integrate(IntegratorVariables& job, ostream& os) {
 	double accuracy_CMF = job.accuracy_root;
 	double accuracy_BS = job.accuracy_leaf;
 
-	bool savepsi = job.save_psi;
-//	ofstream opsi(job.ofname);
-
 	const Tree& tree = *job.tree;
 	Wavefunction& Psi = *job.psi;
 	const Hamiltonian& H = *job.h;
@@ -150,9 +147,7 @@ void CMFIntegrator::Integrate(IntegratorVariables& job, ostream& os) {
 
 			// Datout
 			if (time + 1E-10 >= t_next) {
-//				Psi.Write(files.PsiFile(), savepsi);
-				Psi.write(job.ofname);
-//				opsi << Psi;
+				Psi.write(job.ofname, job.append_);
 				Output(time, Psi, Psistart, H, tree, os);
 				double time_tot = mattime.count() + steptime.count();
 				cout << "Time in CMF-Integrator: " << time_tot / 1000000. << " s\n";

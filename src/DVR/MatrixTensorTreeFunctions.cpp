@@ -9,7 +9,7 @@ namespace TreeFunctions {
 	void Represent(SparseMatrixTreecd& mat, const MatrixTensorTree& Psi, const MLOcd& M,
 		const Tree& tree) {
 
-		const TensorTreecd& Psi_up = Psi.BottomUpNormalized(tree);
+		const TensorTreecd& Psi_up = Psi.bottomUpNormalized(tree);
 		TreeFunctions::represent(mat, M, Psi_up, tree);
 	}
 
@@ -29,7 +29,7 @@ namespace TreeFunctions {
 	void Contraction(SparseMatrixTreecd& hole, const MatrixTensorTree& Psi,
 		const SparseMatrixTreecd& mat, const SparseTree& marker, const Tree& tree) {
 
-		const TensorTreecd& Psi_down = Psi.TopDownNormalized(tree);
+		const TensorTreecd& Psi_down = Psi.topDownNormalized(tree);
 		int sub_topnode = marker.size() - 1;
 		for (int n = sub_topnode; n >= 0; --n) {
 			const Node& node = marker.node(n);

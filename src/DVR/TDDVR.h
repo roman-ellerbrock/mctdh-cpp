@@ -9,6 +9,7 @@
 #include "DVR/XMatrixTrees.h"
 #include "TreeClasses/MatrixTree.h"
 #include "DVR/MatrixTensorTree.h"
+#include "TreeClasses/WorkMemory.h"
 
 class TDDVR {
 public:
@@ -19,7 +20,7 @@ public:
 
 	explicit TDDVR(const Tree& tree)
 		: Xs_(tree), rho_(tree), trafo_(tree), hole_trafo_(tree),
-		  grids_(tree), hole_grids_(tree, true) {
+		  grids_(tree), hole_grids_(tree, true), eps_(1e-8), mem_(tree){
 	}
 
 	~TDDVR() = default;
@@ -40,8 +41,6 @@ public:
 
 	XMatrixTrees Xs_;
 private:
-	MatrixTreecd rho_;
-
 	void NodeTransformation(Wavefunction& Psi, const Tree& tree, bool inverse) const;
 
 	void EdgeTransformation(Matrixcd& B_inv, const Edge& edge, bool inverse) const;
@@ -49,6 +48,10 @@ private:
 
 	void GridTransformation(Wavefunction& Psi, const Tree& tree, bool inverse = false) const;
 	void GridTransformationLocal(Tensorcd& Phi, const Node& node, bool inverse = false) const;
+
+	MatrixTreecd rho_;
+	WorkMemorycd mem_;
+	double eps_;
 };
 
 

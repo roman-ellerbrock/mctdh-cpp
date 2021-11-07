@@ -15,7 +15,7 @@ public:
 	 * \brief All-normalized wavefunction representation with A\tilde's and B_inv's.
 	 */
 
-	void Initialize(const Wavefunction& Psi,
+	void initialize(const Wavefunction& Psi,
 		const Tree& tree, bool orthogonal);
 
 	const TensorTreecd& nodes()const { return first; }
@@ -32,9 +32,9 @@ public:
 
 	void buildFromWeighted(const Tree& tree);
 
-	TensorTreecd TopDownNormalized(const Tree& tree) const;
+	TensorTreecd topDownNormalized(const Tree& tree) const;
 
-	TensorTreecd BottomUpNormalized(const Tree& tree) const;
+	TensorTreecd bottomUpNormalized(const Tree& tree) const;
 
 };
 

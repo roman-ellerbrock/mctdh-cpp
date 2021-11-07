@@ -2,6 +2,7 @@
 // Created by Roman Ellerbrock on 3/9/20.
 //
 
+#include <Core/TensorBLAS.h>
 #include "TDDVR.h"
 #include "TreeClasses/MatrixTreeFunctions.h"
 #include "TreeClasses/SparseMatrixTreeFunctions.h"
@@ -27,20 +28,7 @@ void setGrids(TreeGrids& gridtrees, vector<Vectord> grids, const Node& node) {
 	}
 }
 
-Matrixcd Regularize(Matrixcd w) {
-	double norm = abs(w.trace());
-	w = (1. / norm) * w;
-	double eps = 1e-6;
-	for (size_t i = 0; i < w.dim1(); ++i) {
-		w(i, i) += eps * exp(-w(i, i) / eps);
-	}
-	// Normalize the weight matrix
-	norm = abs(w.trace());
-	w = (1. / norm) * w;
-	return w;
-}
-
-vector<double> CalculateShift(const vector<Matrixcd>& xs, const Matrixcd& w) {
+vector<double> calculateShift(const vector<Matrixcd>& xs, const Matrixcd& w) {
 	vector<double> shifts;
 	for (const auto& x : xs) {
 		double s = abs(x.trace());
@@ -79,22 +67,19 @@ void LayerGrid(TreeGrids& grids, Matrixcd& trafo,
 	Matrixcd w;
 	if (w_ptr != nullptr) {
 		w = *w_ptr;
-		w = regularize(w, 1e-8);
+		w = regularize(w, 1e-9);
 	} else {
 		w = identityMatrix<complex<double>>(trafo.dim1());
 	}
 
 	assert(!xs.empty());
 
-	auto shifts = CalculateShift(xs, w);
+	auto shifts = calculateShift(xs, w);
 
 	shift(xs, shifts);
-/*	node.info();
-	for (auto s : shifts) {
-		cout << s << "\t";
-	}
-	cout << endl;*/
-	auto diags = WeightedSimultaneousDiagonalization::calculate(xs, w, 1e-9);
+
+	auto diags = WeightedSimultaneousDiagonalization::calculate(xs, w, 1e-10);
+
 	shift(diags.second, shifts);
 	setGrids(grids, diags.second, node);
 	trafo = diags.first;
@@ -106,7 +91,6 @@ void UpdateGrids(TreeGrids& grids, MatrixTreecd& trafo, const vector<SparseMatri
 	for (const Node& node : tree) {
 		if (!node.isToplayer()) {
 			if ((rho_ptr == nullptr) || node.isBottomlayer()) {
-//			if ((rho_ptr == nullptr) ) {
 				LayerGrid(grids, trafo[node], Xs, nullptr, node);
 			} else {
 				LayerGrid(grids, trafo[node], Xs, &rho_ptr->operator[](node), node);
@@ -135,19 +119,19 @@ void TDDVR::GridTransformationLocal(Tensorcd& Phi, const Node& node, bool invers
 	for (size_t k = 0; k < node.nChildren(); ++k) {
 		const Node& child = node.child(k);
 		if (!inverse) {
-			Phi = matrixTensor(trafo_[child], Phi, k);
+			Phi = matrixTensorBLAS(trafo_[child], Phi, k);
 		} else {
-		//	Phi = multATB(trafo_[child], Phi, k);
-			Phi = matrixTensor(trafo_[child].adjoint(), Phi, k);
+			Phi = matrixTensorBLAS(trafo_[child].adjoint(), Phi, k);
 		}
 	}
 
 	/// Transform state
 	if (!inverse) {
-		Phi = multStateArTB(hole_trafo_[node], Phi);
+//		Phi = tensorMatrix(Phi, hole_trafo_[node], node.parentIdx());
+		Phi = matrixTensorBLAS(hole_trafo_[node].transpose(), Phi, node.parentIdx());
 	} else {
-		auto m = hole_trafo_[node].adjoint();
-		Phi = multStateArTB(m, Phi);
+//		Phi = tensorMatrix(Phi, hole_trafo_[node].adjoint(), node.parentIdx());
+		Phi = matrixTensorBLAS(hole_trafo_[node].adjoint().transpose(), Phi, node.parentIdx());
 	}
 }
 
@@ -164,10 +148,13 @@ void TDDVR::NodeTransformation(Tensorcd& Phi, const Node& node, bool inverse) co
 		for (size_t k = 0; k < node.nChildren(); ++k) {
 			const Node& child = node.child(k);
 			if (!inverse) {
-				Phi = matrixTensor(trafo_[child], Phi, k);
+				matrixTensorBLAS(mem_.work2_, mem_.work1_, trafo_[child], Phi, k);
+				Phi = mem_.work2_;
+//				Phi = matrixTensorBLAS(trafo_[child], Phi, k);
 			} else {
-//				Phi = multATB(trafo_[child], Phi, k);
-				Phi = matrixTensor(trafo_[child].adjoint(), Phi, k);
+//				Phi = matrixTensorBLAS(trafo_[child].adjoint(), Phi, k);
+				matrixTensorBLAS(mem_.work2_, mem_.work1_, trafo_[child].adjoint(), Phi, k);
+				Phi = mem_.work2_;
 			}
 		}
 	}
@@ -175,10 +162,9 @@ void TDDVR::NodeTransformation(Tensorcd& Phi, const Node& node, bool inverse) co
 	/// Transform state
 	if (!node.isToplayer()) {
 		if (!inverse) {
-			Phi = matrixTensor(hole_trafo_[node], Phi, node.nChildren());
+			Phi = matrixTensorBLAS(hole_trafo_[node], Phi, node.nChildren());
 		} else {
-			Phi = matrixTensor(hole_trafo_[node].adjoint(), Phi, node.nChildren());
-//			Phi = multATB(hole_trafo_[node], Phi, node.nChildren());
+			Phi = matrixTensorBLAS(hole_trafo_[node].adjoint(), Phi, node.nChildren());
 		}
 	}
 }

@@ -8,6 +8,7 @@ Tensorcd SymXMatrixTrees::OptimizeUp(const Tensorcd& Phi, const Matrixcd& rho,
 
 	size_t n_occ = node_small.shape().lastDimension();
 
+	return Phi;
 /*	auto X = BuildX(Phi, rho, node);
 	X = UnProject(n_occ, X, Phi);
 	auto xspec = Diagonalize(X);
@@ -19,7 +20,7 @@ Tensorcd SymXMatrixTrees::OptimizeUp(const Tensorcd& Phi, const Matrixcd& rho,
 
 MatrixTensorTree SymXMatrixTrees::OptimizeUp(const MatrixTensorTree& Psi,
 	const Tree& tree, const Tree& tree_small) const {
-	TensorTreecd PsiUp = Psi.BottomUpNormalized(tree);
+	TensorTreecd PsiUp = Psi.bottomUpNormalized(tree);
 	MatrixTreecd rho = TreeFunctions::contraction(PsiUp, tree, true);
 	for (const Node& node : tree) {
 		const Node& node_small = tree_small.getNode(node.address());

@@ -20,7 +20,7 @@ typedef pair<Matrixcd, size_t> MatrixIdx;
 class XMatrixTrees {
 public:
 	explicit XMatrixTrees(const Tree& tree)
-		: xops_(Xsop(tree)) {
+		: xops_(Xsop(tree)) , eps_(1e-8) {
 		LeafFuncd x = &LeafInterface::applyX;
 
 		for (size_t l = 0; l < tree.nLeaves(); ++l) {
@@ -49,7 +49,7 @@ public:
 		 *
 		 */
 		represent(mats_, xops_, Psi, Psi, tree);
-		Wavefunction Chi = Regularize(Psi, tree, 1e-3);
+		Wavefunction Chi = Regularize(Psi, tree, sqrt(eps_));
 		auto rho = TreeFunctions::contraction(Chi, tree, true);
 		contraction(holes_, Chi, Chi, mats_, rho, tree);
 		UnweightContractions(holes_, Chi, tree);
@@ -59,7 +59,7 @@ public:
 		const Wavefunction& Psi, const Tree& tree) const {
 		auto rho = TreeFunctions::contraction(Psi, tree, true);
 		auto rho_sqrt = sqrt(rho, tree);
-		auto isqrt_rho = inverse(rho_sqrt, tree, 1e-5);
+		auto isqrt_rho = inverse(rho_sqrt, tree, eps_);
 
 		for (auto& xhole : holes) {
 			const auto& stree = xhole.sparseTree();
@@ -106,6 +106,8 @@ public:
 	SOPcd xops_;
 	SparseMatrixTreescd mats_;
 	SparseMatrixTreescd holes_;
+
+	double eps_;
 };
 
 Matrixcd UnProject(size_t n_occupied, const Matrixcd& X,
@@ -115,6 +117,6 @@ Tensorcd Occupy(const Tensorcd& Phi, const Matrixcd& trafo,
 	size_t n_occupied, const Node& node);
 
 Matrixcd BuildX(const Tensorcd& Phi, const Matrixcd& rho,
-	const SparseMatrixTreescd& xmats, const Node& node);
+	const SparseMatrixTreescd& xmats, const Node& node, double eps);
 
 #endif //XMATRIXTREES_H

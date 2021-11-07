@@ -18,14 +18,14 @@ namespace cdvr_functions {
 	void fillXEdge(Vectord& X, vector<size_t> idx, const TreeGrids& grids, const TreeGrids& holegrids,
 		const Node& node);
 
-	void CalculateDeltaVs(DeltaVTree& deltaVTree, const MatrixTensorTree& Chi,
+	void calculateDeltaVs(DeltaVTree& deltaVTree, const MatrixTensorTree& Chi,
 		const TensorTreecd& Vnodes, const MatrixTreed& Vedges, const Tree& tree);
 
-	TensorTreecd Apply(const Wavefunction& Psio, const TensorTreecd& Cdown,
-		const TensorTreecd& V, const DeltaVTree& DeltaVs, const Tree& tree);
+//	TensorTreecd Apply(const Wavefunction& Psio, const TensorTreecd& Cdown,
+//		const TensorTreecd& V, const DeltaVTree& DeltaVs, const Tree& tree);
 
-	Tensorcd Apply(const Tensorcd& Xi, const Tensorcd& V, const TensorTreecd& Cdown,
-		const DeltaVTree& deltaVs, const Node& node);
+	void apply(Tensorcd& VPhi, const Tensorcd& Xi, const Tensorcd& V, const TensorTreecd& Cdown,
+		const DeltaVTree& deltaVs, const Node& node, const WorkMemorycd& mem);
 }
 
 #endif //CDVR_FUNCTIONS_H

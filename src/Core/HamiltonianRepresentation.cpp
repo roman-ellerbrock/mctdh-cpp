@@ -30,7 +30,7 @@ Tensorcd Apply(const Hamiltonian& H, const Tensorcd& Phi,
 	}
 
 	if (H.hasV) {
-		dPhi += hRep.cdvr_.Apply(Phi, hRep.rho_decomposition_[node], node);
+		dPhi += hRep.cdvr_.apply(Phi, hRep.rho_decomposition_[node], node);
 	}
 
 	return dPhi;

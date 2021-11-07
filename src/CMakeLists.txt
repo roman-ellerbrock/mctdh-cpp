@@ -45,6 +45,8 @@ target_sources(mctdh_lib PUBLIC
 
         Parser/yaml_parser.cpp
         Parser/yaml_parser.h
+
+        Utility/Overlaps.cpp
         )
 
 target_include_directories(mctdh_lib PUBLIC

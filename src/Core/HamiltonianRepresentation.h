@@ -17,7 +17,7 @@ class HamiltonianRepresentation {
 public:
 	HamiltonianRepresentation(const Hamiltonian& H, const Tree& tree,
 		const Tree& cdvrtree)
-		: rho_(tree), rho_decomposition_(tree), rho_inverse_(tree), cdvr_(cdvrtree) {
+		: rho_(tree), rho_decomposition_(tree), rho_inverse_(tree), cdvr_(cdvrtree), mem_(tree) {
 		hMats_.clear();
 		hContractions_.clear();
 		for (const auto& M : H) {
@@ -83,6 +83,8 @@ public:
 		}
 	}
 
+	int counter_ = 0;
+
 	MatrixTreecd rho_;
 	SpectralDecompositionTreecd rho_decomposition_;
 	MatrixTreecd rho_inverse_;
@@ -90,6 +92,8 @@ public:
 	SparseMatrixTreescd hContractions_;
 
 	SparseMatrixTreePairscd hMatSets_;
+
+	WorkMemorycd mem_;
 
 	CDVR cdvr_;
 };

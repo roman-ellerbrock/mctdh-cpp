@@ -8,6 +8,7 @@
 #include "TreeShape/TreeFactory.h"
 #include "Hamiltonians.h"
 #include "Core/Eigenstates.h"
+#include "Utility/Overlaps.h"
 
 namespace parser {
 
@@ -272,10 +273,10 @@ namespace parser {
 		auto bs = evaluate<double>(node, "bs", 1e-5);
 		auto file_in = evaluate<string>(node, "file_in", "in.dat");
 		auto file_out = evaluate<string>(node, "file_out", "out.dat");
-		auto save = evaluate<bool>(node, "save_psi", true);
+		auto append = evaluate<bool>(node, "append", true);
 		IntegratorVariables ivar(t, t_end, dt, out, cmf, bs,
 			state.wavefunctions_["Psi"], *state.hamiltonian_,
-			state.tree_, state.cdvrtree_, file_out, file_in, false);
+			state.tree_, state.cdvrtree_, file_out, file_in, append);
 		return ivar;
 	}
 
@@ -291,12 +292,14 @@ namespace parser {
 	mctdh_state run(const string& yaml_filename) {
 		YAML::Node config = YAML::LoadFile(yaml_filename);
 		mctdh_state state;
+
 		for (const auto& node : config["run"]) {
 			const auto& job = node["job"].as<string>();
 			if (job == "tree") {
 				state.tree_ = read_tree(node);
 				state.cdvrtree_ = state.tree_;
 //				if (state.cdvrtree_.nNodes() == 0) { state.cdvrtree_ = state.tree_; }
+
 			} else if (job == "hamiltonian") {
 				state.hamiltonian_ = read_hamiltonian(node, state.tree_);
 			} else if (job == "potential") {
@@ -317,6 +320,10 @@ namespace parser {
 				cmf.Integrate(ivar);
 			} else if (job == "cdvrtree") {
 				state.cdvrtree_ = read_tree(node);
+			} else if (job == "overlaps") {
+				auto file1 = node["bra"].as<string>();
+				auto file2 = node["ket"].as<string>();
+				wavefunctionOverlap(file1, file2, state.tree_);
 			}
 		}
 		return state;

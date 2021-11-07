@@ -24,7 +24,7 @@ public:
 		bool out = false, ostream& os = cout);
 
 //	Tensorcd Apply(Tensorcd Phi, const Matrixcd& invsq_rho, const Node& node) const;
-	Tensorcd Apply(Tensorcd Phi, const SpectralDecompositioncd& rho_x, const Node& node) const;
+	Tensorcd apply(Tensorcd Phi, const SpectralDecompositioncd& rho_x, const Node& node) const;
 
 	TDDVR tddvr_;
 
@@ -38,6 +38,8 @@ private:
 	TensorTreecd Cdown_;
 
 	Tree ltree_;
+
+	WorkMemorycd mem_;
 };
 
 #endif //CDVR_H
