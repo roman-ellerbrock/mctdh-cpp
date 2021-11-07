@@ -46,8 +46,8 @@ private:
 	void EdgeTransformation(Matrixcd& B_inv, const Edge& edge, bool inverse) const;
 	void EdgeTransformation(MatrixTreecd& B_inv, const Tree& tree, bool inverse) const;
 
-	void GridTransformation(Wavefunction& Psi, const Tree& tree, bool inverse = false) const;
-	void GridTransformationLocal(Tensorcd& Phi, const Node& node, bool inverse = false) const;
+//	void GridTransformation(Wavefunction& Psi, const Tree& tree, bool inverse = false) const;
+//	void GridTransformationLocal(Tensorcd& Phi, const Node& node, bool inverse = false) const;
 
 	MatrixTreecd rho_;
 	WorkMemorycd mem_;

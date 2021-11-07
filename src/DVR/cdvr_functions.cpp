@@ -183,21 +183,19 @@ namespace cdvr_functions {
 		size_t dim = Phi.shape()[k];
 
 //		Matrixcd X = contractionBLAS(C, Phi, k);
-		Matrixcd X(dim, dim);
-		contractionBLAS(X, mem.work1_, mem.work2_, C, Phi, k);
-		assert(X.dim1() == dim);
-		assert(X.dim2() == dim);
+		Matrixcd x(dim, dim);
+		contractionBLAS(x, mem.work1_, mem.work2_, C, Phi, k);
 
 		/// II: apply DeltaV
-		Matrixcd Y(dim, dim);
+		Matrixcd y(dim, dim);
 		for (size_t L = 0; L < shape.totalDimension(); ++L) {
 			const auto l = indexMapping(L, shape);
-			Y(l[0], l[1]) += deltaV(L) * X(l[3], l[2]);
+			y(l[0], l[1]) += deltaV(L) * x(l[3], l[2]);
 		}
 
 		/// III: M * C
-//		return matrixTensorBLAS(Y, C, k);
-		matrixTensorBLAS(VPhi, mem.work1_, Y, C, k, false);
+//		VPhi += matrixTensorBLAS(Y, C, k);
+		matrixTensorBLAS(VPhi, mem.work1_, y, C, k, false);
 	}
 
 	void apply(Tensorcd& VXi, const Tensorcd& Xi, const Tensorcd& V,
@@ -210,13 +208,10 @@ namespace cdvr_functions {
 		if (!node.isBottomlayer()) {
 			for (size_t k = 0; k < node.nChildren(); ++k) {
 				const Node& child = node.child(k);
-//				Tensorcd DeltaXi = ApplyCorrection(Xi, Cdown[child], deltaVs[child], child, mem);
-//				VXi += DeltaXi;
+				/// VXi += deltaV_k
 				applyCorrection(VXi, Xi, Cdown[child], deltaVs[child], child, mem);
 			}
 		}
-
-//		return VXi;
 	}
 
 /*	TensorTreecd Apply(const Wavefunction& Psi, const TensorTreecd& Cdown,

@@ -8,20 +8,19 @@ Tensorcd Apply(const Hamiltonian& H, const Tensorcd& Phi,
 	const Node& node) {
 
 	Tensorcd dPhi(Phi.shape());
-	Tensorcd Psi(Phi.shape());
+	Tensorcd Psi(Phi.shape(), &(hRep.mem_.work3_[0]), false, true);
 	for (size_t l = 0; l < H.size(); l++) {
 		const auto& hmat = hRep.hMats_[l];
 		if (!hmat.isActive(node)) { continue; }
-		for (size_t i = 0; i < Psi.shape().totalDimension(); ++i) {
-			Psi[i] = H.coeff(l) * Phi[i];
-		}
 
-//		Psi = H.Coeff(l) * Phi;
-//		Tensorcd Psi(Phi, H.Coeff(l));
-		Psi = TreeFunctions::apply(hmat, Psi, H[l], node);
+		const SparseMatrixTreecd* hole = nullptr;
+		const MatrixTreecd* rho = nullptr;
+		const SparseTree& stree = hmat.sparseTree();
+		TreeFunctions::apply(Psi, hmat, hole, rho, Phi, stree, node, node.parentIdx(), &hRep.mem_.work1_);
+		Psi *= H.coeff(l);
 
-		// Multiply with hole-matrix
 		const auto& hhole = hRep.hContractions_[l];
+		// Multiply with hole-matrix
 		if (!node.isToplayer() && hhole.isActive(node)) {
 			multStateAB(dPhi, hhole[node], Psi, false);
 		} else {

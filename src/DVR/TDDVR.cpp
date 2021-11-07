@@ -113,59 +113,36 @@ void TDDVR::Update(const Wavefunction& Psi, const Tree& tree) {
 	UpdateGrids(hole_grids_, hole_trafo_, Xs_.holes_, &rho_, tree);
 }
 
-void TDDVR::GridTransformationLocal(Tensorcd& Phi, const Node& node, bool inverse) const {
-
-	/// Transform underlying A-coefficient
-	for (size_t k = 0; k < node.nChildren(); ++k) {
-		const Node& child = node.child(k);
-		if (!inverse) {
-			Phi = matrixTensorBLAS(trafo_[child], Phi, k);
-		} else {
-			Phi = matrixTensorBLAS(trafo_[child].adjoint(), Phi, k);
-		}
-	}
-
-	/// Transform state
-	if (!inverse) {
-//		Phi = tensorMatrix(Phi, hole_trafo_[node], node.parentIdx());
-		Phi = matrixTensorBLAS(hole_trafo_[node].transpose(), Phi, node.parentIdx());
-	} else {
-//		Phi = tensorMatrix(Phi, hole_trafo_[node].adjoint(), node.parentIdx());
-		Phi = matrixTensorBLAS(hole_trafo_[node].adjoint().transpose(), Phi, node.parentIdx());
-	}
-}
-
-void TDDVR::GridTransformation(Wavefunction& Psi, const Tree& tree, bool inverse) const {
-	for (const Node& node : tree) {
-		GridTransformationLocal(Psi[node], node, inverse);
-	}
-}
-
 void TDDVR::NodeTransformation(Tensorcd& Phi, const Node& node, bool inverse) const {
 
+	/// @TODO: make in/out independent
 	/// Transform underlying A-coefficient
 	if (!node.isBottomlayer()) {
 		for (size_t k = 0; k < node.nChildren(); ++k) {
 			const Node& child = node.child(k);
+			Tensorcd Xi(Phi.shape(), &(mem_.work1_[0]), false, false);
 			if (!inverse) {
-				matrixTensorBLAS(mem_.work2_, mem_.work1_, trafo_[child], Phi, k);
-				Phi = mem_.work2_;
 //				Phi = matrixTensorBLAS(trafo_[child], Phi, k);
+				matrixTensorBLAS(Xi, mem_.work2_, trafo_[child], Phi, k, true);
 			} else {
 //				Phi = matrixTensorBLAS(trafo_[child].adjoint(), Phi, k);
-				matrixTensorBLAS(mem_.work2_, mem_.work1_, trafo_[child].adjoint(), Phi, k);
-				Phi = mem_.work2_;
+				matrixTensorBLAS(Xi, mem_.work2_, trafo_[child].adjoint(), Phi, k, true);
 			}
+			Phi = Xi;
 		}
 	}
 
 	/// Transform state
 	if (!node.isToplayer()) {
+		Tensorcd Xi(Phi.shape(), &(mem_.work1_[0]), false, false);
 		if (!inverse) {
-			Phi = matrixTensorBLAS(hole_trafo_[node], Phi, node.nChildren());
+//			Phi = matrixTensorBLAS(hole_trafo_[node], Phi, node.nChildren());
+			matrixTensorBLAS(Xi, mem_.work2_, hole_trafo_[node], Phi, node.parentIdx(), true);
 		} else {
-			Phi = matrixTensorBLAS(hole_trafo_[node].adjoint(), Phi, node.nChildren());
+//			Phi = matrixTensorBLAS(hole_trafo_[node].adjoint(), Phi, node.nChildren());
+			matrixTensorBLAS(Xi, mem_.work2_, hole_trafo_[node].adjoint(), Phi, node.parentIdx(), true);
 		}
+		Phi = Xi;
 	}
 }
 
@@ -232,6 +209,34 @@ void TDDVR::print(const Tree& tree) const {
 	}
 }
 
+
+/*void TDDVR::GridTransformationLocal(Tensorcd& Phi, const Node& node, bool inverse) const {
+
+	/// Transform underlying A-coefficient
+	for (size_t k = 0; k < node.nChildren(); ++k) {
+		const Node& child = node.child(k);
+		if (!inverse) {
+			Phi = matrixTensorBLAS(trafo_[child], Phi, k);
+		} else {
+			Phi = matrixTensorBLAS(trafo_[child].adjoint(), Phi, k);
+		}
+	}
+
+	/// Transform state
+	if (!inverse) {
+//		Phi = tensorMatrix(Phi, hole_trafo_[node], node.parentIdx());
+		Phi = matrixTensorBLAS(hole_trafo_[node].transpose(), Phi, node.parentIdx());
+	} else {
+//		Phi = tensorMatrix(Phi, hole_trafo_[node].adjoint(), node.parentIdx());
+		Phi = matrixTensorBLAS(hole_trafo_[node].adjoint().transpose(), Phi, node.parentIdx());
+	}
+}*/
+
+/*void TDDVR::GridTransformation(Wavefunction& Psi, const Tree& tree, bool inverse) const {
+	for (const Node& node : tree) {
+		GridTransformationLocal(Psi[node], node, inverse);
+	}
+}*/
 
 
 
