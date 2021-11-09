@@ -238,7 +238,9 @@ namespace parser {
             auto filename = evaluate<string>(node, "filename");
 			Wavefunction Psi(state.tree_);
 			ifstream is(filename);
-			Psi.read(is);
+			while(is.peek() != EOF) { /// read last wavefunction
+				Psi.read(is);
+			}
 			state.wavefunctions_[name] = Psi;
 			is.close();
 		} else if (type == "create") {

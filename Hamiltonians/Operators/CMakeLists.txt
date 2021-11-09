@@ -13,8 +13,8 @@ add_library(Operators Operators.h
         CH3_meanfield/CH3_meanfield.cpp
         CH3_meanfield/CH3_meanfield.h
 
-#        CH3_quasiexact/CH3_quasiexact.f
-        CH3_quasiexact/CH3_quasiexact.wrong.f
+        CH3_quasiexact/CH3_quasiexact.f
+#        CH3_quasiexact/CH3_quasiexact.wrong.f
         CH3_quasiexact/CH3_quasiexact.cpp
         CH3_quasiexact/CH3_quasiexact.h
         CH3_quasiexact/TrafoCH3Quasiexact.cpp

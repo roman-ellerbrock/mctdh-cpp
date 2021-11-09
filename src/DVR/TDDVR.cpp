@@ -59,6 +59,10 @@ void shift(vector<Vectord>& xs, const vector<double>& shift) {
 	}
 }
 
+void LayerGridSingle() {
+
+}
+
 void LayerGrid(TreeGrids& grids, Matrixcd& trafo,
 	const vector<SparseMatrixTreecd>& Xs,
 	const Matrixcd *w_ptr, const Node& node) {
