@@ -182,9 +182,9 @@ namespace cdvr_functions {
 		assert(C.shape().totalDimension() == Phi.shape().totalDimension());
 		size_t dim = Phi.shape()[k];
 
-//		Matrixcd X = contractionBLAS(C, Phi, k);
-		Matrixcd x(dim, dim);
-		contractionBLAS(x, mem.work1_, mem.work2_, C, Phi, k);
+		Matrixcd x = contractionBLAS(C, Phi, k);
+//		Matrixcd x(dim, dim);
+//		contractionBLAS(x, mem.work1_, mem.work2_, C, Phi, k);
 
 		/// II: apply DeltaV
 		Matrixcd y(dim, dim);
@@ -194,8 +194,8 @@ namespace cdvr_functions {
 		}
 
 		/// III: M * C
-//		VPhi += matrixTensorBLAS(Y, C, k);
-		matrixTensorBLAS(VPhi, mem.work1_, y, C, k, false);
+		VPhi += matrixTensorBLAS(y, C, k);
+//		matrixTensorBLAS(VPhi, mem.work1_, y, C, k, false);
 	}
 
 	void apply(Tensorcd& VXi, const Tensorcd& Xi, const Tensorcd& V,

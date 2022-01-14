@@ -13,6 +13,10 @@
 #include "DVR/CDVR.h"
 #include "DVR/MatrixTensorTreeFunctions.h"
 
+#include "TreeShape/LeafTypes/HO_Basis.h"
+#include "TreeShape/LeafTypes/FFTGrid.h"
+#include "TreeShape/LeafTypes/LegendrePolynomials.h"
+
 class HamiltonianRepresentation {
 public:
 	HamiltonianRepresentation(const Hamiltonian& H, const Tree& tree,
@@ -41,6 +45,7 @@ public:
 	~HamiltonianRepresentation() = default;
 
 	void build(const Hamiltonian& H, const Wavefunction& Psi, const Tree& tree) {
+
 		/// Calculate density matrix tree
 		TreeFunctions::contraction(rho_, Psi, tree, true);
 
@@ -48,7 +53,7 @@ public:
 		rho_decomposition_.calculate(rho_, tree);
 
 		/// Calculate inverse density matrix tree
-		rho_inverse_ = rho_decomposition_.invert(tree);
+		rho_inverse_ = rho_decomposition_.invert(tree, 1e-10);
 //		rho_inverse_ = inverse(rho_, tree);
 
 		/// Calculate h-matrix trees

@@ -3,6 +3,7 @@
 #include "PhysicalSystems/StandardOperatorLibrary.h"
 #include "PhysicalSystems/SpinBoson.h"
 #include "Molecules/NOCl.h"
+#include "NDI/NDIHamiltonian.h"
 #include "CH3_meanfield/CH3_meanfield.h"
 #include "CH3_quasiexact/TrafoCH3Quasiexact.h"
 #include "CH3_quasiexact/CH3_quasiexact.h"

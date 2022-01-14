@@ -9,6 +9,7 @@ vector<TensorTreecd> readTensorTrees(const string& file1) {
 	ifstream is(file1);
 	vector<TensorTreecd> psi;
 	int i = 0;
+	cout << "reading: " << file1 << endl;
 	while (!is.eof()) {
 		psi.emplace_back(TensorTreecd(is));
 		cout << i++ << endl;
@@ -47,7 +48,7 @@ void wavefunctionOverlap(const vector<TensorTreecd>& Psi,
 			}
 			break;
 		case diagonal:
-			cout << fixed << setprecision(8);
+			cout << fixed << setprecision(20);
 			for (size_t i = 0; i < Psi.size(); ++i) {
 				MatrixTreecd S(tree);
 				for (const Node& node : tree) {
@@ -57,7 +58,10 @@ void wavefunctionOverlap(const vector<TensorTreecd>& Psi,
 				}
 				TreeFunctions::dotProduct(S, Psi[i], Chi[i], tree);
 				auto& s = S[top];
-				cout << i << "\t" << pow(abs(s(0, 0)), 2) << "\t" << real(s(0,0)) << "\n";
+				cout << i << "\t";
+				for (size_t n = 0; n < s.dim1(); ++n) {
+					cout << pow(abs(s(n, n)), 2) << "\t" << real(s(n,n)) << "\n";
+				}
 			}
 			break;
 	}

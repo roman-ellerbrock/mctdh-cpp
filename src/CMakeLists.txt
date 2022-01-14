@@ -22,6 +22,7 @@ target_sources(mctdh_lib PUBLIC
         Core/HamiltonianRepresentation.cpp
         Core/HamiltonianRepresentation.h
         Core/Wavefunction.h
+        Core/Wavefunction.cpp
 
         DVR/MatrixTensorTree.cpp
         DVR/MatrixTensorTree.h

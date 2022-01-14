@@ -134,6 +134,8 @@ namespace parser {
 			H = Operator::CH3_meanfield();
 		} else if (name == "exciton") {
 			H = Operator::Exciton("matrix.out", tree);
+		} else if (name == "ndi") {
+			H = Operator::ndi();
 		} else if (name == "ch3_quasiexact") {
 			CH3_quasiexact Hch3(tree);
 			H = Hch3;
@@ -245,7 +247,9 @@ namespace parser {
 			is.close();
 		} else if (type == "create") {
 			bool Hartree = evaluate<bool>(node, "Hartree", true);
-			state.wavefunctions_[name] = Wavefunction(state.rng_, state.tree_, Hartree);
+			Wavefunction Psi(state.rng_, state.tree_, Hartree);
+			occupyCIS(Psi, state.tree_);
+			state.wavefunctions_[name] = Psi;
 		} else if (type == "save") {
 		    if(evaluate<string>(node, "filename").empty()){
 		        cerr << "supply filename to save and read directive" << endl;

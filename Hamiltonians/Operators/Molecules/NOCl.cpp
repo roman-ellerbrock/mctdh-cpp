@@ -11,9 +11,15 @@ namespace Operator {
 		const double mN = 14.0 * mh;
 		const double mCl = 35.403 * mh;
 		const double mO = 16.0 * mh;
-		const double muv = 1. / mN + 1. / mO;
-		const double mud = 1. / (mN + mO) + 1. / mCl;
+//		const double muv = 1. / mN + 1. / mO;
+//		const double mud = 1. / (mN + mO) + 1. / mCl;
+		const double muv = 1./13615.5;
+		const double mud = 1./29456.5;
 
+//		cout << "muv: " << 1./muv << endl;
+//		cout << "mud: " << 1./mud << endl;
+//		cout << "muN: " << 1./mN << endl;
+//		getchar();
 		// equilibrium geometry
 		const double alpha = 1.5;
 		const double rde = 4.315;
@@ -59,8 +65,14 @@ namespace Operator {
 		const double mN = 14.0 * mh;
 		const double mCl = 35.403 * mh;
 		const double mO = 16.0 * mh;
-		const double muv = 1. / mN + 1. / mO;
-		const double mud = 1. / (mN + mO) + 1. / mCl;
+//		const double muv = 1. / mN + 1. / mO;
+//		const double mud = 1. / (mN + mO) + 1. / mCl;
+		const double muv = 1./13615.5;
+		const double mud = 1./29456.5;
+//		cout << "muv: " << 1./muv << endl;
+//		cout << "mud: " << 1./mud << endl;
+//		cout << "muN: " << mN << endl;
+//		getchar();
 		// equilibriu geometrys
 		const double rve = 2.136;
 		for (int i = 0; i < Acoeffs.shape().lastBefore(); i++) {
@@ -628,8 +640,10 @@ namespace Operator {
 		const double mN = 14.0 * mh;
 		const double mCl = 35.403 * mh;
 		const double mO = 16.0 * mh;
-		const double muv = 1. / mN + 1. / mO;
-		const double mud = 1. / (mN + mO) + 1. / mCl;
+//		const double muv = 1. / mN + 1. / mO;
+//		const double mud = 1. / (mN + mO) + 1. / mCl;
+		const double muv = 1./13615.5;
+		const double mud = 1./29456.5;
 		// equilibriu geometrys
 		const double rve = 2.136;
 

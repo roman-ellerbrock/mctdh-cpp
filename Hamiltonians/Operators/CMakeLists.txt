@@ -25,6 +25,9 @@ add_library(Operators Operators.h
         ElectronicStructure/JordanWigner.cpp
         ElectronicStructure/JordanWigner.h
 
+        NDI/NDIHamiltonian.cpp
+        NDI/NDIHamiltonian.h
+
         Molecules/NOCl.cpp
         Molecules/NOCl.h
 

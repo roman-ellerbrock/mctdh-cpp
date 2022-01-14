@@ -19,6 +19,9 @@ Tensorcd Applyqd(const LeafInterface& grid, const Tensorcd& Acoeffs, int exponen
 	const double mO = 16.0*mh;
 	const double muv = 1. / mN + 1. / mO;
 	const double mud = 1. / (mN + mO) + 1. / mCl;
+	cout << "muv: " << muv << endl;
+	cout << "mud: " << mud << endl;
+	cout << "muN: " << mN << endl;
 
 	// equilibrium geometry
 	const double alpha = 1.5;
@@ -66,6 +69,11 @@ Tensorcd const Applyqv(const LeafInterface& grid, const Tensorcd& Acoeffs, int e
 	const double mO = 16.0*mh;
 	const double muv = 1. / mN + 1. / mO;
 	const double mud = 1. / (mN + mO) + 1. / mCl;
+	cout << "muv: " << muv << endl;
+	cout << "mud: " << mud << endl;
+	cout << "muN: " << mN << endl;
+
+	getchar();
 	// equilibriu geometrys
 	const double rve = 2.136;
 	for (int i = 0; i < Acoeffs.shape().lastBefore(); i++) {

@@ -59,35 +59,39 @@ void shift(vector<Vectord>& xs, const vector<double>& shift) {
 	}
 }
 
-void LayerGridSingle() {
-
-}
-
 void LayerGrid(TreeGrids& grids, Matrixcd& trafo,
 	const vector<SparseMatrixTreecd>& Xs,
 	const Matrixcd *w_ptr, const Node& node) {
 	assert(grids.size() == Xs.size());
 	auto xs = getXs(Xs, node);
-	Matrixcd w;
-	if (w_ptr != nullptr) {
-		w = *w_ptr;
-		w = regularize(w, 1e-9);
-	} else {
-		w = identityMatrix<complex<double>>(trafo.dim1());
-	}
-
 	assert(!xs.empty());
 
-	auto shifts = calculateShift(xs, w);
+	if (xs.size() == 1) {
+		SpectralDecompositioncd diags = diagonalize(xs.front());
+		trafo = diags.first;
+		trafo = trafo.adjoint();
+		setGrids(grids, {diags.second}, node);
+	} else {
 
-	shift(xs, shifts);
+		Matrixcd w;
+		if (w_ptr != nullptr) {
+			w = *w_ptr;
+			w = regularize(w, 1e-9);
+		} else {
+			w = identityMatrix<complex<double>>(trafo.dim1());
+		}
 
-	auto diags = WeightedSimultaneousDiagonalization::calculate(xs, w, 1e-10);
+		auto shifts = calculateShift(xs, w);
 
-	shift(diags.second, shifts);
-	setGrids(grids, diags.second, node);
-	trafo = diags.first;
-	trafo = trafo.adjoint();
+		shift(xs, shifts);
+
+		auto diags = WeightedSimultaneousDiagonalization::calculate(xs, w, 1e-10);
+
+		shift(diags.second, shifts);
+		setGrids(grids, diags.second, node);
+		trafo = diags.first;
+		trafo = trafo.adjoint();
+	}
 }
 
 void UpdateGrids(TreeGrids& grids, MatrixTreecd& trafo, const vector<SparseMatrixTreecd>& Xs,
@@ -124,29 +128,30 @@ void TDDVR::NodeTransformation(Tensorcd& Phi, const Node& node, bool inverse) co
 	if (!node.isBottomlayer()) {
 		for (size_t k = 0; k < node.nChildren(); ++k) {
 			const Node& child = node.child(k);
-			Tensorcd Xi(Phi.shape(), &(mem_.work1_[0]), false, false);
+//			Tensorcd Xi(Phi.shape(), &(mem_.work1_[0]), false, false);
 			if (!inverse) {
-//				Phi = matrixTensorBLAS(trafo_[child], Phi, k);
-				matrixTensorBLAS(Xi, mem_.work2_, trafo_[child], Phi, k, true);
+				Phi = matrixTensorBLAS(trafo_[child], Phi, k);
+//				matrixTensorBLAS(Xi, mem_.work2_, trafo_[child], Phi, k, true);
 			} else {
-//				Phi = matrixTensorBLAS(trafo_[child].adjoint(), Phi, k);
-				matrixTensorBLAS(Xi, mem_.work2_, trafo_[child].adjoint(), Phi, k, true);
+				Phi = matrixTensorBLAS(trafo_[child].adjoint(), Phi, k);
+//				matrixTensorBLAS(Xi, mem_.work2_, trafo_[child].adjoint(), Phi, k, true);
 			}
-			Phi = Xi;
+//			Phi = Xi;
 		}
 	}
 
 	/// Transform state
 	if (!node.isToplayer()) {
-		Tensorcd Xi(Phi.shape(), &(mem_.work1_[0]), false, false);
+//		Tensorcd Xi(Phi.shape(), &(mem_.work1_[0]), false, false);
 		if (!inverse) {
-//			Phi = matrixTensorBLAS(hole_trafo_[node], Phi, node.nChildren());
-			matrixTensorBLAS(Xi, mem_.work2_, hole_trafo_[node], Phi, node.parentIdx(), true);
+			Phi = matrixTensorBLAS(hole_trafo_[node], Phi, node.nChildren());
+//			Xi.shape().print();
+//			matrixTensorBLAS(Xi, mem_.work2_, hole_trafo_[node], Phi, node.parentIdx(), true);
 		} else {
-//			Phi = matrixTensorBLAS(hole_trafo_[node].adjoint(), Phi, node.nChildren());
-			matrixTensorBLAS(Xi, mem_.work2_, hole_trafo_[node].adjoint(), Phi, node.parentIdx(), true);
+			Phi = matrixTensorBLAS(hole_trafo_[node].adjoint(), Phi, node.nChildren());
+//			matrixTensorBLAS(Xi, mem_.work2_, hole_trafo_[node].adjoint(), Phi, node.parentIdx(), true);
 		}
-		Phi = Xi;
+//		Phi = Xi;
 	}
 }
 

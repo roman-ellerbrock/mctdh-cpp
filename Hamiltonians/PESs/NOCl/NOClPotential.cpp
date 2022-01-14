@@ -13,12 +13,19 @@ double NOClPotential::evaluate(const Vectord& Xv, size_t part) const {
 
 double NOClPotential::evaluateGS(const Vectord& Xv, size_t part) const {
 	const double mh = 1836.;
-	const double mN = 14.0 * mh;
+//	const double mN = 14.0 * mh;
 	const double mCl = 35.403 * mh;
 	const double mO = 16.0 * mh;
 
-	const double mud = 1. / (mN + mO) + 1. / mCl;
-	const double muv = 1. / mN + 1. / mO;
+//	const double mud = 1. / (mN + mO) + 1. / mCl;
+//	const double muv = 1. / mN + 1. / mO;
+	const double mN = 25529.;
+	const double muv = 1./13615.5;
+	const double mud = 1./29456.5;
+//	cout << "muv: " << 1./muv << endl;
+//	cout << "mud: " << 1./mud << endl;
+//	cout << "muN: " << mN << endl;
+//	getchar();
 
 	const double smuv = sqrt(1. / muv);
 	const double smud = sqrt(1. / mud);
@@ -60,11 +67,15 @@ double NOClPotential::evaluateGS(const Vectord& Xv, size_t part) const {
 double NOClPotential::evaluateS1(const Vectord& Xv, size_t part) const {
 
 	// mu stuff
-	const double mh = 1836.;
-	const double mN = 14.0 * mh;
-	const double mCl = 35.403 * mh;
-	const double mO = 16.0 * mh;
-	const double mud = 1. / (mN + mO) + 1. / mCl;
+//	const double mh = 1836.;
+//	const double mN = 14.0 * mh;
+//	const double mCl = 35.403 * mh;
+//	const double mO = 16.0 * mh;
+//	const double mud = 1. / (mN + mO) + 1. / mCl;
+//	const double smud = sqrt(1. / mud);
+	const double mN = 25529.;
+	const double muv = 1./13615.5;
+	const double mud = 1./29456.5;
 	const double smud = sqrt(1. / mud);
 
 	// Dissociation coordinate
@@ -77,7 +88,7 @@ double NOClPotential::evaluateS1(const Vectord& Xv, size_t part) const {
 	*/
 
 	// Vibration coordinate
-	const double muv = 1. / mN + 1. / mO;
+//	const double muv = 1. / mN + 1. / mO;
 	const double smuv = sqrt(1. / muv);
 
 	// Dissociation coordinate

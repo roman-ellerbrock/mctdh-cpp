@@ -8,4 +8,6 @@
 
 typedef TensorTreecd Wavefunction;
 
+void occupyCIS(TensorTreecd& Psi, const Tree& tree);
+
 #endif //WAVEFUNCTION_H

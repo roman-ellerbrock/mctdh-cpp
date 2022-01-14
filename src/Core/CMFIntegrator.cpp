@@ -41,7 +41,7 @@ void CMFIntegrator::Integrate(IntegratorVariables& job, ostream& os) {
 	Wavefunction& Psi = *job.psi;
 	const Hamiltonian& H = *job.h;
 
-	Psi.write(job.ofname);
+	Psi.write(job.ofname, job.append_);
 
 	// Reinitiate initia; steps
 	double timepart = 0.25;
@@ -166,6 +166,8 @@ void CMFIntegrator::Integrate(IntegratorVariables& job, ostream& os) {
 	cout << "Time in CMF-Integrator: " << time_tot / 1000000. << " s\n";
 	cout << "Matrix calculation:     " << mattime.count() / time_tot * 100. << " %\n";
 	cout << "Integration:            " << steptime.count() / time_tot * 100. << " %\n" << endl;
+//	cout << "Psi:\n";
+//	Psi.print(tree);
 
 	job.dt = dt;
 }
@@ -183,6 +185,7 @@ void CMFIntegrator::CMFstep(Wavefunction& Psi, double time, double timeend,
 	constexpr bool eom_spf = true;
 	// Integrate on every layer_ with constant matrices
 	for (const Node& node : tree) {
+//		if (node.isToplayer() || node.isBottomlayer()) {
 		if (node.isToplayer() || eom_spf) {
 			LayerInterface I = interfaces_[node.address()];
 			bs_integrator& layer_bs = bs_integrators_[node.address()];
@@ -195,8 +198,7 @@ void CMFIntegrator::CMFstep(Wavefunction& Psi, double time, double timeend,
 	orthogonal(Psi, tree);
 }
 
-double
-CMFIntegrator::Error(const Wavefunction& Psi, const Wavefunction& Chi,
+double CMFIntegrator::Error(const Wavefunction& Psi, const Wavefunction& Chi,
 	const MatrixTreecd& rho, const Tree& tree) const {
 	function<double(const LayerInterface&, const Tensorcd&, const Tensorcd&)>
 		Delta = &LayerInterface::Error;
