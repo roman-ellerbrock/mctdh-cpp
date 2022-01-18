@@ -26,7 +26,7 @@ namespace Operator {
 		}
 	}
 
-	void readLineMPO(SOPcd& S, string line, size_t nprod) {
+	void readLineMPO(SOPcd& S, string line, size_t nprod, size_t nFragments) {
 		std::replace(line.begin(), line.end(), '*', ' ');
 		stringstream ss(line);
 
@@ -48,7 +48,8 @@ namespace Operator {
 		}
 		for (size_t i = 0; i < nprod; ++i) {
 //			if (M.mode(i) >= 13) {
-			if (M.mode(i) >= 52) {
+//			if (M.mode(i) >= 52) {
+			if (M.mode(i) >= nFragments) {
 				cout << endl;
 				return;
 			}
@@ -60,6 +61,8 @@ namespace Operator {
 	SOPcd ndi() {
 		string filename = "pauli_52q.txt";
 		ifstream file(filename);
+		size_t nFragments = 52; // number of active fragments
+
 		size_t n_single = 104;
 		size_t n_double = 208;
 		size_t nline = 1 + n_single + n_double;
@@ -69,14 +72,24 @@ namespace Operator {
 		/// read & ignore energy shift
 		getline(file, line);
 
+		/// Energy shift
+		MLOcd I;
+		for (size_t n = 0; n < nFragments; ++n) {
+			I.push_back(identityMatrixcd(2), n);
+			double shift = 8.56655 / 52.;
+			S.push_back(I, shift);
+		}
+
 		for (size_t i = 0; i < n_single; ++i) {
 			getline(file, line);
-			readLineMPO(S, line, 1);
+			readLineMPO(S, line, 1, nFragments);
 		}
+
 		for (size_t i = 0; i < n_double; ++i) {
 			getline(file, line);
-			readLineMPO(S, line, 2);
+			readLineMPO(S, line, 2, nFragments);
 		}
+
 		cout << "S.size() = " << S.size() << endl;
 		return S;
 	}

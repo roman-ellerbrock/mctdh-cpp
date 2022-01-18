@@ -3,7 +3,7 @@
 //
 #include "Wavefunction.h"
 
-void occupySingles(Tensorcd& A, size_t& n) {
+void occupySingles(Tensorcd& A, size_t& n, const Node& node) {
 	const TensorShape& shape = A.shape();
 
 	// only do singles, if all fit in!
@@ -19,10 +19,6 @@ void occupySingles(Tensorcd& A, size_t& n) {
 			vector<size_t> idx(shape.order(), 0);
 			idx[i] = m;
 			idx[shape.lastIdx()] = n++;
-			for (auto x : idx) {
-				cout << x << " ";
-			}
-			cout << endl;
 			A(idx) = 1.;
 		}
 	}
@@ -41,29 +37,33 @@ void occupyRandom(Tensorcd& A, size_t& n) {
 	}
 }
 
-void occupyCIS(Tensorcd& A) {
+void occupyCIS(Tensorcd& A, const Node& node) {
 	A.zero();
 	// gs
 	size_t n = 1;
 	A(0) = 1.;
 
-	occupySingles(A, n);
+	occupySingles(A, n, node);
 	occupyRandom(A, n);
-	gramSchmidt(A);
-}
 
-void occupyCIS(TensorTreecd& Psi, const Tree& tree) {
+
 	Tensorcd spf({2, 2});
-//	spf[0] = 0.844866; // 13 Fragments
-//	spf[1] = -0.534978;
+	//	spf[0] = 0.844866; // 13 Fragments
+	//	spf[1] = -0.534978;
 	spf[0] = 0.844866;
 	spf[1] = -0.534978;
 	spf[2] = -spf[1];
 	spf[3] = spf[0];
 	gramSchmidt(spf);
+	if (node.isBottomlayer())  { A = spf; }
+
+	gramSchmidt(A);
+}
+
+void occupyCIS(TensorTreecd& Psi, const Tree& tree) {
+
 	for( const Node& node : tree) {
-		occupyCIS(Psi[node]);
-		if (node.isBottomlayer())  { Psi[node] = spf; }
+		occupyCIS(Psi[node], node);
 	}
 }
 

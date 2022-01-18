@@ -47,8 +47,7 @@ void wavefunctionOverlap(const vector<TensorTreecd>& Psi,
 				}
 			}
 			break;
-		case diagonal:
-			cout << fixed << setprecision(20);
+		case diagonal: cout << fixed << setprecision(20);
 			for (size_t i = 0; i < Psi.size(); ++i) {
 				MatrixTreecd S(tree);
 				for (const Node& node : tree) {
@@ -60,8 +59,11 @@ void wavefunctionOverlap(const vector<TensorTreecd>& Psi,
 				auto& s = S[top];
 				cout << i << "\t";
 				for (size_t n = 0; n < s.dim1(); ++n) {
-					cout << pow(abs(s(n, n)), 2) << "\t" << real(s(n,n)) << "\n";
+					cout << pow(abs(s(n, n)), 2) << "\t" << real(s(n, n)) << "\n";
 				}
+				auto I = identityMatrixcd(s.dim1());
+				auto delta = I - s;
+				cout << "tr((I-S)^2) = " << delta.frobeniusNorm() / ((double) sqrt(s.dim2())) << endl;
 			}
 			break;
 	}
