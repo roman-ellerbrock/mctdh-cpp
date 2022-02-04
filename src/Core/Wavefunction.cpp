@@ -47,7 +47,7 @@ void occupyCIS(Tensorcd& A, const Node& node) {
 	occupyRandom(A, n);
 
 
-	Tensorcd spf({2, 2});
+/*	Tensorcd spf({2, 2});
 	//	spf[0] = 0.844866; // 13 Fragments
 	//	spf[1] = -0.534978;
 	spf[0] = 0.844866;
@@ -55,7 +55,7 @@ void occupyCIS(Tensorcd& A, const Node& node) {
 	spf[2] = -spf[1];
 	spf[3] = spf[0];
 	gramSchmidt(spf);
-	if (node.isBottomlayer())  { A = spf; }
+	if (node.isBottomlayer())  { A = spf; }*/
 
 	gramSchmidt(A);
 }
@@ -63,7 +63,9 @@ void occupyCIS(Tensorcd& A, const Node& node) {
 void occupyCIS(TensorTreecd& Psi, const Tree& tree) {
 
 	for( const Node& node : tree) {
-		occupyCIS(Psi[node], node);
+		if (!node.isBottomlayer()) {
+			occupyCIS(Psi[node], node);
+		}
 	}
 }
 

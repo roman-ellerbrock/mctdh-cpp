@@ -23,7 +23,7 @@ namespace JordanWigner {
 	Matrixcd sigmaZ() {
 		Matrixcd z(2, 2);
 		z(0, 0) = 1.;
-		z(1, 1) = 1.;
+		z(1, 1) = -1.;
 		return z;
 	}
 
@@ -59,7 +59,7 @@ namespace JordanWigner {
 		size_t max = p + 1;
 		if (q >= max) max = q + 1;
 
-		MLOcd A; /// A = (a_p^+) (a_q^+) (a_r) (a_s)
+		MLOcd A; /// A = (a_p^+) (a_q)
 		cout << p << " " << q << " | ";
 		for (size_t i = 0; i < max; ++i) {
 			Matrixcd op = identityMatrixcd(2);
@@ -148,6 +148,7 @@ namespace JordanWigner {
 	SOPcd electronicHamiltonian(const TwoIndex& Hpq, const FourIndex& Hpqrs) {
 		double eps = 1e-10;
 		SOPcd H;
+
 		cout << "==== Hpq =================" << endl;
 		for (const auto& hpq : Hpq) {
 			size_t p = get<0>(hpq);
@@ -171,7 +172,7 @@ namespace JordanWigner {
 			double h = get<4>(term);
 			if (abs(h) < eps) { continue; }
 
-			if (p == q || r == s) { continue; } /// always evaluates to zero due to a_p+ a_p+=0 or a_r a_r=0
+//			if (p == q || r == s) { continue; } /// always evaluates to zero due to a_p+ a_p+=0 or a_r a_r=0
 			auto M = fourIndexOperator(p, q, r, s, eps);
 			if (M.size() == 0) { continue; }
 			if (M.size() == 0) { cerr << "M empty in Hpqrs!\n"; exit(1); }

@@ -43,7 +43,15 @@ void wavefunctionOverlap(const vector<TensorTreecd>& Psi,
 					TreeFunctions::dotProduct(S, Psi[i], Chi[j], tree);
 					auto& s = S[top];
 					cout << i << "\t" << j << "\t" << pow(abs(s(0, 0)), 2) << "\t";
-					s.print();
+					for (size_t l = 0; l < s.dim1()	;++l) {
+						double x = 0.;
+						for (size_t m = 0; m < s.dim2(); ++m) {
+							x += pow(abs(s(l,m)),2);
+//							cout << real(s(l,m)) << "\t";
+						}
+						cout << x << endl;
+//						cout << endl;
+					}
 				}
 			}
 			break;

@@ -39,7 +39,7 @@ FourIndex readFourIndexIntegral(ifstream& file, size_t nOrbital) {
 		auto pos = file.tellg();
 		string peek;
 		file >> peek;
-		if (peek == "CI") { break; }
+		if (peek == "CI" || peek == "=") { break; }
 		file.seekg(pos);
 	}
 	return hpqrs;
@@ -54,8 +54,9 @@ SOPcd electronicStructure(const string& filename) {
 	string dump;
 	size_t nOrbitals = 0;
 	/// Read header, nElectrons, nOrbitals
-	file >> dump >> dump >> dump >> nOrbitals;
+	file >> dump >> dump >> dump >> dump >> nOrbitals;
 	cout << "#Electrons = " << nOrbitals << endl;
+	file >> dump >> dump >> dump >> dump >> dump;
 	file >> dump >> dump >> dump >> nOrbitals;
 	cout << "#Orbitals = " << nOrbitals << endl;
 
@@ -64,6 +65,10 @@ SOPcd electronicStructure(const string& filename) {
 	file >> dump >> dump >> dump >> E;
 	file >> dump >> dump >> dump >> Ecore;
 	cout << "E = " << E << " | E_core = " << Ecore << " | E-Ecore" << E - Ecore << endl;
+	double Esinglet = 0.;
+	file >> dump >> dump >> dump >> dump >> dump >> Esinglet;
+	cout << "E_singlet = " << Esinglet << endl;
+	cout << "E_singlet - E_core = " << Esinglet - Ecore << endl;
 
 	/// Read Hpq
 	TwoIndex hpq = readTwoIndexIntegral(file, nOrbitals);
