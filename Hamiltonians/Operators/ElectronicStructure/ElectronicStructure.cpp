@@ -78,6 +78,7 @@ SOPcd electronicStructure(const string& filename) {
 	FourIndex hpqrs = readFourIndexIntegral(file, nOrbitals);
 	cout << "#hpqrs = " << hpqrs.size() << endl;
 
+	cerr << "WARNING:\n";
 	return JordanWigner::electronicHamiltonian(hpq, hpqrs);
 }
 
@@ -97,6 +98,8 @@ Matrixd convertTwoIndex(const TwoIndex& h) {
 	return ht;
 }
 
+void tucker(Tensord h);
+
 Tensord convertFourIndex(const FourIndex& h) {
 	size_t dim = 1;
 	for (auto pqrs : h) {
@@ -112,6 +115,29 @@ Tensord convertFourIndex(const FourIndex& h) {
 		double val = get<4>(pqrs);
 		ht({p, q, r, s}) = val;
 	}
+//	tucker(ht);
 	return ht;
 }
 
+void tucker(Tensord h) {
+	for (size_t k = 0; k < h.shape().order(); ++k) {
+		auto rho = contraction(h, h, k);
+		auto xev = diagonalize(rho);
+		cout << "=== k : " << k << " ===\n";
+		xev.second.print();
+	}
+
+	Tensord g = h;
+	for (size_t I = 0; I < h.shape().totalDimension(); ++I) {
+		auto idx = indexMapping(I, h.shape());
+		swap(idx[1], idx[2]);
+		h(idx) = g(I);
+	}
+	size_t n = h.shape()[0];
+	TensorShape shape({n*n, n*n});
+	h.reshape(shape);
+	auto rho = contraction(h, h, 0);
+	auto xev = diagonalize(rho);
+	xev.second.print();
+	getchar();
+}

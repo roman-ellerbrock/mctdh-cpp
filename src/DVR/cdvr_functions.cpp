@@ -64,6 +64,108 @@ namespace cdvr_functions {
 		fillX(X, idx.back(), holegrids, node);
 	}
 
+	Tensorcd buildE(const Tensorcd& subDeltaV,
+		const Tensorcd& D, const Node& node, size_t k) {
+
+		const TensorShape& shape = node.shape();
+		size_t dimc = shape[k];
+		size_t dimn = shape[node.nChildren()];
+		TensorShape eshape({dimc, dimc, dimn, dimn});
+		Tensorcd E(eshape);
+/*		vector<size_t> idx(4);
+		vector<size_t> vidx(4);
+		vector<size_t> didx(4);
+		for (size_t J = 0; J < eshape.totalDimension(); ++J) {
+			for (size_t l2 = 0; l2 < dimc; ++l2) {
+				for (size_t l1 = 0; l1 < dimc; ++l1) {
+					indexMapping(idx, J, eshape);
+					vidx = {idx[0], idx[1], l1, l2};
+					didx = {l2, idx[3], l1, idx[2]};
+					E(J) += subDeltaV(vidx) * D(didx);
+				}
+			}
+		}*/
+
+		size_t dimc2 = dimc * dimc;
+		size_t dimc3 = dimc * dimc * dimc;
+		// eshape = {dimc, dimc, dimn, dimn}
+		// subdeltaVshape = {dimc, dimc, dimc, dimc}
+		// dshape = {dimc, dimn, dimc, dimn}
+		for (size_t i0 = 0; i0 < dimc; ++i0) {
+			for (size_t i1 = 0; i1 < dimc; ++i1) {
+				for (size_t i2 = 0; i2 < dimn; ++i2) { // dimn
+					for (size_t i3 = 0; i3 < dimn; ++i3) { // dimn
+						for (size_t l1 = 0; l1 < dimc; ++l1) {
+							for (size_t l2 = 0; l2 < dimc; ++l2) {
+								// vidx = {idx[0], idx[1], l1, l2};
+								size_t vidx = i0 + i1 * dimc + l1 * dimc2 + l2 * dimc3;
+								// didx = {l2, idx[3], l1, idx[2]};
+								size_t didx = l2 + i3 * dimc + l1 * dimc * dimn + i2 * dimc2 * dimn;
+								// indexMapping(idx, J, eshape);
+								size_t J = i0 + i1 * dimc + i2 * dimc2 + i3 * dimc2 * dimn;
+								E(J) += subDeltaV(vidx) * D(didx);
+							}
+						}
+					}
+				}
+			}
+		}
+
+		return E;
+	}
+
+	void contractEF(Tensorcd& deltaV, const Tensorcd& E, const Tensorcd& F,
+		const Node& node, size_t k) {
+
+		const Node& child = node.child(k);
+		const TensorShape& shape = node.shape();
+		size_t dimc = shape[k];
+		const TensorShape& vshape = deltaV.shape();
+		size_t dimn = vshape[0];
+/*		node.info();
+		vshape.print();
+		cout << "dimc: " << dimc << endl;
+		cout << "F:\n";
+		F.shape().print();
+		cout << "E:\n";
+		E.shape().print();
+		getchar();*/
+/*		vector<size_t> idx(4);
+		vector<size_t> fidx(4);
+		vector<size_t> eidx(4);
+		for (size_t I = 0; I < vshape.totalDimension(); ++I) {
+			for(size_t l1 = 0; l1 < dimc; ++l1) {
+				for (size_t l2 = 0; l2 < dimc; ++l2) {
+					indexMapping(idx, I, vshape);
+					fidx = {l1, idx[0], l2, idx[1]};
+					eidx = {l1, l2, idx[2], idx[3]};
+					deltaV(I) += F(fidx) * E(eidx);
+				}
+			}
+		}*/
+		size_t dimc2 = dimc * dimc;
+		size_t dimn2 = dimn * dimn;
+		size_t dimn3 = dimn * dimn * dimn;
+		for (size_t i0 = 0; i0 < dimn; ++i0) {
+			for (size_t i1 = 0; i1 < dimn; ++i1) {
+				for (size_t i2 = 0; i2 < dimn; ++i2) {
+					for (size_t i3 = 0; i3 < dimn; ++i3) {
+						for (size_t l1 = 0; l1 < dimc; ++l1) {
+							for (size_t l2 = 0; l2 < dimc; ++l2) {
+//								size_t I = indexMapping({i0, i1, i2, i3}, vshape);
+								size_t I = i0 + i1 * dimn + i2 * dimn2 + i3 * dimn3;
+								size_t fidx = l1 + i0 * dimc + l2 * dimc * dimn + i1 * dimc2 * dimn;
+								size_t eidx = l1 + l2 * dimc + i2 * dimc2 + i3 * dimc2 * dimn;
+								deltaV(I) += F(fidx) * E(eidx);
+//								deltaV(I) += F({l1, i0, l2, i1}) * E({l1, l2, i2, i3});
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+
 	void deltaEdgeCorrection(Tensorcd& deltaV, const Tensorcd& Cup,
 		const TensorTreecd& Cdown, const DeltaVTree& DeltaVs,
 		const Node& node) {
@@ -73,38 +175,12 @@ namespace cdvr_functions {
 		for (size_t k = 0; k < node.nChildren(); ++k) {
 			const Node& child = node.child(k);
 			const Tensorcd& SubDeltaV = DeltaVs[child];
-			size_t dimc = shape[k];
-			size_t dimn = shape[node.nChildren()];
 
 			auto D = Tensor_Extension::doubleHoleContraction(Cdown[child], Cup, k, node.nChildren());
 			auto F = Tensor_Extension::doubleHoleContraction(Cup, Cdown[child], k, node.nChildren());
-
-			TensorShape eshape({dimc, dimc, dimn, dimn});
-			Tensorcd E(eshape);
-			for (size_t J = 0; J < eshape.totalDimension(); ++J) {
-				for (size_t l2 = 0; l2 < dimc; ++l2) {
-					for (size_t l1 = 0; l1 < dimc; ++l1) {
-						auto idx = indexMapping(J, eshape);
-						vector<size_t> vidx({idx[0], idx[1], l1, l2});
-						vector<size_t> didx({l2, idx[3], l1, idx[2]});
-						E(J) += SubDeltaV(vidx) * D(didx);
-					}
-				}
-			}
-
-			const TensorShape& vshape = deltaV.shape();
-			for (size_t I = 0; I < vshape.totalDimension(); ++I) {
-				for(size_t l1 = 0; l1 < dimc; ++l1) {
-					for (size_t l2 = 0; l2 < dimc; ++l2) {
-						auto idx = indexMapping(I, vshape);
-						vector<size_t> fidx({l1, idx[0], l2, idx[1]});
-						vector<size_t> eidx({l1, l2, idx[2], idx[3]});
-						deltaV(I) += F(fidx) * E(eidx);
-					}
-				}
-			}
+			Tensorcd E = buildE(SubDeltaV, D, node, k);
+			contractEF(deltaV, E, F, node, k);
 		}
-
 	}
 
 	void calculateDeltaEdgeLocal(Tensorcd& deltaV, const Tensorcd& Cup,
@@ -131,10 +207,11 @@ namespace cdvr_functions {
 		assert(deltaV.shape().totalDimension() == pow(shape.lastDimension(), 4));
 
 		deltaV.zero();
+		vector<size_t> idxs(4);
 		for (size_t l1 = 0; l1 < dim; ++l1) {
 			for (size_t i0 = 0; i0 < dim; ++i0) {
 				for (size_t m1 = 0; m1 < dim; ++m1) {
-					vector<size_t> idxs = {l1, i0, m1, i0};
+					idxs = {l1, i0, m1, i0};
 					size_t J = indexMapping(idxs, deltaV.shape());
 					for (size_t Ibef = 0; Ibef < dimbef; Ibef++) {
 						deltaV(J) += conj(Cup(Ibef, l1)) * Vnode(Ibef, i0) * Cup(Ibef, m1);
@@ -146,7 +223,7 @@ namespace cdvr_functions {
 		/// Substract Vedge from diagonal
 		for (size_t l0 = 0; l0 < dim; ++l0) {
 			for (size_t l1 = 0; l1 < dim; ++l1) {
-				vector<size_t> idxs = {l0, l1, l0, l1};
+				idxs = {l0, l1, l0, l1};
 				size_t L = indexMapping(idxs, deltaV.shape());
 				deltaV(L) -= Vedge(l0, l1);
 			}
@@ -163,7 +240,6 @@ namespace cdvr_functions {
 			if (node.isBottomlayer()) {
 				calculateDeltaEdgeLocal(deltaVs[node], Cup[node],
 					Vnodes[node], Vedges[node], node);
-
 			} else if (!node.isToplayer()) {
 				calculateDeltaEdgeLocal(deltaVs[node], Cup[node],
 					Vnodes[node], Vedges[node], node);
@@ -173,6 +249,33 @@ namespace cdvr_functions {
 		}
 	}
 
+	Matrixcd applyDeltaV(const Tensorcd& deltaV, const Matrixcd& x,
+		size_t dim) {
+
+		const TensorShape& shape = deltaV.shape();
+		Matrixcd y(dim, dim);
+//		vector<size_t> l(shape.order());
+/*		for (size_t L = 0; L < shape.totalDimension(); ++L) {
+			indexMapping(l, L, shape);
+			y(l[0], l[1]) += deltaV(L) * x(l[3], l[2]);
+		}*/
+
+		size_t dim2 = dim * dim;
+		size_t dim3 = dim * dim * dim;
+		for (size_t l0 = 0; l0 < dim; ++l0) {
+			for (size_t l1 = 0; l1 < dim; ++l1) {
+				for (size_t l2 = 0; l2 < dim; ++l2) {
+					for (size_t l3 = 0; l3 < dim; ++l3) {
+						size_t L = l0 + l1 * dim + l2 * dim2 + l3 * dim3;
+						y(l0, l1) += deltaV(L) * x(l3, l2);
+					}
+				}
+			}
+		}
+
+		return y;
+	}
+
 	void applyCorrection(Tensorcd& VPhi, const Tensorcd& Phi, const Tensorcd& C,
 		const Tensorcd& deltaV, const Node& child, const WorkMemorycd& mem) {
 
@@ -180,22 +283,14 @@ namespace cdvr_functions {
 		size_t k = child.childIdx();
 		const TensorShape& shape = deltaV.shape();
 		assert(C.shape().totalDimension() == Phi.shape().totalDimension());
-		size_t dim = Phi.shape()[k];
 
 		Matrixcd x = contractionBLAS(C, Phi, k);
-//		Matrixcd x(dim, dim);
-//		contractionBLAS(x, mem.work1_, mem.work2_, C, Phi, k);
 
 		/// II: apply DeltaV
-		Matrixcd y(dim, dim);
-		for (size_t L = 0; L < shape.totalDimension(); ++L) {
-			const auto l = indexMapping(L, shape);
-			y(l[0], l[1]) += deltaV(L) * x(l[3], l[2]);
-		}
+		Matrixcd y = applyDeltaV(deltaV, x, Phi.shape()[k]);
 
 		/// III: M * C
 		VPhi += matrixTensorBLAS(y, C, k);
-//		matrixTensorBLAS(VPhi, mem.work1_, y, C, k, false);
 	}
 
 	void apply(Tensorcd& VXi, const Tensorcd& Xi, const Tensorcd& V,

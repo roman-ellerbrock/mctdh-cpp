@@ -18,12 +18,21 @@ vector<TensorTreecd> readTensorTrees(const string& file1) {
 	return psi;
 }
 
+void adjustNOCl(vector<TensorTreecd>& Psi, const Tree& tree) {
+	for (auto& Chi : Psi) {
+		for (const Node& node : tree) {
+			Chi[node] = Chi[node].adjustDimensions(node.shape());
+		}
+	}
+}
+
 void wavefunctionOverlap(const string& file1, const string& file2,
 	const Tree& tree, OverlapType type) {
 	auto bra = readTensorTrees(file1);
 	auto ket = readTensorTrees(file2);
 	cout << "Number of wavefunctions found for bra:" << bra.size() << endl;
 	cout << "Number of wavefunctions found for ket:" << ket.size() << endl;
+	adjustNOCl(ket, tree);
 	wavefunctionOverlap(bra, ket, tree, type);
 }
 
@@ -71,7 +80,7 @@ void wavefunctionOverlap(const vector<TensorTreecd>& Psi,
 				}
 				auto I = identityMatrixcd(s.dim1());
 				auto delta = I - s;
-				cout << "tr((I-S)^2) = " << delta.frobeniusNorm() / ((double) sqrt(s.dim2())) << endl;
+//				cout << "tr((I-S)^2) = " << delta.frobeniusNorm() / ((double) sqrt(s.dim2())) << endl;
 			}
 			break;
 	}

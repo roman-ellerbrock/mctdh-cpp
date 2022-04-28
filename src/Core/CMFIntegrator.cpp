@@ -6,6 +6,8 @@
 #include <chrono>
 #include "TreeClasses/TreeIO.h"
 
+constexpr bool eom_spf = true;
+
 CMFIntegrator::CMFIntegrator(const Hamiltonian& H,
 	const Tree& tree, const Tree& cdvrtree, complex<double> phase)
 	: matrices_(H, tree, cdvrtree), tconst_(0.25), max_increase_(2.25),
@@ -62,6 +64,8 @@ void CMFIntegrator::Integrate(IntegratorVariables& job, ostream& os) {
 	calc_mat = false;
 	Output(time, Psi, Psistart, H, tree, os);
 
+	double err = 0.;
+
 	while (time + 1E-6 < timeend) {
 		// restrict timelength
 		double dtmax = min(timeend - time, t_next - time);
@@ -74,7 +78,7 @@ void CMFIntegrator::Integrate(IntegratorVariables& job, ostream& os) {
 		}
 
 		// Stepsize output
-		cout << "time= " << time << " dt=" << dt << endl;
+		cout << "time= " << time << " dt=" << dt << ", err_cmf = " << err << endl;
 
 		// t=0 based calculation
 		Wavefunction Psi0 = Psi;
@@ -128,7 +132,7 @@ void CMFIntegrator::Integrate(IntegratorVariables& job, ostream& os) {
 		steptime += duration_cast<microseconds>(t2 - t1);
 
 		// Check if step is accepted
-		double err = Error(Psi, Psi2, matrices_.rho_, tree);
+		err = Error(Psi, Psi2, matrices_.rho_, tree);
 		err *= 0.25;
 
 		// Step refused
@@ -137,9 +141,8 @@ void CMFIntegrator::Integrate(IntegratorVariables& job, ostream& os) {
 			Psi = Psi0;
 			calc_mat = true;
 			dt *= pow(accuracy_CMF / err, 1. / 3.) * 0.8;
-		} else
+		} else {
 			// step accepted
-		{
 			time += dt;
 
 			// call orthogonal
@@ -157,7 +160,7 @@ void CMFIntegrator::Integrate(IntegratorVariables& job, ostream& os) {
 			}
 
 			// Adjust the timestep
-			dt = dt * min(pow(accuracy_CMF / err, 1. / 3.), max_increase_) * 0.8;
+			dt = dt * min(pow(accuracy_CMF / err, 1. / 3.), max_increase_);
 		}
 	}
 
@@ -182,7 +185,6 @@ void CMFIntegrator::CMFstep(Wavefunction& Psi, double time, double timeend,
 	function<double(const LayerInterface&, const Tensorcd&, const Tensorcd&)> Delta =
 		&LayerInterface::Error;
 
-	constexpr bool eom_spf = true;
 	// Integrate on every layer_ with constant matrices
 	for (const Node& node : tree) {
 //		if (node.isToplayer() || node.isBottomlayer()) {
@@ -195,7 +197,7 @@ void CMFIntegrator::CMFstep(Wavefunction& Psi, double time, double timeend,
 				accuracy_leaf, ddt, Delta, I);
 		}
 	}
-	orthogonal(Psi, tree);
+//	orthogonal(Psi, tree); // @TODO: this should not be here?
 }
 
 double CMFIntegrator::Error(const Wavefunction& Psi, const Wavefunction& Chi,
@@ -208,20 +210,14 @@ double CMFIntegrator::Error(const Wavefunction& Psi, const Wavefunction& Chi,
 	/// in its current form.
 	/// @OTODO: build in a non-local error measure ||Psi-Chi||=|Psi|+|Chi|-2Re(<Psi|Chi>).
 
-	double result = 0.0;
-	double number = 0.0;
+	double err = 0.0;
 	for (const Node& node : tree) {
 		const LayerInterface& layer = interfaces_[node.address()];
-
-		const Tensorcd& Phi = Psi[node];
-		const Tensorcd& xi = Chi[node];
-
-		result += pow(Delta(layer, Phi, xi), 2);
-		number += Phi.shape().totalDimension();
+		if (node.isToplayer() || eom_spf) {
+			err += pow(Delta(layer, Psi[node], Chi[node]), 2);
+		}
 	}
-
-//	return sqrt(result / number);
-	return sqrt(result);
+	return sqrt(err);
 }
 
 void CMFIntegrator::Output(double time, const Wavefunction& Psi,

@@ -4,7 +4,12 @@
 
 #include "NDIHamiltonian.h"
 
+
 namespace Operator {
+
+	// !!! IMPORTANT !!!
+	double cutoff_acc = 1e-5;
+
 	std::string fix(const std::string& in) {
 		return std::regex_replace(
 			in,
@@ -54,17 +59,19 @@ namespace Operator {
 				return;
 			}
 		}
-		cout << " in" << endl;
-		S.push_back(M, coeff);
+		if (abs(coeff) > cutoff_acc) {
+			S.push_back(M, coeff);
+			cout << " in" << endl;
+		}
 	}
 
 	SOPcd ndi() {
-		string filename = "pauli_52q.txt";
+		string filename = "pauli_143q.txt";
 		ifstream file(filename);
-		size_t nFragments = 52; // number of active fragments
+		size_t nFragments = 143; // number of active fragments
 
-		size_t n_single = 104;
-		size_t n_double = 208;
+		size_t n_single = 286;
+		size_t n_double = 46371;
 		size_t nline = 1 + n_single + n_double;
 		SOPcd S;
 		string line;
@@ -76,7 +83,8 @@ namespace Operator {
 		MLOcd I;
 		for (size_t n = 0; n < nFragments; ++n) {
 			I.push_back(identityMatrixcd(2), n);
-			double shift = 8.56655 / 52.;
+//			double shift = 8.56655 / 52.;
+			double shift = 6.562775130472779 / (double) nFragments;
 			S.push_back(I, shift);
 		}
 

@@ -42,7 +42,9 @@ Tensorcd XMatrixTrees::Optimize(const Tensorcd& Phi, const Matrixcd& rho,
 
 	size_t n_occ = node_small.shape().lastDimension();
 
+	/// x rho x
 	auto X = BuildX(Phi, rho, mats_, node, eps_);
+	/// (1-P) x rho x ( 1-P)
 	X = UnProject(n_occ, X, Phi);
 	auto xspec = diagonalize(X);
 	auto oPhi = Occupy(Phi, xspec.first, n_occ, node);

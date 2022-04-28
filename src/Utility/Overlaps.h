@@ -11,7 +11,7 @@ enum OverlapType {
 	diagonal
 };
 
-void wavefunctionOverlap(const string& file1, const string& file2, const Tree& tree, OverlapType = full);
+void wavefunctionOverlap(const string& file1, const string& file2, const Tree& tree, OverlapType = diagonal);
 
 void wavefunctionOverlap(const vector<TensorTreecd>& Psi,
 	const vector<TensorTreecd>& Chi, const Tree& tree, OverlapType = full);

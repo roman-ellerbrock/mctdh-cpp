@@ -7,6 +7,7 @@
 #include "TreeClasses/MatrixTreeFunctions.h"
 #include "TreeClasses/SparseMatrixTreeFunctions.h"
 #include "Util/WeightedSimultaneousDiagonalization.h"
+#include "Util/SimultaneousDiagonalization.h"
 
 vector<Matrixcd> getXs(const vector<SparseMatrixTreecd>& Xs, const Node& node) {
 	vector<Matrixcd> xs;
@@ -72,7 +73,6 @@ void LayerGrid(TreeGrids& grids, Matrixcd& trafo,
 		trafo = trafo.adjoint();
 		setGrids(grids, {diags.second}, node);
 	} else {
-
 		Matrixcd w;
 		if (w_ptr != nullptr) {
 			w = *w_ptr;
@@ -82,12 +82,11 @@ void LayerGrid(TreeGrids& grids, Matrixcd& trafo,
 		}
 
 		auto shifts = calculateShift(xs, w);
-
 		shift(xs, shifts);
 
 		auto diags = WeightedSimultaneousDiagonalization::calculate(xs, w, 1e-10);
-
 		shift(diags.second, shifts);
+
 		setGrids(grids, diags.second, node);
 		trafo = diags.first;
 		trafo = trafo.adjoint();
@@ -98,7 +97,8 @@ void UpdateGrids(TreeGrids& grids, MatrixTreecd& trafo, const vector<SparseMatri
 	const MatrixTreecd *rho_ptr, const Tree& tree) {
 	for (const Node& node : tree) {
 		if (!node.isToplayer()) {
-			if ((rho_ptr == nullptr) || node.isBottomlayer()) {
+//			if ((rho_ptr == nullptr) || node.isBottomlayer()) {
+			if (rho_ptr == nullptr) {
 				LayerGrid(grids, trafo[node], Xs, nullptr, node);
 			} else {
 				LayerGrid(grids, trafo[node], Xs, &rho_ptr->operator[](node), node);

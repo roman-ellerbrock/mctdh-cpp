@@ -3,30 +3,30 @@
 //
 #include "Core/LayerInterface.h"
 
-double LayerInterface::Error(const Tensorcd& Phi, const Tensorcd& Chi)const {
+double LayerInterface::Error(const Tensorcd& Phi, const Tensorcd& Chi) const {
 	double Delta = 0;
-	if (!node_->isToplayer()) {
-		// Density weighted Error
-		const MatrixTreecd& rho = hRep_->rho_;
-		const Matrixcd& rhomat = rho[*node_];
-		double norm = real(rhomat.trace());
-		Tensorcd C = Phi - Chi;
-		C = multStateAB(rhomat, C);
-		for (size_t j = 0; j < C.shape().totalDimension(); j++)
-			Delta += pow(abs(C(j)), 2);
-		Delta /= norm;
-	} else {
-		// @TODO: Check if this is ok:
-		// Incorporating norm
-		Matrixcd S = Phi.dotProduct(Phi);
-		double norm = real(S.trace());
-		for (size_t j = 0; j < Phi.shape().totalDimension(); j++) {
-			// Primitive Error without density matrix stuff
-			Delta += pow(abs(Phi(j) - Chi(j)), 2);
+	double norm = 1.;
+	Tensorcd diff = Phi - Chi;
+
+	if (node_->isToplayer()) {
+		for (size_t i = 0; i < Phi.shape().totalDimension(); ++i) {
+			Delta += real(conj(diff(i)) * diff(i));
 		}
-		norm /= Phi.shape().lastDimension();
-		Delta /= norm;
+
+		auto S = Phi.dotProduct(Phi);
+		norm = abs(S.trace());
+
+	} else {
+		const Matrixcd& rho = hRep_->rho_[*node_];
+		for (size_t n = 0; n < Phi.shape().lastDimension(); ++n) {
+			for (size_t m = 0; m < Phi.shape().lastDimension(); ++m) {
+				for (size_t i = 0; i < Phi.shape().lastBefore(); ++i) {
+					Delta += real(conj(diff(i, n)) * rho(n, m) * diff(i, m));
+				}
+			}
+		}
+		norm = abs(rho.trace());
 	}
-	return sqrt(Delta);
+	return sqrt(abs(Delta / norm));
 }
 
