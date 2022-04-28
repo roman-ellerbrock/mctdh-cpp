@@ -72,19 +72,6 @@ namespace cdvr_functions {
 		size_t dimn = shape[node.nChildren()];
 		TensorShape eshape({dimc, dimc, dimn, dimn});
 		Tensorcd E(eshape);
-/*		vector<size_t> idx(4);
-		vector<size_t> vidx(4);
-		vector<size_t> didx(4);
-		for (size_t J = 0; J < eshape.totalDimension(); ++J) {
-			for (size_t l2 = 0; l2 < dimc; ++l2) {
-				for (size_t l1 = 0; l1 < dimc; ++l1) {
-					indexMapping(idx, J, eshape);
-					vidx = {idx[0], idx[1], l1, l2};
-					didx = {l2, idx[3], l1, idx[2]};
-					E(J) += subDeltaV(vidx) * D(didx);
-				}
-			}
-		}*/
 
 		size_t dimc2 = dimc * dimc;
 		size_t dimc3 = dimc * dimc * dimc;
@@ -122,27 +109,6 @@ namespace cdvr_functions {
 		size_t dimc = shape[k];
 		const TensorShape& vshape = deltaV.shape();
 		size_t dimn = vshape[0];
-/*		node.info();
-		vshape.print();
-		cout << "dimc: " << dimc << endl;
-		cout << "F:\n";
-		F.shape().print();
-		cout << "E:\n";
-		E.shape().print();
-		getchar();*/
-/*		vector<size_t> idx(4);
-		vector<size_t> fidx(4);
-		vector<size_t> eidx(4);
-		for (size_t I = 0; I < vshape.totalDimension(); ++I) {
-			for(size_t l1 = 0; l1 < dimc; ++l1) {
-				for (size_t l2 = 0; l2 < dimc; ++l2) {
-					indexMapping(idx, I, vshape);
-					fidx = {l1, idx[0], l2, idx[1]};
-					eidx = {l1, l2, idx[2], idx[3]};
-					deltaV(I) += F(fidx) * E(eidx);
-				}
-			}
-		}*/
 		size_t dimc2 = dimc * dimc;
 		size_t dimn2 = dimn * dimn;
 		size_t dimn3 = dimn * dimn * dimn;
@@ -254,11 +220,6 @@ namespace cdvr_functions {
 
 		const TensorShape& shape = deltaV.shape();
 		Matrixcd y(dim, dim);
-//		vector<size_t> l(shape.order());
-/*		for (size_t L = 0; L < shape.totalDimension(); ++L) {
-			indexMapping(l, L, shape);
-			y(l[0], l[1]) += deltaV(L) * x(l[3], l[2]);
-		}*/
 
 		size_t dim2 = dim * dim;
 		size_t dim3 = dim * dim * dim;
