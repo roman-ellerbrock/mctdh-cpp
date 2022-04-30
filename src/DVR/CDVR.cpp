@@ -40,10 +40,10 @@ void UpdateNodeDVRLocal(Tensorcd& dvr, const TreeGrids& grids,
 		fillXNode(X, idxs, grids, holegrids, node);
 		dvr(I) = V.evaluate(X, part);
 
-		if (out) {
+//		if (out) {
 //			for (size_t i = 0; i < X.dim(); ++i) { os << X(i) << "\t"; }
 //			os << real(dvr(I)) << endl;
-		}
+//		}
 	}
 }
 

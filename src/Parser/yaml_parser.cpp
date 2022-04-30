@@ -9,6 +9,7 @@
 #include "Hamiltonians.h"
 #include "Core/Eigenstates.h"
 #include "Utility/Overlaps.h"
+#include "Utility/normal_modes.h"
 
 namespace parser {
 
@@ -139,7 +140,6 @@ namespace parser {
 		} else if (name == "ch3_quasiexact") {
 			CH3_quasiexact Hch3(tree);
 			H = Hch3;
-			cout << "YAML H size: " << H.size() << endl;
 		} else if (name == "electronicstructure") {
 			auto hfile = evaluate<string>(node, "hamiltonian");
 			H = electronicStructure(hfile);
@@ -330,6 +330,11 @@ namespace parser {
 				auto file1 = node["bra"].as<string>();
 				auto file2 = node["ket"].as<string>();
 				wavefunctionOverlap(file1, file2, state.tree_);
+			} else if (job == "find_minimum") {
+				auto ivar = new_ivar(node, state);
+				const auto H = state.hamiltonian_;
+				const Tree& tree = state.tree_;
+				find_minimum(*H, tree);
 			}
 		}
 		return state;

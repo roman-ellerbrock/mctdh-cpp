@@ -84,7 +84,22 @@ void LayerGrid(TreeGrids& grids, Matrixcd& trafo,
 		auto shifts = calculateShift(xs, w);
 		shift(xs, shifts);
 
-		auto diags = WeightedSimultaneousDiagonalization::calculate(xs, w, 1e-10);
+//		trafo.print();
+//		getchar();
+/*		auto trafo_old = trafo;
+		size_t i = 0;
+		for (Matrixcd& x : xs) {
+			cout << "before, i = " << i << endl;
+			x.print();
+			cout << "after " << i << endl;
+			x = trafo * x * trafo.adjoint();
+			x.print();
+		}*/
+		auto diags = WeightedSimultaneousDiagonalization::calculate(xs, w, 1e-5);
+//		getchar();
+
+//		diags.first = diags.first * trafo_old;
+
 		shift(diags.second, shifts);
 
 		setGrids(grids, diags.second, node);
