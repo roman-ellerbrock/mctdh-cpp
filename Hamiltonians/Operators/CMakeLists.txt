@@ -28,6 +28,7 @@ add_library(Operators Operators.h
         NDI/NDIHamiltonian.cpp
         NDI/NDIHamiltonian.h
 
+        Molecules/NormalModes.h
         Molecules/NOCl.cpp
         Molecules/NOCl.h
 

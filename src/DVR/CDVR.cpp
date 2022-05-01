@@ -85,30 +85,6 @@ void UpdateEdgeDVR(MatrixTreed& cdvr, const TreeGrids& grids, const TreeGrids& h
 	}
 }
 
-void CDVR::Update(const Wavefunction& Psi, const PotentialOperator& V,
-	const Tree& tree, size_t part, bool out, ostream& os) {
-
-	/// Get Edge wavefunction
-	Chi_ = MatrixTensorTree(Psi, tree, true);
-
-	/// Build X-matrices, diagonalize them simultaneously
-	tddvr_.Update(Psi, tree);
-
-	/// Transform to grid
-	tddvr_.GridTransformation(Chi_, tree);
-
-	/// Save top-down normalized wavefunction, since it is needed to apply the CDVR-operator
-	Cdown_ = Chi_.topDownNormalized(tree);
-
-	/// evaluate potential at Nodes and edges
-	UpdateNodeDVR(Vnode_, tddvr_.grids_, tddvr_.hole_grids_, V, tree, part, out, os);
-	UpdateEdgeDVR(Vedge_, tddvr_.grids_, tddvr_.hole_grids_, V, tree, part, out, os);
-	if (out) { os << endl; }
-
-	/// evaluate correction matrices
-	cdvr_functions::calculateDeltaVs(deltaV_, Chi_, Vnode_, Vedge_, tree);
-}
-
 //Tensorcd CDVR::Apply(Tensorcd Phi, const Matrixcd& sqrho, const Node& node) const {
 Tensorcd CDVR::apply(Tensorcd Phi, const SpectralDecompositioncd& rho_x, const Node& node) const {
 
@@ -143,6 +119,30 @@ Tensorcd CDVR::apply(Tensorcd Phi, const SpectralDecompositioncd& rho_x, const N
 		VXi = matrixTensor(sqrho.adjoint(), VXi, node.nChildren());
 	}
 	return VXi;
+}
+
+void CDVR::Update(const Wavefunction& Psi, const PotentialOperator& V,
+	const Tree& tree, size_t part, bool out, ostream& os) {
+
+	/// Get Edge wavefunction
+	Chi_ = MatrixTensorTree(Psi, tree, true);
+
+	/// Build X-matrices, diagonalize them simultaneously
+	tddvr_.Update(Psi, tree);
+
+	/// Transform to grid
+	tddvr_.GridTransformation(Chi_, tree);
+
+	/// Save top-down normalized wavefunction, since it is needed to apply the CDVR-operator
+	Cdown_ = Chi_.topDownNormalized(tree);
+
+	/// evaluate potential at Nodes and edges
+	UpdateNodeDVR(Vnode_, tddvr_.grids_, tddvr_.hole_grids_, V, tree, part, out, os);
+	UpdateEdgeDVR(Vedge_, tddvr_.grids_, tddvr_.hole_grids_, V, tree, part, out, os);
+	if (out) { os << endl; }
+
+	/// evaluate correction matrices
+	cdvr_functions::calculateDeltaVs(deltaV_, Chi_, Vnode_, Vedge_, tree);
 }
 
 void CDVR::Update2(Wavefunction Psi, const PotentialOperator& V,

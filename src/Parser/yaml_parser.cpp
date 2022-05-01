@@ -198,6 +198,12 @@ namespace parser {
 			PotentialOperator Vop(V, 0, 0);
 			Vop.Q_ = make_shared<TrafoCH3Quasiexact>(mass);
 			return Vop;
+		} else if(name == "ch3_normal_modes") {
+			auto V = make_shared<CH3Potential>();
+
+			PotentialOperator Vop(V, 0, 0);
+			Vop.Q_ = make_shared<NormalModes>("U.dat", "x0.dat", 6);
+			return Vop;
 		} else if(name == "liuch4cl") {
             // find the masses supplied for this potential
             auto masses = evaluate<string>(node, "masses");

@@ -54,7 +54,8 @@ Vectord getq0(const Tree& tree) {
 	return q;
 }
 
-Matrixd hessian(const Vectord& X, const Potential& V, const Vectord& h, const Matrixd& U) {
+Matrixd hessian(const Vectord& X, const Potential& V,
+	const Vectord& h, const Matrixd& U) {
 
 	vector<Vectord> grad_plus;
 	vector<Vectord> grad_minus;
@@ -100,14 +101,51 @@ Matrixd hessian(const Vectord& X, const Potential& V, const Vectord& h, const Ma
 	return H;
 }
 
+void normalModeOutput(const Matrixd& Hessian, const Vectord& m, const Vectord& X0) {
+
+	auto diag = diagonalize(Hessian);
+	auto ev = diag.second;
+	auto U = diag.first;
+
+	const double ha2cm = 219474.6313705;
+	cout << "==========================================\n";
+	cout << "Normal Mode frequencies (cm-1):\n";
+	cout << "==========================================\n";
+	for (size_t i = 0; i < ev.dim(); ++i) {
+		if (ev(i) > 0) {
+			cout << i << "\t-\t" << sqrt(ev(i)) * ha2cm << " | " << sqrt(ev(i)) << endl;
+		} else {
+			cout << i << "\t-\t-" << sqrt(abs(ev(i))) * ha2cm << " | " << sqrt(abs(ev(i))) << endl;
+		}
+	}
+
+	ofstream os("U.dat");
+	ofstream os_x("x0.dat");
+	os << U.dim1() << " " << U.dim2() << endl;
+	for (size_t i = 0; i < U.dim1(); ++i) {
+		for (size_t j = 0; j < U.dim2(); ++j) {
+			os << U(j, i) / m(j) << " ";
+		}
+		os << endl;
+	}
+	for (size_t i = 0; i < U.dim1(); ++i) {
+		os_x << X0(i) << " ";
+	}
+	double E = 0;
+	for (size_t i = 6; i < U.dim1(); ++i) {
+		E += 0.5 * sqrt(abs(ev(i)));
+	}
+	cout << "Harmonic ground state energy: " << E * ha2cm << " cm-1" << endl;
+}
+
 void find_minimum(const Hamiltonian& H, const Tree& tree) {
 	const PotentialOperator& V = H.V_;
 	Vectord q = getq0(tree);
-	for (size_t i = 0; i < q.dim(); ++i) {
-//		q(i) += 0.01;
+/*	for (size_t i = 0; i < q.dim(); ++i) {
+		q(i) += 0.01;
 	}
 
-/*	size_t n_iter = 500;
+	size_t n_iter = 500;
 	double hlen = 1e-2;
 	double delta = 1e-3;
 
@@ -119,10 +157,11 @@ void find_minimum(const Hamiltonian& H, const Tree& tree) {
 
 	const Potential& v = *V.v();
 	Vectord X = V.Q_->transform(q);
+
 	cout << "Final energy: " << v.evaluate(X, 0) << endl;
 
 	size_t natom = 4;
-	double mh = 1837.153;
+	double mh = 1836.153;
 
 	Vectord mass_atom(natom * 3);
 	mass_atom(0) = 12.00;
@@ -134,60 +173,20 @@ void find_minimum(const Hamiltonian& H, const Tree& tree) {
 	double delta = 1e-3;
 	Matrixd U(h.dim(), h.dim());
 	for (size_t i = 0; i < 3 * natom; ++i) {
-		h(i) = delta;
-//		m(i) = 1.;
 		m(i) = sqrt(mass_atom(i / 3) * mh);
-//		h(i) = sqrt(mass_atom(i / 3)) * delta;
-		U(i, i) = 1.;
+		h(i) = delta * m(i);
+		U(i, i) = 1. / m(i);
 	}
+
+	Vectord X0 = X;
+	for (size_t i = 0; i < 3 * natom; ++i) {
+		X(i) *= m(i);
+	}
+
+	cout << "Hessian at energy: " << Vmassweighted(X, v, U) << endl;
 
 	auto Hessian = hessian(X, v, h, U);
-	for (size_t i = 0; i < X.dim(); ++i) {
-		for (size_t j = 0; j < X.dim(); ++j) {
-			Hessian(i, j) *= sqrt(m(i)*m(j));
-		}
-	}
 
-	auto diag = diagonalize(Hessian);
-	auto ev = diag.second;
-
-	for (size_t i = 0; i < 3 * natom; ++i) {
-		h(i) = delta;
-	}
-
-	ev *= 219474.6313705; //* sqrt(mh);
-
-	for (size_t i = 0; i < ev.dim(); ++i) {
-		if (ev(i) > 0) {
-			cout << i << " - " << sqrt(ev(i)) << " | " << ev(i) << endl;
-		} else {
-			cout << i << " - -" << sqrt(abs(ev(i))) << " | " << ev(i) << endl;
-		}
-	}
-
-	U = diag.first;
-	X = U.adjoint() * X;
-	Hessian = hessian(X, v, h, U);
-
-	diag = diagonalize(Hessian);
-	ev = diag.second;
-	ev *= 219474.6313705 * sqrt(mh);
-
-	for (size_t i = 0; i < ev.dim(); ++i) {
-		if (ev(i) > 0) {
-			cout << i << " - " << sqrt(ev(i)) << " | " << ev(i) << endl;
-		} else {
-			cout << i << " - -" << sqrt(abs(ev(i))) << " | " << ev(i) << endl;
-		}
-	}
-
-	ofstream os("U.dat");
-	os << U.dim1() << " " << U.dim2() << endl;
-	for (size_t i = 0; i < U.dim1(); ++i) {
-		for (size_t j = 0; j < U.dim2(); ++j) {
-			os << U(j, i) << " ";
-		}
-		os << endl;
-	}
+	normalModeOutput(Hessian, m, X0);
 }
 

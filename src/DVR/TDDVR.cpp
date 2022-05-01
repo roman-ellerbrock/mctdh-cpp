@@ -143,15 +143,15 @@ void TDDVR::NodeTransformation(Tensorcd& Phi, const Node& node, bool inverse) co
 	if (!node.isBottomlayer()) {
 		for (size_t k = 0; k < node.nChildren(); ++k) {
 			const Node& child = node.child(k);
-//			Tensorcd Xi(Phi.shape(), &(mem_.work1_[0]), false, false);
+			Tensorcd Xi(Phi.shape(), &(mem_.work1_[0]), false, false);
 			if (!inverse) {
-				Phi = matrixTensorBLAS(trafo_[child], Phi, k);
-//				matrixTensorBLAS(Xi, mem_.work2_, trafo_[child], Phi, k, true);
+//				Phi = matrixTensorBLAS(trafo_[child], Phi, k);
+				matrixTensorBLAS(Xi, mem_.work2_, trafo_[child], Phi, k, true);
 			} else {
-				Phi = matrixTensorBLAS(trafo_[child].adjoint(), Phi, k);
-//				matrixTensorBLAS(Xi, mem_.work2_, trafo_[child].adjoint(), Phi, k, true);
+//				Phi = matrixTensorBLAS(trafo_[child].adjoint(), Phi, k);
+				matrixTensorBLAS(Xi, mem_.work2_, trafo_[child].adjoint(), Phi, k, true);
 			}
-//			Phi = Xi;
+			Phi = Xi;
 		}
 	}
 

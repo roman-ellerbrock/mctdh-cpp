@@ -2,6 +2,7 @@
 #include "ElectronicStructure/ElectronicStructure.h"
 #include "PhysicalSystems/StandardOperatorLibrary.h"
 #include "PhysicalSystems/SpinBoson.h"
+#include "Molecules/NormalModes.h"
 #include "Molecules/NOCl.h"
 #include "NDI/NDIHamiltonian.h"
 #include "CH3_meanfield/CH3_meanfield.h"
