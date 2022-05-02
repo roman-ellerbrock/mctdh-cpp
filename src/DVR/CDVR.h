@@ -29,6 +29,8 @@ public:
 	TDDVR tddvr_;
 
 private:
+	Tree ltree_;
+
 	TensorTreecd Vnode_;
 	MatrixTreed Vedge_;
 
@@ -37,9 +39,8 @@ private:
 	MatrixTensorTree Chi_;
 	TensorTreecd Cdown_;
 
-	Tree ltree_;
-
 	WorkMemorycd mem_;
+
 };
 
 #endif //CDVR_H

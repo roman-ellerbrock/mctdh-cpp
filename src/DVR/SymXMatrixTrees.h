@@ -27,8 +27,8 @@ public:
 			SparseMatrixTreePaircd y({x1, x2});
 			emplace_back(y);
 		}
-
 	}
+
 	~SymXMatrixTrees() = default;
 
 	void Update();

@@ -84,21 +84,7 @@ void LayerGrid(TreeGrids& grids, Matrixcd& trafo,
 		auto shifts = calculateShift(xs, w);
 		shift(xs, shifts);
 
-//		trafo.print();
-//		getchar();
-/*		auto trafo_old = trafo;
-		size_t i = 0;
-		for (Matrixcd& x : xs) {
-			cout << "before, i = " << i << endl;
-			x.print();
-			cout << "after " << i << endl;
-			x = trafo * x * trafo.adjoint();
-			x.print();
-		}*/
 		auto diags = WeightedSimultaneousDiagonalization::calculate(xs, w, 1e-5);
-//		getchar();
-
-//		diags.first = diags.first * trafo_old;
 
 		shift(diags.second, shifts);
 
@@ -128,6 +114,7 @@ void TDDVR::Update(const Wavefunction& Psi, const Tree& tree) {
 
 	/// Calculate X-Matrices
 	Xs_.Update(Psi, tree);
+	symx_.Update();
 
 	/// Build standard grid
 	UpdateGrids(grids_, trafo_, Xs_.mats_, &rho_, tree);
