@@ -154,6 +154,8 @@ void CDVR::Update2(Wavefunction Psi, const PotentialOperator& V,
 	/// Get Edge wavefunction
 	Chi_ = MatrixTensorTree(Psi, ltree_, true);
 
+	C_ = SymTensorTree(Psi, ltree_);
+
 //	tddvr_.Update(Psi, ltree_);
 	tddvr_.Xs_.Update(Psi, ltree_);
 	auto rho = TreeFunctions::contraction(Psi, ltree_, true);

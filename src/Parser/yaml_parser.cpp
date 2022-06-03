@@ -143,30 +143,32 @@ namespace parser {
 		} else if (name == "electronicstructure") {
 			auto hfile = evaluate<string>(node, "hamiltonian");
 			H = electronicStructure(hfile);
-        }else if (name == "schaepers") {
-		    // find the masses supplied for this hamiltonian
-            auto masses = evaluate<string>(node, "masses");
-            stringstream masses_ss(masses);
-            vector<double> massvec;
-            while(masses_ss.good()){
-                string substr;
-                getline(masses_ss, substr, ',');
-                massvec.push_back(stod(substr));
-            }
+		}else if (name == "schaepers") {
+			// find the masses supplied for this hamiltonian
+			auto masses = evaluate<string>(node, "masses");
+			stringstream masses_ss(masses);
+			vector<double> massvec;
+			while(masses_ss.good()){
+				string substr;
+				getline(masses_ss, substr, ',');
+				massvec.push_back(stod(substr));
+			}
 
-            // find the coupling construction for this hamiltonian
-            auto coupling = evaluate<string>(node, "coupling");
-            stringstream coupling_ss(coupling);
-            vector<int> couplingvec;
-            while(coupling_ss.good()){
-                string substr;
-                getline(coupling_ss, substr, ',');
-                couplingvec.push_back(stoi(substr));
-            }
+			// find the coupling construction for this hamiltonian
+			auto coupling = evaluate<string>(node, "coupling");
+			stringstream coupling_ss(coupling);
+			vector<int> couplingvec;
+			while(coupling_ss.good()){
+				string substr;
+				getline(coupling_ss, substr, ',');
+				couplingvec.push_back(stoi(substr));
+			}
 
-            // init schaepers vector
-            H = Operator::schaepers(tree, massvec, couplingvec);
+			// init schaepers vector
+			H = Operator::schaepers(tree, massvec, couplingvec);
 
+		}else if (name == "portfoliooptimization") {
+			H = meanVarianceAnalysis();
 		} else {
 			cout << "No valid Hamiltonian name." << endl;
 			cout << "Chosen name: " << name << endl;

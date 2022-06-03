@@ -18,7 +18,7 @@ Vectord Eigenstate(Wavefunction& Psi, const Hamiltonian& H, const Tree& tree,
 	const Tree& cdvrtree) {
 
 	HamiltonianRepresentation hRep(H, tree, cdvrtree);
-	hRep.build(H, Psi, tree);
+	hRep.build(H, Psi, tree, 0);
 	auto Hval = Expectation(hRep, Psi, H, tree);
 	auto spec = diagonalize(Hval);
 	auto trafo = spec.first;

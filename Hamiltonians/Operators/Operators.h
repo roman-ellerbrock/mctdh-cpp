@@ -9,6 +9,7 @@
 #include "CH3_quasiexact/TrafoCH3Quasiexact.h"
 #include "CH3_quasiexact/CH3_quasiexact.h"
 #include "schaepers/schaepers.h"
+#include "PortfolioOptimization/PortfolioOptimization.h"
 /*#include "NOCl/NOCl.h"
 #include "CH3_meanfield/CH3_meanfield.h"
 #include "CH3_quasiexact/CH3_quasiexact.h"

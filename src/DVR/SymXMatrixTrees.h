@@ -8,6 +8,7 @@
 #include "TreeClasses/SparseMatrixTreeFunctions.h"
 #include "MatrixTensorTreeFunctions.h"
 #include "XMatrixTrees.h"
+#include "TreeClasses/SymTensorTree.h"
 
 class SymXMatrixTrees : public SparseMatrixTreePairscd {
 public:
@@ -23,7 +24,8 @@ public:
 			MLOcd M(x, mode);
 
 			auto x1 = SparseMatrixTreecd(M, tree);
-			auto x2 = SparseMatrixTreecd(M, tree, false, true);
+			auto x2 = SparseMatrixTreecd(M, tree, false, false);
+//			auto x2 = SparseMatrixTreecd(M, tree, false, true);
 			SparseMatrixTreePaircd y({x1, x2});
 			emplace_back(y);
 		}
@@ -31,7 +33,27 @@ public:
 
 	~SymXMatrixTrees() = default;
 
-	void Update();
+	void Update(const Wavefunction& Psi, const Tree& tree) {
+		cout << "Casting to sTTN:\n";
+		SymTensorTree psi(Psi, tree);
+		psi.up_.print(tree);
+
+		cout << "representing:\n";
+		for (size_t l = 0; l < xops_.size(); ++l) {
+			TreeFunctions::represent(xmat_[l].first, xops_[l], psi.up_, psi.up_, tree);
+		}
+
+//		TreeFunctions::symRepresent(xmat_, psi, psi, xops_, tree);
+
+		size_t l = 0;
+		for (const auto& xmat : xmat_) {
+			cout << "coordinate l = " << l <<endl;
+			cout << "mat:\n";
+			xmat.first.print();
+			cout << "hole:\n";
+			xmat.second.print();
+		}
+	}
 
 	void Optimize(MatrixTensorTree& Psi, const Tree& tree);
 
@@ -42,6 +64,8 @@ public:
 		const Node& node, const Node& node_small) const;
 
 	SOPcd xops_;
+
+	SymMatrixTrees xmat_;
 };
 
 

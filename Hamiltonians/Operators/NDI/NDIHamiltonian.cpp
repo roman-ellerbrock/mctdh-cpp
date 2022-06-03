@@ -8,7 +8,7 @@
 namespace Operator {
 
 	// !!! IMPORTANT !!!
-	double cutoff_acc = 1e-5;
+	double cutoff_acc = 1e-3;
 
 	std::string fix(const std::string& in) {
 		return std::regex_replace(
@@ -20,7 +20,6 @@ namespace Operator {
 	}
 
 	void toPauli(MLOcd& M, string op, size_t t) {
-		cout << op << t;
 		if (op == "X") {
 			M.push_back(sigma_x(), t);
 		} else if (op == "Z") {
@@ -37,7 +36,8 @@ namespace Operator {
 
 		double coeff = 0;
 		ss >> coeff;
-		cout << coeff;
+		bool out = abs(coeff) > cutoff_acc;
+		if (out) { cout << coeff; }
 
 		line = line.erase(0, line.find(' '));
 		line = fix(line);
@@ -48,43 +48,55 @@ namespace Operator {
 			ss >> op;
 			size_t t;
 			ss >> t;
-			cout << " * ";
+			if (out) { cout << " * " << op << t; }
 			toPauli(M, op, t);
 		}
 		for (size_t i = 0; i < nprod; ++i) {
 //			if (M.mode(i) >= 13) {
 //			if (M.mode(i) >= 52) {
 			if (M.mode(i) >= nFragments) {
-				cout << endl;
 				return;
 			}
+			if (out) { cout << endl; }
 		}
 		if (abs(coeff) > cutoff_acc) {
 			S.push_back(M, coeff);
-			cout << " in" << endl;
 		}
 	}
 
 	SOPcd ndi() {
-		string filename = "pauli_143q.txt";
+		string filename = "pauli_156q.txt";
+//		string filename = "pauli_13q.txt";
 		ifstream file(filename);
-		size_t nFragments = 143; // number of active fragments
-
-		size_t n_single = 286;
-		size_t n_double = 46371;
+		size_t nFragments = 156; // number of active fragments
+		size_t n_single = 312;
+		size_t n_double = 59442;
 		size_t nline = 1 + n_single + n_double;
 		SOPcd S;
 		string line;
 
-		/// read & ignore energy shift
-		getline(file, line);
+		file >> cutoff_acc;
+		file >> nFragments;
+		file >> n_single;
+		file >> n_double;
+		cout << "cutoff: " << cutoff_acc << endl;
+		cout << "nFragments: " << nFragments << endl;
+		cout << "n_single: " << n_single << endl;
+		cout << "n_double: " << n_double << endl;
 
 		/// Energy shift
+		double shift = 0.;
+		file >> shift;
+		getline(file, line);
 		MLOcd I;
+		shift = shift / 156.;
+		cout << "E-shift: " << shift << endl;
 		for (size_t n = 0; n < nFragments; ++n) {
 			I.push_back(identityMatrixcd(2), n);
+//			double shift = 0.5914818726393506 / (double) nFragments;
 //			double shift = 8.56655 / 52.;
-			double shift = 6.562775130472779 / (double) nFragments;
+//			double shift = 6.562775130472779 / (double) nFragments;
+//			double shift = 7.000638078882831 / (double) nFragments;
 			S.push_back(I, shift);
 		}
 

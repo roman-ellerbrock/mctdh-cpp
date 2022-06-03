@@ -60,7 +60,7 @@ void CMFIntegrator::Integrate(IntegratorVariables& job, ostream& os) {
 	Wavefunction Psistart = Psi;
 
 	// Initial output
-	matrices_.build(H, Psi, tree);
+	matrices_.build(H, Psi, tree, time);
 	calc_mat = false;
 	Output(time, Psi, Psistart, H, tree, os);
 
@@ -85,7 +85,7 @@ void CMFIntegrator::Integrate(IntegratorVariables& job, ostream& os) {
 
 		t1 = high_resolution_clock::now();
 		if (calc_mat) {
-			matrices_.build(H, Psi, tree);
+			matrices_.build(H, Psi, tree, time);
 			calc_mat = false;
 		}
 
@@ -107,7 +107,7 @@ void CMFIntegrator::Integrate(IntegratorVariables& job, ostream& os) {
 
 		// t=dt/2 based calculation
 		t1 = high_resolution_clock::now();
-		matrices_.build(H, Psi2, tree);
+		matrices_.build(H, Psi2, tree, time);
 		t2 = high_resolution_clock::now();
 		mattime += duration_cast<microseconds>(t2 - t1);
 
@@ -122,7 +122,7 @@ void CMFIntegrator::Integrate(IntegratorVariables& job, ostream& os) {
 
 		// t=dt based propagation
 		t1 = high_resolution_clock::now();
-		matrices_.build(H, Psi2, tree);
+		matrices_.build(H, Psi2, tree, time);
 		t2 = high_resolution_clock::now();
 		mattime += duration_cast<microseconds>(t2 - t1);
 
@@ -169,8 +169,6 @@ void CMFIntegrator::Integrate(IntegratorVariables& job, ostream& os) {
 	cout << "Time in CMF-Integrator: " << time_tot / 1000000. << " s\n";
 	cout << "Matrix calculation:     " << mattime.count() / time_tot * 100. << " %\n";
 	cout << "Integration:            " << steptime.count() / time_tot * 100. << " %\n" << endl;
-//	cout << "Psi:\n";
-//	Psi.print(tree);
 
 	job.dt = dt;
 }

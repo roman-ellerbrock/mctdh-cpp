@@ -108,13 +108,95 @@ void UpdateGrids(TreeGrids& grids, MatrixTreecd& trafo, const vector<SparseMatri
 	}
 }
 
+/*
+#include "Util/RandomMatrices.h"
+
+void wavelet(const Tree& tree) {
+	for (size_t l = 0; l < tree.nLeaves(); ++l) {
+		const Leaf& leaf = tree.getLeaf(l);
+		LeafFuncd xl = &LeafInterface::applyX;
+		LeafFuncd pl = &LeafInterface::applyP;
+		LeafFunctioncd xf(xl);
+		LeafFunctioncd pf(pl);
+
+		vector<Matrixcd> xps;
+		xps.push_back(toMatrix(xf, leaf));
+		xps.push_back(toMatrix(pf, leaf));
+		Matrixcd& x = xps.front();
+		Matrixcd& p = xps.back();
+
+		Matrixcd trafo(xps.front());
+		trafo.zero();
+		for (size_t i = 0; i < trafo.dim1(); ++i) {
+			trafo(i, i) = 1.;
+		}
+		size_t dim = trafo.dim1();
+
+
+		/// random init
+		mt19937 gen(time(nullptr));
+		auto U = RandomMatrices::gue(trafo.dim1(), gen);
+//		x = U * x * U.adjoint();
+//		p = U * p * U.adjoint();
+
+
+		cout << "Leaf: " << l << endl;
+		double normx = x.frobeniusNorm();
+		double normp = p.frobeniusNorm();
+		x /= normx;
+		p /= normp;
+		cout << "norm(x) = " << x.frobeniusNorm() << endl;
+		cout << "norm(p) = " << p.frobeniusNorm() << endl;
+		auto comm = x * p - p * x;
+		cout << "[x, p] = " << comm.frobeniusNorm() << endl;
+
+		auto xx = diagonalize(x);
+		auto px = diagonalize(p);
+
+		SimultaneousDiagonalization sd;
+		sd.initialization(xps, 1e-10);
+		sd.calculate(xps, trafo);
+
+		Vectord xvec(dim);
+		Vectord pvec(dim);
+		for (size_t i = 0; i < dim; ++i) {
+			xvec(i) = real(x(i, i));
+			pvec(i) = real(p(i, i));
+		}
+
+		cout << "x:\n";
+		xvec.print();
+		cout << endl;
+		cout << "p:\n";
+		pvec.print();
+		cout << endl;
+
+		cout << "x diag:\n";
+		xx.second.print();
+		cout << endl;
+
+		cout << "p diag:\n";
+		px.second.print();
+		cout << endl;
+		cout << "Example: " << xvec(20) << endl;
+		for (size_t i = 0; i < dim; ++i) {
+			cout << pow(abs(trafo(i, 40)), 2) << " " << pow(abs(xx.first(i, 40)), 2) << endl;
+		}
+		getchar();
+	}
+}
+*/
+
 void TDDVR::Update(const Wavefunction& Psi, const Tree& tree) {
 	/// Calculate density matrix
 	TreeFunctions::contraction(rho_, Psi, tree, true);
 
 	/// Calculate X-Matrices
 	Xs_.Update(Psi, tree);
-	symx_.Update();
+//	cout << "Update:\n";
+//	symx_.Update(Psi, tree);
+//	cout << "done.\n";
+//	wavelet(tree);
 
 	/// Build standard grid
 	UpdateGrids(grids_, trafo_, Xs_.mats_, &rho_, tree);
@@ -130,15 +212,15 @@ void TDDVR::NodeTransformation(Tensorcd& Phi, const Node& node, bool inverse) co
 	if (!node.isBottomlayer()) {
 		for (size_t k = 0; k < node.nChildren(); ++k) {
 			const Node& child = node.child(k);
-			Tensorcd Xi(Phi.shape(), &(mem_.work1_[0]), false, false);
+//			Tensorcd Xi(Phi.shape(), &(mem_.work1_[0]), false, false);
 			if (!inverse) {
-//				Phi = matrixTensorBLAS(trafo_[child], Phi, k);
-				matrixTensorBLAS(Xi, mem_.work2_, trafo_[child], Phi, k, true);
+				Phi = matrixTensorBLAS(trafo_[child], Phi, k);
+//				matrixTensorBLAS(Xi, mem_.work2_, trafo_[child], Phi, k, true);
 			} else {
-//				Phi = matrixTensorBLAS(trafo_[child].adjoint(), Phi, k);
-				matrixTensorBLAS(Xi, mem_.work2_, trafo_[child].adjoint(), Phi, k, true);
+				Phi = matrixTensorBLAS(trafo_[child].adjoint(), Phi, k);
+//				matrixTensorBLAS(Xi, mem_.work2_, trafo_[child].adjoint(), Phi, k, true);
 			}
-			Phi = Xi;
+//			Phi = Xi;
 		}
 	}
 

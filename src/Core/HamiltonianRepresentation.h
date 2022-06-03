@@ -21,7 +21,9 @@ class HamiltonianRepresentation {
 public:
 	HamiltonianRepresentation(const Hamiltonian& H, const Tree& tree,
 		const Tree& cdvrtree)
-		: rho_(tree), rho_decomposition_(tree), rho_inverse_(tree), cdvr_(cdvrtree), mem_(tree) {
+		: rho_(tree), rho_decomposition_(tree),
+		rho_inverse_(tree), cdvr_(tree), mem_(tree) {
+		;
 		hMats_.clear();
 		hContractions_.clear();
 		for (const auto& M : H) {
@@ -44,7 +46,7 @@ public:
 
 	~HamiltonianRepresentation() = default;
 
-	void build(const Hamiltonian& H, const Wavefunction& Psi, const Tree& tree) {
+	void build(const Hamiltonian& H, const Wavefunction& Psi, const Tree& tree, double time) {
 
 		/// Calculate density matrix tree
 		TreeFunctions::contraction(rho_, Psi, tree, true);
@@ -63,8 +65,8 @@ public:
 		TreeFunctions::contraction(hContractions_, hMats_, Psi, Psi, tree);
 
 		/// Calculate CDVR
-//		if (H.hasV) { cdvr_.Update(Psi, H.V_, tree); }
-		if (H.hasV) { cdvr_.Update2(Psi, H.V_, tree); }
+		if (H.hasV) { cdvr_.Update(Psi, H.V_, tree); }
+//		if (H.hasV) { cdvr_.Update2(Psi, H.V_, tree); }
 	}
 
 	void symbuild(const Hamiltonian& H, MatrixTensorTree Psi,

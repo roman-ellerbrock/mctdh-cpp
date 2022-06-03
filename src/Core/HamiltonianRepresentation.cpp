@@ -66,7 +66,7 @@ void LayerDerivative(Tensorcd& dPhi, double time, const Tensorcd& Phi,
 void Derivative(Wavefunction& dPsi, HamiltonianRepresentation& hRep,
 	double time, const Wavefunction& Psi, const Hamiltonian& H,
 	const Tree& tree, complex<double> propagation_phase) {
-	hRep.build(H, Psi, tree);
+	hRep.build(H, Psi, tree, time);
 	for (const Node& node : tree) {
 		LayerDerivative(dPsi[node], time, Psi[node], H, hRep, node);
 	}

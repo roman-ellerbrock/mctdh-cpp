@@ -9,6 +9,7 @@
 #include "DVR/DeltaVTree.h"
 #include "DVR/cdvr_functions.h"
 #include "TreeClasses/TensorTreeFunctions.h"
+#include "TreeClasses/SymTensorTree.h"
 
 class CDVR {
 public:
@@ -38,6 +39,8 @@ private:
 
 	MatrixTensorTree Chi_;
 	TensorTreecd Cdown_;
+
+	SymTensorTree C_;
 
 	WorkMemorycd mem_;
 

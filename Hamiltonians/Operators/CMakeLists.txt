@@ -38,6 +38,9 @@ add_library(Operators Operators.h
         PhysicalSystems/SpinBoson.h
         CWrapper.f
 
+        PortfolioOptimization/PortfolioOptimization.cpp
+        PortfolioOptimization/PortfolioOptimization.h
+
         schaepers/fortran/schaepers.f
         schaepers/schaepers.cpp
         schaepers/schaepers.h)
