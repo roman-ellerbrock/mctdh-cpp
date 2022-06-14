@@ -43,7 +43,7 @@ SUITE(OperatorRepresentation){
 
         Wavefunction dPsi(tree);
         HamiltonianRepresentation HRep(Hamiltonian, tree);
-        HRep.build(Hamiltonian, Psi, tree);
+        HRep.build(Hamiltonian, Psi, tree, 0.);
 
         auto eval = Expectation(HRep, Psi, Hamiltonian, tree);
 
@@ -64,7 +64,6 @@ SUITE(OperatorRepresentation){
 
         CHECK_CLOSE(0.0,diff,epsilon);
 
-
     }
 
     TEST(ML_HEXPECTATION){
@@ -75,7 +74,7 @@ SUITE(OperatorRepresentation){
         auto tree = SORtest.state_.tree_;
 
         HamiltonianRepresentation HRep(Hamiltonian, tree);
-        HRep.build(Hamiltonian, Psi, tree);
+        HRep.build(Hamiltonian, Psi, tree, 0.);
 
         auto eval = Expectation(HRep, Psi, Hamiltonian, tree);
 
@@ -95,7 +94,6 @@ SUITE(OperatorRepresentation){
         }
 
         CHECK_CLOSE(0.0,diff,epsilon);
-
 
     }
 }

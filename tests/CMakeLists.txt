@@ -6,6 +6,7 @@ set(mctdh_tests
         test_SL_Propagator.cpp
         test_ML_Propagator.cpp
         test_parser.cpp
+        test_TDDVR.cpp
         test_representation.cpp)
 
 add_executable(tests ${mctdh_tests})

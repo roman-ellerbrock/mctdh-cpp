@@ -193,10 +193,6 @@ void TDDVR::Update(const Wavefunction& Psi, const Tree& tree) {
 
 	/// Calculate X-Matrices
 	Xs_.Update(Psi, tree);
-//	cout << "Update:\n";
-//	symx_.Update(Psi, tree);
-//	cout << "done.\n";
-//	wavelet(tree);
 
 	/// Build standard grid
 	UpdateGrids(grids_, trafo_, Xs_.mats_, &rho_, tree);

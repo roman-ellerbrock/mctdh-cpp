@@ -256,7 +256,7 @@ namespace parser {
 		} else if (type == "create") {
 			bool Hartree = evaluate<bool>(node, "Hartree", true);
 			Wavefunction Psi(state.rng_, state.tree_, Hartree);
-			occupyCIS(Psi, state.tree_);
+//			occupyCIS(Psi, state.tree_);
 			state.wavefunctions_[name] = Psi;
 		} else if (type == "save") {
 		    if(evaluate<string>(node, "filename").empty()){

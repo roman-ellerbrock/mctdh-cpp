@@ -23,8 +23,8 @@ public:
 			size_t mode = leaf.mode();
 			MLOcd M(x, mode);
 
-			auto x1 = SparseMatrixTreecd(M, tree);
-			auto x2 = SparseMatrixTreecd(M, tree, false, false);
+			auto x1 = SparseMatrixTreecd(M, tree, false, false);
+			auto x2 = SparseMatrixTreecd(M, tree, false, true);
 //			auto x2 = SparseMatrixTreecd(M, tree, false, true);
 			SparseMatrixTreePaircd y({x1, x2});
 			emplace_back(y);
