@@ -158,11 +158,13 @@ namespace parser {
 			auto coupling = evaluate<string>(node, "coupling");
 			stringstream coupling_ss(coupling);
 			vector<int> couplingvec;
-			while(coupling_ss.good()){
-				string substr;
-				getline(coupling_ss, substr, ',');
-				couplingvec.push_back(stoi(substr));
-			}
+            if(massvec.size() > 2){
+                while(coupling_ss.good()){
+                    string substr;
+                    getline(coupling_ss, substr, ',');
+                    couplingvec.push_back(stoi(substr));
+                }
+            }
 
 			// init schaepers vector
 			H = Operator::schaepers(tree, massvec, couplingvec);
@@ -220,14 +222,23 @@ namespace parser {
             auto coupling = evaluate<string>(node, "coupling");
             stringstream coupling_ss(coupling);
             vector<int> couplingvec;
-            while(coupling_ss.good()){
-                string substr;
-                getline(coupling_ss, substr, ',');
-                couplingvec.push_back(stoi(substr));
+            if(massvec.size() > 2){
+                while(coupling_ss.good()){
+                    string substr;
+                    getline(coupling_ss, substr, ',');
+                    couplingvec.push_back(stoi(substr));
+                }
             }
-
             auto V = make_shared<liuch4cl>(massvec,couplingvec);
             PotentialOperator Vop(V, 0, 0);
+            /*
+            Vectord mass(4);
+            mass(0) = 12.0;
+            mass(1) = 1.007;
+            mass(2) = 1.007;
+            mass(3) = 1.007;
+            Vop.Q_ = std::make_shared<TrafoCH3Quasiexact>(mass);
+             */
 		    return Vop;
 
         } else {

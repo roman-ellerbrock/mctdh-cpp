@@ -82,12 +82,14 @@ C     did happen in operatoren.f
       integer ibasis,npd,iterm,ib,nfile
       character f1*80,line*80
 
-      open(4,file='/home/hoppe/Documents/mctdh-cpp/Hamiltonians/PESs/liu
-     ._ch4cl/pipNN/biases.txt',status='old')
+      open(4,file='/Users/hanneshoppe/Desktop/romans_code/mctdh-cpp/Hami
+     .ltonians/PESs/liu_ch4cl/pipNN/biases.txt',status='old')
 
-        nfile=7
-        open(nfile,file='/home/hoppe/Documents/mctdh-cpp/Hamiltonians/PE
-     .Ss/liu_ch4cl/pipNN/weights.txt')
+      nfile=7
+      open(nfile,file='/Users/hanneshoppe/Desktop/romans_code/mctdh-cpp/
+     .Hamiltonians/PESs/liu_ch4cl/pipNN/weights.txt')
+
+
         read(nfile,*)ninput,nhid,noutput
         nscale=ninput+noutput
         nlayer=nhid+2 !additional one for input layer and one for output

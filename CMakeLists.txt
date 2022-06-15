@@ -15,6 +15,8 @@ cmake_policy(SET "CMP0042" NEW)
 # For debugging CMake
 #set(CMAKE_VERBOSE_MAKEFILE ON)
 
+include_directories(external/eigen)
+
 include(vectorization.cmake)
 set(mctdh_DEBUG_FLAGS "-g")
 #set(FLAGS_VECTORIZE "-fopenmp-simd -march=native -Rpass='loop|vect' -Rpass-missed='loop|vect' -Rpass-analysis='loop|vect'")

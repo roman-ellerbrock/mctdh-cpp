@@ -29,7 +29,7 @@ c       end module nnparam
       real*8     x(ndimx),q(ndimq),x0(ndimx)
       parameter (vmax=5.0d0/27.2114d0)
 
-      call IntToCart(q,x0)
+      call IntToCartStereo(q,x0,m)
 
       call ARRANGE(x0,x)
 
