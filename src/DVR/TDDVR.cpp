@@ -49,7 +49,7 @@ void shift(vector<Matrixcd>& xs, const vector<double>& shift) {
 	}
 }
 
-void shift(vector<Vectord>& xs, const vector<double>& shift) {
+void shiftBack(vector<Vectord>& xs, const vector<double>& shift) {
 	assert(xs.size() == shift.size());
 	for (size_t i = 0; i < xs.size(); ++i) {
 		double s = shift[i];
@@ -86,7 +86,7 @@ void LayerGrid(TreeGrids& grids, Matrixcd& trafo,
 
 		auto diags = WeightedSimultaneousDiagonalization::calculate(xs, w, 1e-5);
 
-		shift(diags.second, shifts);
+		shiftBack(diags.second, shifts);
 
 		setGrids(grids, diags.second, node);
 		trafo = diags.first;

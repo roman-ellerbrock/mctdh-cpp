@@ -85,11 +85,11 @@ namespace cdvr_functions {
 						for (size_t l1 = 0; l1 < dimc; ++l1) {
 							for (size_t l2 = 0; l2 < dimc; ++l2) {
 								// vidx = {idx[0], idx[1], l1, l2};
-								size_t vidx = i0 + i1 * dimc + l1 * dimc2 + l2 * dimc3;
+								const size_t vidx = i0 + i1 * dimc + l1 * dimc2 + l2 * dimc3;
 								// didx = {l2, idx[3], l1, idx[2]};
-								size_t didx = l2 + i3 * dimc + l1 * dimc * dimn + i2 * dimc2 * dimn;
+								const size_t didx = l2 + i3 * dimc + l1 * dimc * dimn + i2 * dimc2 * dimn;
 								// indexMapping(idx, J, eshape);
-								size_t J = i0 + i1 * dimc + i2 * dimc2 + i3 * dimc2 * dimn;
+								const size_t J = i0 + i1 * dimc + i2 * dimc2 + i3 * dimc2 * dimn;
 								E(J) += subDeltaV(vidx) * D(didx);
 							}
 						}

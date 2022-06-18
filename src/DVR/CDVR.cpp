@@ -95,6 +95,7 @@ Tensorcd CDVR::apply(Tensorcd Phi, const SpectralDecompositioncd& rho_x, const N
 	if (!node.isToplayer()) {
 		Phi = matrixTensor(sqrho, Phi, node.nChildren());
 	}
+
 	/// adjust size
 	const Node& lnode = ltree_.getNode(node.address());
 	if (lnode.shape() != Phi.shape()) {
