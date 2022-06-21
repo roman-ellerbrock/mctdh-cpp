@@ -129,7 +129,7 @@ void CDVR::Update(const Wavefunction& Psi, const PotentialOperator& V,
 	Chi_ = MatrixTensorTree(Psi, tree, true);
 
 	/// Build X-matrices, diagonalize them simultaneously
-	tddvr_.Update(Psi, tree);
+	tddvr_.update(Psi, tree);
 
 	/// Transform to grid
 	tddvr_.GridTransformation(Chi_, tree);
@@ -146,7 +146,29 @@ void CDVR::Update(const Wavefunction& Psi, const PotentialOperator& V,
 	cdvr_functions::calculateDeltaVs(deltaV_, Chi_, Vnode_, Vedge_, tree);
 }
 
-void CDVR::Update2(Wavefunction Psi, const PotentialOperator& V,
+void CDVR::update(SymTensorTree& Psi, const PotentialOperator& V,
+	const Tree& tree, size_t part, bool out, ostream& os) {
+
+	/// Build X-matrices, diagonalize them simultaneously
+	tddvr_.update(Psi, tree);
+
+	/// Transform to grid
+	tddvr_.GridTransformation(Psi, tree);
+
+	/// Save top-down normalized wavefunction, since it is needed to apply the CDVR-operator
+	Cdown_ = Psi.down_;
+//	Cdown_ = Chi_.topDownNormalized(tree);
+
+	/// evaluate potential at Nodes and edges
+	UpdateNodeDVR(Vnode_, tddvr_.grids_, tddvr_.hole_grids_, V, tree, part, out, os);
+	UpdateEdgeDVR(Vedge_, tddvr_.grids_, tddvr_.hole_grids_, V, tree, part, out, os);
+	if (out) { os << endl; }
+
+	/// evaluate correction matrices
+	cdvr_functions::calculateDeltaVs(deltaV_, Chi_, Vnode_, Vedge_, tree);
+}
+
+/*void CDVR::Update2(Wavefunction Psi, const PotentialOperator& V,
 	const Tree& smalltree, size_t part, bool out, ostream& os) {
 
 	/// Inflate wavefunction basis
@@ -163,7 +185,7 @@ void CDVR::Update2(Wavefunction Psi, const PotentialOperator& V,
 	Psi = tddvr_.Xs_.Optimize(Psi, rho, ltree_, smalltree);
 
 	/// Build X-matrices, diagonalize them simultaneously
-	tddvr_.Update(Psi, ltree_);
+	tddvr_.update(Psi, ltree_);
 
 	/// Transform to grid
 	tddvr_.GridTransformation(Chi_, ltree_);
@@ -179,5 +201,4 @@ void CDVR::Update2(Wavefunction Psi, const PotentialOperator& V,
 	/// evaluate correction matrices
 	cdvr_functions::calculateDeltaVs(deltaV_, Chi_, Vnode_, Vedge_, ltree_);
 }
-
-
+*/

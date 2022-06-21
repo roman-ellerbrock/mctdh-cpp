@@ -67,6 +67,10 @@ public:
 		/// Calculate CDVR
 		if (H.hasV) { cdvr_.Update(Psi, H.V_, tree); }
 //		if (H.hasV) { cdvr_.Update2(Psi, H.V_, tree); }
+
+//		SymTensorTree Chi(Psi, tree);
+//		cdvr_.update(Chi, H.V_, tree);
+
 	}
 
 	void symbuild(const Hamiltonian& H, MatrixTensorTree Psi,

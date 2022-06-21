@@ -16,7 +16,7 @@ class TDDVR {
 public:
 	TDDVR(const Wavefunction& Psi, const Tree& tree)
 		: TDDVR(tree) {
-		Update(Psi, tree);
+		update(Psi, tree);
 	}
 
 	explicit TDDVR(const Tree& tree)
@@ -32,12 +32,20 @@ public:
 	~TDDVR() = default;
 
 	void GridTransformation(MatrixTensorTree& Psi, const Tree& tree, bool inverse = false) const;
+	void GridTransformation(SymTensorTree& Psi, const Tree& tree, bool inverse = false) const;
 
-	void Update(const Wavefunction& Psi, const Tree& tree);
+	void update(const Wavefunction& Psi, const Tree& tree);
+
+	void update(const SymTensorTree& Psi, const Tree& tree);
 
 	void print(const Tree& tree) const;
 
 	void NodeTransformation(Tensorcd& Phi, const Node& node, bool inverse) const;
+
+	void downTransformation(Tensorcd& Phi, const Node& node, bool inverse) const;
+	void upTransformation(Tensorcd& Phi, const Node& node, bool inverse) const;
+	void upTransformation(SymTensorTree& Psi, const Tree& tree, bool inverse) const;
+	void downTransformation(SymTensorTree& Psi, const Tree& tree, bool inverse) const;
 
 	TreeGrids grids_;
 	MatrixTreecd trafo_;

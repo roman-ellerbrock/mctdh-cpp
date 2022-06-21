@@ -20,12 +20,15 @@ public:
 	void Update(const Wavefunction& Psi, const PotentialOperator& V, const Tree& tree,
 		size_t part = 0, bool out = false, ostream& os = cout);
 
-	void Update2(Wavefunction Psi, const PotentialOperator& V,
+/*	void Update2(Wavefunction Psi, const PotentialOperator& V,
 		const Tree& smalltree, size_t part = 0,
-		bool out = false, ostream& os = cout);
+		bool out = false, ostream& os = std::cout);*/
 
 //	Tensorcd Apply(Tensorcd Phi, const Matrixcd& invsq_rho, const Node& node) const;
 	Tensorcd apply(Tensorcd Phi, const SpectralDecompositioncd& rho_x, const Node& node) const;
+
+	void update(SymTensorTree& Psi, const PotentialOperator& V,
+		const Tree& tree, size_t part = 0, bool out = false, ostream& os = std::cout);
 
 	TDDVR tddvr_;
 
