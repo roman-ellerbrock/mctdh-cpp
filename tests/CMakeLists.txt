@@ -11,7 +11,7 @@ enable_testing()
 set(mctdh_tests
         tests.cpp
         test_TDDVR.cpp
-        )
+        test_SCF.cpp)
 add_executable(tests ${mctdh_tests})
 
 set(tests_DEBUG_FLAGS "-g -O3")
