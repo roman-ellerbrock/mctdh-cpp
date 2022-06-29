@@ -7,7 +7,7 @@
 #include "TreeClasses/MatrixTreeFunctions.h"
 #include "TreeClasses/SparseMatrixTreeFunctions.h"
 #include "Util/WeightedSimultaneousDiagonalization.h"
-#include "Util/SimultaneousDiagonalization.h"
+#include "TreeClasses/SymMatrixTreeFunctions.h"
 
 vector<Matrixcd> getXs(const vector<SparseMatrixTreecd>& Xs, const Node& node) {
 	vector<Matrixcd> xs;
@@ -62,7 +62,7 @@ void shiftBack(vector<Vectord>& xs, const vector<double>& shift) {
 
 void LayerGrid(TreeGrids& grids, Matrixcd& trafo,
 	const vector<SparseMatrixTreecd>& Xs,
-	const Matrixcd *w_ptr, const Node& node) {
+	Matrixcd w, const Node& node) {
 	assert(grids.size() == Xs.size());
 	auto xs = getXs(Xs, node);
 	assert(!xs.empty());
@@ -73,13 +73,7 @@ void LayerGrid(TreeGrids& grids, Matrixcd& trafo,
 		trafo = trafo.adjoint();
 		setGrids(grids, {diags.second}, node);
 	} else {
-		Matrixcd w;
-		if (w_ptr != nullptr) {
-			w = *w_ptr;
-			w = regularize(w, 1e-9);
-		} else {
-			w = identityMatrix<complex<double>>(trafo.dim1());
-		}
+		w = regularize(w, 1e-9);
 
 		auto shifts = calculateShift(xs, w);
 		shift(xs, shifts);
@@ -94,17 +88,11 @@ void LayerGrid(TreeGrids& grids, Matrixcd& trafo,
 	}
 }
 
-void UpdateGrids(TreeGrids& grids, MatrixTreecd& trafo, const vector<SparseMatrixTreecd>& Xs,
-	const MatrixTreecd *rho_ptr, const Tree& tree) {
+void updateGrids(TreeGrids& grids, MatrixTreecd& trafo, const vector<SparseMatrixTreecd>& Xs,
+	const MatrixTreecd& rho, const Tree& tree) {
 	for (const Node& node: tree) {
-		if (!node.isToplayer()) {
-//			if ((rho_ptr == nullptr) || node.isBottomlayer()) {
-			if (rho_ptr == nullptr) {
-				LayerGrid(grids, trafo[node], Xs, nullptr, node);
-			} else {
-				LayerGrid(grids, trafo[node], Xs, &rho_ptr->operator[](node), node);
-			}
-		}
+		if (node.isToplayer()) { continue; }
+		LayerGrid(grids, trafo[node], Xs, rho[node], node);
 	}
 }
 
@@ -116,24 +104,87 @@ void TDDVR::update(const Wavefunction& Psi, const Tree& tree) {
 	Xs_.Update(Psi, tree);
 
 	/// Build standard grid
-	UpdateGrids(grids_, trafo_, Xs_.mats_, &rho_, tree);
+	updateGrids(grids_, trafo_, Xs_.mats_, rho_, tree);
 
 	/// Build hole grid
-	UpdateGrids(hole_grids_, hole_trafo_, Xs_.holes_, &rho_, tree);
+	updateGrids(hole_grids_, hole_trafo_, Xs_.holes_, rho_, tree);
+}
+
+void layerGrid(TreeGrids& grids, Matrixcd& trafo,
+	vector<Matrixcd> xs,
+	Matrixcd w, const Node& node) {
+
+	assert(grids.size() == Xs.size());
+	assert(!xs.empty());
+
+	if (xs.size() == 1) {
+		SpectralDecompositioncd diags = diagonalize(xs.front());
+		trafo = diags.first;
+		trafo = trafo.adjoint();
+		setGrids(grids, {diags.second}, node);
+	} else {
+		w = regularize(w, 1e-9);
+
+		auto shifts = calculateShift(xs, w);
+		shift(xs, shifts);
+
+		auto diags = WeightedSimultaneousDiagonalization::calculate(xs, w, 1e-5);
+
+		shiftBack(diags.second, shifts);
+
+		setGrids(grids, diags.second, node);
+		trafo = diags.first;
+		trafo = trafo.adjoint();
+	}
+}
+
+vector<Matrixcd> getX(const SymXMatrixTrees& Xs,
+	const Node& node, bool up) {
+	vector<Matrixcd> xs;
+	if (up) {
+		for (const auto& xsym: Xs.xmat_) {
+			const auto& xtree = xsym.up();
+			if (xtree.isActive(node)) {
+				xs.push_back(xtree[node]);
+			}
+		}
+	} else {
+		for (const auto& xsym: Xs.xmat_) {
+			const auto& xtree = xsym.down();
+			if (xtree.isActive(node)) {
+				xs.push_back(xtree[node]);
+			}
+		}
+	}
+	return xs;
+}
+
+void updateGrids(SymTreeGrid& sgrids, SymMatrixTree& u, const SymXMatrixTrees& xsym,
+	const SymMatrixTree& rho, const Tree& tree) {
+
+	for (const Node& node: tree) {
+		auto xs = getX(xsym, node, true);
+		layerGrid(sgrids.up(), u.up()[node], xs, rho.down()[node], node);
+	}
+
+	for (const Node& node: tree) {
+		auto xs = getX(xsym, node, false);
+		layerGrid(sgrids.down(), u.down()[node], xs, rho.up()[node], node);
+	}
 }
 
 void TDDVR::update(const SymTensorTree& Psi, const Tree& tree) {
+
+	/// Calculate sym density-Matrices
+	auto srho = TreeFunctions::weightedContraction(Psi, Psi, tree);
+
 	/// Calculate X-Matrices
-	cout << "update xsym\n";
 	symx_.update(Psi, tree);
-	cout << "update xsym done.\n";
 
-//	UpdateGrids(grids_, trafo_, symx_.xmat_, &rho_, tree);
+	/// Evaluate Grids
+	updateGrids(sgrids_, strafo_, symx_, srho, tree);
 
-	/// Build hole grid
-//	UpdateGrids(hole_grids_, hole_trafo_, Xs_.holes_, &rho_, tree);
-
-	getchar();
+	sgrids_.print(tree);
 }
 
 void TDDVR::NodeTransformation(Tensorcd& Phi, const Node& node, bool inverse) const {
@@ -219,7 +270,6 @@ void TDDVR::upTransformation(SymTensorTree& Psi, const Tree& tree, bool inverse)
 	}
 }
 
-
 void TDDVR::NodeTransformation(Wavefunction& Psi, const Tree& tree, bool inverse) const {
 	for (const Node& node: tree) {
 		NodeTransformation(Psi[node], node, inverse);
@@ -246,7 +296,7 @@ void TDDVR::print(const Tree& tree) const {
 	cout << "TDDVR: " << endl;
 	cout << "Grids:" << endl;
 	for (const Node& node: tree) {
-		if (!node.isToplayer() && !node.isBottomlayer()) {
+		if (!node.isToplayer()) {
 			size_t dim = trafo_[node].dim1();
 			node.info();
 			for (size_t i = 0; i < dim; ++i) {
@@ -262,7 +312,7 @@ void TDDVR::print(const Tree& tree) const {
 	}
 	cout << "Hole grids:" << endl;
 	for (const Node& node: tree) {
-		if (!node.isToplayer() && !node.isBottomlayer()) {
+		if (!node.isToplayer()) {
 			size_t dim = trafo_[node].dim1();
 			node.info();
 			for (size_t i = 0; i < dim; ++i) {

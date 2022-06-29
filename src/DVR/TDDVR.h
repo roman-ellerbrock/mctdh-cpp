@@ -22,14 +22,12 @@ public:
 	explicit TDDVR(const Tree& tree)
 		: Xs_(tree), symx_(tree), rho_(tree), trafo_(tree), hole_trafo_(tree),
 		  grids_(tree), hole_grids_(tree, true),
-		  eps_(1e-8), mem_(tree){
+		  mem_(tree), strafo_(tree), sgrids_(tree){
 		for (const Node& node : tree) {
 			trafo_[node] = identityMatrixcd(node.shape().lastDimension());
 			hole_trafo_[node] = identityMatrixcd(node.shape().lastDimension());
 		}
 	}
-
-	~TDDVR() = default;
 
 	void GridTransformation(MatrixTensorTree& Psi, const Tree& tree, bool inverse = false) const;
 	void GridTransformation(SymTensorTree& Psi, const Tree& tree, bool inverse = false) const;
@@ -54,7 +52,10 @@ public:
 	MatrixTreecd hole_trafo_;
 
 	XMatrixTrees Xs_;
+
 	SymXMatrixTrees symx_;
+	SymMatrixTree strafo_;
+	SymTreeGrid sgrids_;
 
 private:
 	void NodeTransformation(Wavefunction& Psi, const Tree& tree, bool inverse) const;
@@ -62,12 +63,9 @@ private:
 	void EdgeTransformation(Matrixcd& B_inv, const Edge& edge, bool inverse) const;
 	void EdgeTransformation(MatrixTreecd& B_inv, const Tree& tree, bool inverse) const;
 
-//	void GridTransformation(Wavefunction& Psi, const Tree& tree, bool inverse = false) const;
-//	void GridTransformationLocal(Tensorcd& Phi, const Node& node, bool inverse = false) const;
-
 	MatrixTreecd rho_;
 	WorkMemorycd mem_;
-	double eps_;
+	double eps_{1e-8};
 };
 
 

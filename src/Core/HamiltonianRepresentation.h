@@ -23,7 +23,7 @@ public:
 		const Tree& cdvrtree)
 		: rho_(tree), rho_decomposition_(tree),
 		rho_inverse_(tree), cdvr_(tree), mem_(tree) {
-		;
+
 		hMats_.clear();
 		hContractions_.clear();
 		for (const auto& M : H) {
@@ -68,8 +68,8 @@ public:
 		if (H.hasV) { cdvr_.Update(Psi, H.V_, tree); }
 //		if (H.hasV) { cdvr_.Update2(Psi, H.V_, tree); }
 
-//		SymTensorTree Chi(Psi, tree);
-//		cdvr_.update(Chi, H.V_, tree);
+		SymTensorTree Chi(Psi, tree);
+		cdvr_.update(Chi, H.V_, tree);
 
 	}
 
@@ -78,7 +78,7 @@ public:
 
 		Psi.buildFromWeighted(tree);
 
-		TreeFunctions::Represent(hMatSets_, Psi, H, tree);
+		TreeFunctions::represent(hMatSets_, Psi, H, tree);
 	}
 
 	void print(const Tree& tree, ostream& os = cout) {

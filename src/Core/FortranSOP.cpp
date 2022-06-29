@@ -20,11 +20,6 @@ extern "C"
 	void fillpara_(int* f, double* para);
 }
 
-void FillFortranPara()
-{
-
-}
-
 void ApplyFortranDDX(complex<double> hPsi[], complex<double> Psi[],
 	const LeafInterface& grid, int dim) {
 
@@ -103,9 +98,9 @@ void FortranSOP::SpecialInitialize(const Tree& tree) {
 			break;
 		}
 	}
-	cout << "nparts = " << nparts << endl;
+	// cout << "nparts = " << nparts << endl;
 
-	cout << "Building Fortran Hamiltonian in C++..." << endl;
+	// cout << "Building Fortran Hamiltonian in C++..." << endl;
 	// Push_back each Single-Particle Operator
 	for (int i = 0; i < nparts; i++) {
 		MLOcd M;
@@ -118,10 +113,10 @@ void FortranSOP::SpecialInitialize(const Tree& tree) {
 				F->Initialize(i + 1, mode, dim, SystemH);
 				shared_ptr<LeafOperatorcd> F_shared(F);
 				M.push_back(F_shared, k);
-				cout << "part = " << i << " mode = " << k << " diag = " << diag(k, i) << "\n";
+	//			cout << "part = " << i << " mode = " << k << " diag = " << diag(k, i) << "\n";
 			}
 			else {
-				cout << "part = " << i << " mode = " << k << " diag = " << diag(k, i) << endl;
+	//			cout << "part = " << i << " mode = " << k << " diag = " << diag(k, i) << endl;
 			}
 		}
 		push_back(M, fortrancoeffs(i));

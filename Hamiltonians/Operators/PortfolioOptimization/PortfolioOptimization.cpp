@@ -147,16 +147,18 @@ Matrixcd set1() {
 	return s;
 }
 
+double weight(size_t k, size_t Nq) {
+	return (double) pow(2, k) / (double) (pow(2, Nq) - 1);
+}
+
 void addReturns(SOPcd& H, const Tensord& mu, size_t Nt, size_t Na, size_t Nq) {
 	TensorShape shape_q({Nq, Na, Nt});
 	for (size_t t = 0; t < Nt; ++t) {
 		for (size_t i = 0; i < Na; ++i) {
 			size_t muidx = indexMapping({t, i}, mu.shape_);
 			for (size_t k = 0; k < Nq; ++k) {
-				/// weight of the qubit integer encoding
-				double xw = pow(2, k) / (double) pow(2, Nq - 1);
 				/// total weight including negative returns
-				double c = -mu(muidx) * xw;
+				double c = -mu(muidx) * weight(k, Nq);
 
 				size_t qidx = indexMapping({k, i, t}, shape_q);
 				MLOcd M(set1(), qidx);
@@ -172,19 +174,20 @@ void addCovariance(SOPcd& H, const Tensord& cov, double gamma, size_t Nt, size_t
 	for (size_t t = 0; t < Nt; ++t) { /// time
 		for (size_t i = 0; i < Na; ++i) { /// asset i
 			for (size_t j = 0; j < Na; ++j) { /// asset j
-				size_t sigidx = indexMapping({t, i, j}, cov.shape_);
 				/// qubit indices
+				size_t sigidx = indexMapping({t, i, j}, cov.shape_);
 				for (size_t k = 0; k < Nq; ++k) {
-					double xwk = pow(2, k) / (double) pow(2, Nq - 1);
 					for (size_t l = 0; l < Nq; ++l) {
-						double xwl = pow(2, l) / (double) pow(2, Nq - 1);
-						double c = 0.5 * gamma * cov(sigidx) * xwk * xwl;
+						double c = 0.5 * gamma * cov(sigidx) * weight(k, Nq) * weight(l, Nq);
 
-						size_t qkidx = indexMapping({k, i, t}, shape_q);
-						size_t qlidx = indexMapping({l, j, t}, shape_q);
+						size_t kidx = indexMapping({k, i, t}, shape_q);
+						size_t lidx = indexMapping({l, j, t}, shape_q);
 
-						MLOcd M(set1(), qkidx);
-						M.push_back(set1(), qlidx);
+						assert(kidx < shape_q.totalDimension());
+						assert(lidx < shape_q.totalDimension());
+
+						MLOcd M(set1(), kidx);
+						M.push_back(set1(), lidx);
 
 						H.push_back(M, c);
 					}
@@ -200,14 +203,12 @@ void addConstraint(SOPcd& H, const double rho, size_t Nt, size_t Na, size_t Nq) 
 		for (size_t i = 0; i < Na; ++i) {
 			for (size_t j = 0; j < Na; ++j) {
 				for (size_t k = 0; k < Nq; ++k) {
-					double xwk = pow(2, k) / (double) pow(2, Nq - 1);
 					size_t kidx = indexMapping({k, i, t}, shape_q);
 					for (size_t l = 0; l < Nq; ++l) {
-						double xwl = pow(2, l) / (double) pow(2, Nq - 1);
 						size_t lidx = indexMapping({l, j, t}, shape_q);
 						MLOcd M(set1(), kidx);
 						M.push_back(set1(), lidx);
-						H.push_back(M, rho * xwk * xwl);
+						H.push_back(M, rho * weight(k, Nq) * weight(l, Nq));
 					}
 				}
 			}
@@ -218,9 +219,8 @@ void addConstraint(SOPcd& H, const double rho, size_t Nt, size_t Na, size_t Nq) 
 		for (size_t i = 0; i < Na; ++i) {
 			for (size_t k = 0; k < Nq; ++k) {
 				size_t qkidx = indexMapping({k, i, t}, shape_q);
-				double xwk = pow(2, k) / (double) pow(2, Nq - 1);
 				MLOcd M(set1(), qkidx);
-				H.push_back(M, -2. * rho * xwk * xwk);
+				H.push_back(M, -2. * rho * weight(k, Nq));
 			}
 		}
 	}
@@ -229,9 +229,8 @@ void addConstraint(SOPcd& H, const double rho, size_t Nt, size_t Na, size_t Nq) 
 		for (size_t i = 0; i < Na; ++i) {
 			for (size_t k = 0; k < Nq; ++k) {
 				size_t kidx = indexMapping({k, i, t}, shape_q);
-				double xwk = pow(2, k) / (double) pow(2, Nq - 1);
 				MLOcd M(identityMatrixcd(2), kidx);
-				H.push_back(M, 1. / ((double) Na * Nt * Nq));
+				H.push_back(M, 1. / ((double) (Na * Nt * Nq)));
 			}
 		}
 	}
@@ -244,9 +243,10 @@ SOPcd meanVarianceAnalysis() {
 	vector<string> names = {"BTC-USD.csv", "ETH-USD.csv"};
 	size_t N = names.size(); // number of assets
 	size_t m = 180; // number of time steps
-	size_t Delta = 30; // only read any "Delta" days
-	double rho = 1.;
-	double gamma = 1.;
+	size_t Delta = 60; // only read any "Delta" days - Nt = 2
+//	size_t Delta = 30; // only read any "Delta" days - Nt = 5
+	double rho = 2.;
+	double gamma = 2.;
 
 	/// read
 	auto A = readAssets(names, m);
@@ -305,6 +305,8 @@ SOPcd meanVarianceAnalysis() {
 
 	/// How do you obtain mu, and sigma? (forecast return and covariance)
 	/// For proof of concepts: 3 month until now on a daily basis
+
+	getchar();
 
 	return H;
 }

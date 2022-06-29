@@ -80,7 +80,7 @@ void symLayerDerivative(Tensorcd& dPhi, double time, const Tensorcd& Phi,
 	const Hamiltonian& H, const HamiltonianRepresentation& hRep,
 	const Node& node, complex<double> propagation_phase) {
 
-	dPhi = TreeFunctions::symApply(Phi, hRep.hMatSets_, H, node);
+//	dPhi = TreeFunctions::symApply(Phi, hRep.hMatSets_, H, node);
 	dPhi *= -propagation_phase * QM::im;
 }
 

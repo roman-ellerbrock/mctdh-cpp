@@ -151,6 +151,8 @@ void CDVR::update(SymTensorTree& Psi, const PotentialOperator& V,
 
 	/// Build X-matrices, diagonalize them simultaneously
 	tddvr_.update(Psi, tree);
+	cout << "tddvr done.\n";
+	getchar();
 
 	/// Transform to grid
 	tddvr_.GridTransformation(Psi, tree);

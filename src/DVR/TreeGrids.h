@@ -5,6 +5,7 @@
 #ifndef TREEGRIDS_H
 #define TREEGRIDS_H
 #include "TreeClasses/SparseMatrixTreeFunctions.h"
+#include "TreeClasses/SymMatrixTree.h"
 
 class SparseVectorTreed: public SparseNodeAttribute<Vectord> {
 public:
@@ -53,6 +54,28 @@ public:
 				}
 			}
 		}
+	}
+};
+
+class SymTreeGrid : public pair<TreeGrids, TreeGrids> {
+public:
+	SymTreeGrid() = default;
+	~SymTreeGrid() = default;
+
+	explicit SymTreeGrid(const Tree& tree)
+		: pair<TreeGrids, TreeGrids>(TreeGrids(tree), TreeGrids(tree, true)) {
+
+	}
+
+	[[nodiscard]] const TreeGrids& up() const { return first; }
+	TreeGrids& up() { return first; }
+
+	[[nodiscard]] const TreeGrids& down() const { return second; }
+	TreeGrids& down() { return second; }
+
+	void print(const Tree& tree) const {
+		up().print(tree);
+		down().print(tree);
 	}
 };
 

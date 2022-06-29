@@ -9,18 +9,20 @@
 #include "MatrixTensorTreeFunctions.h"
 #include "XMatrixTrees.h"
 #include "TreeClasses/SymTensorTree.h"
+#include "TreeClasses/SymMatrixTreeFunctions.h"
+
+SOPcd symXsop(const Tree& tree);
 
 class SymXMatrixTrees {
 public:
 
 	SymXMatrixTrees(const Tree& tree)
-	: xops_(Xsop(tree)) {
+	: xops_(symXsop(tree)) {
 		xmat_.clear();
 		for (const auto& x : xops_) {
-			SparseMatrixTreecd x1(x, tree);
-			SparseMatrixTreecd x2(x, tree);
-			SparseMatrixTreePaircd y({x1, x2});
-			xmat_.emplace_back(y);
+			SparseMatrixTreecd mat(x, tree);
+			SparseMatrixTreecd hole(x, tree, false, true);
+			xmat_.emplace_back(SymMatrixTree(mat, hole));
 		}
 	}
 
