@@ -26,6 +26,7 @@ public:
 
 //	Tensorcd Apply(Tensorcd Phi, const Matrixcd& invsq_rho, const Node& node) const;
 	Tensorcd apply(Tensorcd Phi, const SpectralDecompositioncd& rho_x, const Node& node) const;
+	Tensorcd applySym(Tensorcd Phi, const SpectralDecompositioncd& rho_x, const Node& node) const;
 
 	void update(SymTensorTree& Psi, const PotentialOperator& V,
 		const Tree& tree, size_t part = 0, bool out = false, ostream& os = std::cout);
@@ -40,10 +41,8 @@ private:
 
 	DeltaVTree deltaV_;
 
-	MatrixTensorTree Chi_;
 	TensorTreecd Cdown_;
-
-	SymTensorTree C_;
+	TensorTreecd Cup_;
 
 	WorkMemorycd mem_;
 

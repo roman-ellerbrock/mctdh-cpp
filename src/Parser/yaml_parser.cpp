@@ -143,6 +143,8 @@ namespace parser {
 		} else if (name == "electronicstructure") {
 			auto hfile = evaluate<string>(node, "hamiltonian");
 			H = electronicStructure(hfile);
+		} else if (name == "fermigas") {
+			H = fermiGas2D(2);
 		}else if (name == "schaepers") {
 			// find the masses supplied for this hamiltonian
 			auto masses = evaluate<string>(node, "masses");
@@ -170,7 +172,12 @@ namespace parser {
 			H = Operator::schaepers(tree, massvec, couplingvec);
 
 		}else if (name == "portfoliooptimization") {
-			H = meanVarianceAnalysis();
+			auto Na = evaluate<size_t>(node, "nAssets", 25);
+			auto NaTot = evaluate<size_t>(node, "nAssetsTotal", 99);
+			auto Nt = evaluate<size_t>(node, "nTime", 1);
+			auto NtTot = evaluate<size_t>(node, "nTimeTotal", 180);
+			auto tickers = evaluate<string>(node, "tickers", "merged.csv");
+			H = meanVarianceAnalysis(tickers, Na, Nt, NaTot, NtTot);
 		} else {
 			cout << "No valid Hamiltonian name." << endl;
 			cout << "Chosen name: " << name << endl;

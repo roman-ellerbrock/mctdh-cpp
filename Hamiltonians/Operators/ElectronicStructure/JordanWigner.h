@@ -12,6 +12,9 @@ namespace JordanWigner {
 	typedef vector<tuple<int, int, double>> TwoIndex;
 
 	typedef vector<tuple<int, int, int, int, double>> FourIndex;
+	Matrixcd sigmaPlus();
+	Matrixcd sigmaMinus();
+	Matrixcd sigmaZ();
 
 	MLOcd twoIndexOperator(size_t p, size_t q, double eps);
 

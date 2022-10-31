@@ -196,13 +196,12 @@ namespace cdvr_functions {
 		}
 	}
 
-	void calculateDeltaVs(DeltaVTree& deltaVs, const MatrixTensorTree& Chi,
+	void calculateDeltaVs(DeltaVTree& deltaVs,
+		const TensorTreecd& Cup, const TensorTreecd& Cdown,
 		const TensorTreecd& Vnodes, const MatrixTreed& Vedges,
 		const Tree& tree) {
 
-		const TensorTreecd& Cup = Chi.bottomUpNormalized(tree);
-		const TensorTreecd& Cdown = Chi.topDownNormalized(tree);
-		for (const Node& node : tree) {
+		for (const Node& node: tree) {
 			if (node.isBottomlayer()) {
 				calculateDeltaEdgeLocal(deltaVs[node], Cup[node],
 					Vnodes[node], Vedges[node], node);

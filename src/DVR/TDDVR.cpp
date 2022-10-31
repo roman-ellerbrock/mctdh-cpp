@@ -183,8 +183,6 @@ void TDDVR::update(const SymTensorTree& Psi, const Tree& tree) {
 
 	/// Evaluate Grids
 	updateGrids(sgrids_, strafo_, symx_, srho, tree);
-
-	sgrids_.print(tree);
 }
 
 void TDDVR::NodeTransformation(Tensorcd& Phi, const Node& node, bool inverse) const {
@@ -217,16 +215,12 @@ void TDDVR::downTransformation(Tensorcd& Phi, const Node& node, bool inverse) co
 	const Node& parent = node.parent();
 	for (size_t k = 0; k < parent.nChildren(); ++k) {
 		const Node& child = parent.child(k);
-		if (k == node.childIdx()) {
-			Matrixcd U = inverse ? hole_trafo_[child].adjoint() : hole_trafo_[child];
-			Phi = matrixTensor(U, Phi, k);
-		} else {
-			Matrixcd U = inverse ? trafo_[child].adjoint() : trafo_[child];
-			Phi = matrixTensor(U, Phi, k);
-		}
+		Matrixcd U = inverse ? strafo_.down()[child].adjoint() : strafo_.down()[child];
+		Phi = matrixTensor(U, Phi, k);
 	}
+
 	if (!parent.isToplayer()) {
-		Matrixcd U = inverse ? trafo_[node].adjoint() : trafo_[node];
+		Matrixcd U = inverse ? strafo_.down()[node].adjoint() : strafo_.down()[node];
 		Phi = matrixTensor(U, Phi, node.parentIdx());
 	}
 }
@@ -243,15 +237,18 @@ void TDDVR::EdgeTransformation(Matrixcd& B_inv, const Edge& edge, bool inverse) 
 
 void TDDVR::upTransformation(Tensorcd& Phi, const Node& node, bool inverse) const {
 	assert(!node.isToplayer());
-	const Node& parent = node.parent();
-	for (size_t k = 0; k < parent.nChildren(); ++k) {
-		const Node& child = parent.child(k);
-		Matrixcd U = inverse ? trafo_[child].adjoint() : trafo_[child];
-		Phi = matrixTensor(U, Phi, k);
+	if (!node.isBottomlayer()) {
+		for (size_t k = 0; k < node.nChildren(); ++k) {
+			const Node& child = node.child(k);
+//			Matrixcd u = inverse ? strafo_.up()[child].adjoint() : strafo_.up()[child];
+			Matrixcd u = inverse ? trafo_[child].adjoint() : trafo_[child];
+			Phi = matrixTensor(u, Phi, k);
+		}
 	}
 
-	if (!parent.isToplayer()) {
-		Matrixcd U = inverse ? trafo_[node].adjoint() : trafo_[node];
+	if (!node.isToplayer()) {
+		Matrixcd U = inverse ? hole_trafo_[node].adjoint() : hole_trafo_[node];
+//		Matrixcd U = inverse ? strafo_.down()[node].adjoint() : strafo_.down()[node];
 		Phi = matrixTensor(U, Phi, node.parentIdx());
 	}
 }
@@ -265,7 +262,6 @@ void TDDVR::downTransformation(SymTensorTree& Psi, const Tree& tree, bool invers
 
 void TDDVR::upTransformation(SymTensorTree& Psi, const Tree& tree, bool inverse) const {
 	for (const Node& node: tree) {
-		if (node.isToplayer()) { continue; }
 		upTransformation(Psi.up_[node], node, inverse);
 	}
 }
@@ -327,7 +323,6 @@ void TDDVR::print(const Tree& tree) const {
 		}
 	}
 }
-
 
 /*void TDDVR::GridTransformationLocal(Tensorcd& Phi, const Node& node, bool inverse) const {
 

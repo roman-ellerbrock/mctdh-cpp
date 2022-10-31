@@ -1,5 +1,6 @@
 #include "CoupledHO/CoupledHO.h"
 #include "ElectronicStructure/ElectronicStructure.h"
+#include "ElectronicStructure/FermiGas.h"
 #include "PhysicalSystems/StandardOperatorLibrary.h"
 #include "PhysicalSystems/SpinBoson.h"
 #include "Molecules/NormalModes.h"

@@ -22,6 +22,8 @@ add_library(Operators Operators.h
 
         ElectronicStructure/ElectronicStructure.cpp
         ElectronicStructure/ElectronicStructure.h
+        ElectronicStructure/FermiGas.cpp
+        ElectronicStructure/FermiGas.h
         ElectronicStructure/JordanWigner.cpp
         ElectronicStructure/JordanWigner.h
 

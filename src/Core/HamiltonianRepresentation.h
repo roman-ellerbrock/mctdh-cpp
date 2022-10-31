@@ -46,7 +46,8 @@ public:
 
 	~HamiltonianRepresentation() = default;
 
-	void build(const Hamiltonian& H, const Wavefunction& Psi, const Tree& tree, double time) {
+	void build(const Hamiltonian& H, const Wavefunction& Psi, const Tree& tree,
+		double time) {
 
 		/// Calculate density matrix tree
 		TreeFunctions::contraction(rho_, Psi, tree, true);
@@ -65,21 +66,19 @@ public:
 		TreeFunctions::contraction(hContractions_, hMats_, Psi, Psi, tree);
 
 		/// Calculate CDVR
-		if (H.hasV) { cdvr_.Update(Psi, H.V_, tree); }
+//		ofstream os("points.dat");
+		if (H.hasV) { cdvr_.Update(Psi, H.V_, tree, 0, false); }
 //		if (H.hasV) { cdvr_.Update2(Psi, H.V_, tree); }
-
-		SymTensorTree Chi(Psi, tree);
-		cdvr_.update(Chi, H.V_, tree);
-
+		if (H.hasV) { SymTensorTree Chi(Psi, tree); cdvr_.update(Chi, H.V_, tree, 0, false); }
 	}
 
-	void symbuild(const Hamiltonian& H, MatrixTensorTree Psi,
+/*	void symbuild(const Hamiltonian& H, MatrixTensorTree Psi,
 		const Tree& tree) {
 
 		Psi.buildFromWeighted(tree);
 
 		TreeFunctions::represent(hMatSets_, Psi, H, tree);
-	}
+	}*/
 
 	void print(const Tree& tree, ostream& os = cout) {
 		os << "Rho:" << endl;

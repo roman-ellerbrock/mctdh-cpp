@@ -40,10 +40,10 @@ void UpdateNodeDVRLocal(Tensorcd& dvr, const TreeGrids& grids,
 		fillXNode(X, idxs, grids, holegrids, node);
 		dvr(I) = V.evaluate(X, part);
 
-//		if (out) {
-//			for (size_t i = 0; i < X.dim(); ++i) { os << X(i) << "\t"; }
-//			os << real(dvr(I)) << endl;
-//		}
+		if (out) {
+			for (size_t i = 0; i < X.dim(); ++i) { os << X(i) << "\t"; }
+			os << real(dvr(I)) << endl;
+		}
 	}
 }
 
@@ -67,10 +67,10 @@ void UpdateEdgeDVRLocal(Matrixd& edgedvr, const TreeGrids& grids, const TreeGrid
 		fillXEdge(X, idxs, grids, holegrids, node);
 		edgedvr(idxs.front(), idxs.back()) = V.evaluate(X, part);
 		if (out) {
-//			for (size_t i = 0; i < X.dim(); ++i) {
-//				os << X(i) << "\t";
-//			}
-//			os << edgedvr(idxs.front(), idxs.back()) << endl;
+			for (size_t i = 0; i < X.dim(); ++i) {
+				os << X(i) << "\t";
+			}
+			os << edgedvr(idxs.front(), idxs.back()) << endl;
 		}
 	}
 }
@@ -122,20 +122,44 @@ Tensorcd CDVR::apply(Tensorcd Phi, const SpectralDecompositioncd& rho_x, const N
 	return VXi;
 }
 
+Tensorcd CDVR::applySym(Tensorcd Phi, const SpectralDecompositioncd& rho_x, const Node& node) const {
+
+	auto x_sqrt_rho = sqrt(rho_x);
+	x_sqrt_rho.second = regularize(x_sqrt_rho.second, 1e-6);
+	auto sqrho = toMatrix(x_sqrt_rho);
+
+	if (!node.isToplayer()) {
+		Phi = matrixTensor(sqrho, Phi, node.nChildren());
+	}
+
+	tddvr_.upTransformation(Phi, node, false);
+
+	Tensorcd VXi(Phi.shape());
+	cdvr_functions::apply(VXi, Phi, Vnode_[node], Cdown_, deltaV_, node, mem_);
+
+	tddvr_.upTransformation(Phi, node, true);
+
+/*	if (!node.isToplayer()) {
+		VXi = matrixTensor(sqrho.adjoint(), VXi, node.nChildren());
+	}
+*/
+	return VXi;
+}
+
 void CDVR::Update(const Wavefunction& Psi, const PotentialOperator& V,
 	const Tree& tree, size_t part, bool out, ostream& os) {
 
 	/// Get Edge wavefunction
-	Chi_ = MatrixTensorTree(Psi, tree, true);
+	MatrixTensorTree Chi(Psi, tree, true);
 
 	/// Build X-matrices, diagonalize them simultaneously
 	tddvr_.update(Psi, tree);
 
 	/// Transform to grid
-	tddvr_.GridTransformation(Chi_, tree);
-
-	/// Save top-down normalized wavefunction, since it is needed to apply the CDVR-operator
-	Cdown_ = Chi_.topDownNormalized(tree);
+	tddvr_.GridTransformation(Chi, tree);
+	cout << "old up:\n";
+//	Chi.nodes().print(tree);
+	Chi.bottomUpNormalized(tree).print(tree);
 
 	/// evaluate potential at Nodes and edges
 	UpdateNodeDVR(Vnode_, tddvr_.grids_, tddvr_.hole_grids_, V, tree, part, out, os);
@@ -143,7 +167,10 @@ void CDVR::Update(const Wavefunction& Psi, const PotentialOperator& V,
 	if (out) { os << endl; }
 
 	/// evaluate correction matrices
-	cdvr_functions::calculateDeltaVs(deltaV_, Chi_, Vnode_, Vedge_, tree);
+	const TensorTreecd& Cup = Chi.bottomUpNormalized(tree);
+	Cup_ = Cup;
+	Cdown_ = Chi.topDownNormalized(tree);
+	cdvr_functions::calculateDeltaVs(deltaV_, Cup, Cdown_, Vnode_, Vedge_, tree);
 }
 
 void CDVR::update(SymTensorTree& Psi, const PotentialOperator& V,
@@ -151,23 +178,41 @@ void CDVR::update(SymTensorTree& Psi, const PotentialOperator& V,
 
 	/// Build X-matrices, diagonalize them simultaneously
 	tddvr_.update(Psi, tree);
-	cout << "tddvr done.\n";
-	getchar();
 
 	/// Transform to grid
 	tddvr_.GridTransformation(Psi, tree);
+	cout << "new up:\n";
+	Psi.up_.print(tree);
+	getchar();
+
+	SymTensorTree chi;
+	chi.initialize(tree);
+	chi.up_ = Cup_;
+	chi.down_ = Cdown_;
+
+	/// evaluate potential at Nodes and edges
+	UpdateNodeDVR(Vnode_, tddvr_.sgrids_.up(), tddvr_.sgrids_.down(), V, tree, part, out, os);
+	UpdateEdgeDVR(Vedge_, tddvr_.sgrids_.up(), tddvr_.sgrids_.down(), V, tree, part, out, os);
+	if (out) { os << endl; }
 
 	/// Save top-down normalized wavefunction, since it is needed to apply the CDVR-operator
 	Cdown_ = Psi.down_;
-//	Cdown_ = Chi_.topDownNormalized(tree);
 
-	/// evaluate potential at Nodes and edges
-	UpdateNodeDVR(Vnode_, tddvr_.grids_, tddvr_.hole_grids_, V, tree, part, out, os);
-	UpdateEdgeDVR(Vedge_, tddvr_.grids_, tddvr_.hole_grids_, V, tree, part, out, os);
-	if (out) { os << endl; }
+/*	SymTensorTree xi;
+	xi.initialize(tree);
+	xi.up_ = Cup_;
+	xi.down_ = Cdown_;
+	SymMatrixTree s(tree);
+	TreeFunctions::symRepresent(s, Psi, xi, tree);
+	cout << "s up:\n";
+	s.up().print();
+	cout << "s down:\n";
+	s.down().print();
+	getchar();*/
+
 
 	/// evaluate correction matrices
-	cdvr_functions::calculateDeltaVs(deltaV_, Chi_, Vnode_, Vedge_, tree);
+	cdvr_functions::calculateDeltaVs(deltaV_, Psi.up_, Psi.down_, Vnode_, Vedge_, tree);
 }
 
 /*void CDVR::Update2(Wavefunction Psi, const PotentialOperator& V,

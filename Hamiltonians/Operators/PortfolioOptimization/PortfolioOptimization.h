@@ -6,6 +6,6 @@
 #define PORTFOLIOOPTIMIZATION_H
 #include "TreeOperators/SumOfProductsOperator.h"
 
-SOPcd meanVarianceAnalysis();
+SOPcd meanVarianceAnalysis(string tickers, size_t Na, size_t Nt, size_t NaTot, size_t NtTot);
 
 #endif //PORTFOLIOOPTIMIZATION_H
