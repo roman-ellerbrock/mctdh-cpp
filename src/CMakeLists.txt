@@ -21,8 +21,14 @@ target_sources(mctdh_lib PUBLIC
         Core/Hamiltonian.h
         Core/HamiltonianRepresentation.cpp
         Core/HamiltonianRepresentation.h
+        Core/QuadraticSOP.cpp
+        Core/QuadraticSOP.h
+        Core/QuadraticSVD.cpp
+        Core/QuadraticSVD.h
         Core/Wavefunction.h
         Core/Wavefunction.cpp
+        Core/SCF.cpp
+        Core/SCF.h
 
         DVR/MatrixTensorTree.cpp
         DVR/MatrixTensorTree.h
@@ -49,6 +55,7 @@ target_sources(mctdh_lib PUBLIC
 
         Utility/Overlaps.cpp
         Utility/normal_modes.cpp
+        Utility/NewtonRaphson.cpp
         )
 
 target_include_directories(mctdh_lib PUBLIC

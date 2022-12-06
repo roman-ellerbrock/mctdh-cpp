@@ -42,6 +42,7 @@ void Status(const Vectord& eigenvalues, const Vectord& propergatorev,
 
 	// Write out Eigenvalues
 	int zero = propergatorev.dim() - 1;
+	cout << setprecision(12);
 	os << "Eigenvalues (Diagonalizing Hamiltonmatrix"
 	   << " / Propagatormatrix)" << endl;
 	os << "Ground state :\t" << eigenvalues(0) * energy.second << " " << energy.first;

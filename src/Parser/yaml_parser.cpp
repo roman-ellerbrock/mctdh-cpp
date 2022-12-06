@@ -10,6 +10,7 @@
 #include "Core/Eigenstates.h"
 #include "Utility/Overlaps.h"
 #include "Utility/normal_modes.h"
+#include "Core/SCF.h"
 
 namespace parser {
 
@@ -312,6 +313,17 @@ namespace parser {
 		return ivar;
 	}
 
+	SCF_parameters scf_parameters(const YAML::Node& node, mctdh_state& state) {
+		SCF_parameters par;
+		par.nIter = evaluate<size_t>(node, "niter", 20);
+		par.nKrylov = evaluate<size_t>(node, "nkrylov", 20);
+		par.beta = evaluate<double>(node, "beta", 1);
+		par.psi = &state.wavefunctions_["Psi"];
+		par.h = state.hamiltonian_.get();
+		par.tree = &state.tree_;
+		return par;
+	}
+
 	mctdh_state read(const string& yaml_filename) {
 		YAML::Node config = YAML::LoadFile(yaml_filename);
 		mctdh_state job;
@@ -343,6 +355,9 @@ namespace parser {
 			} else if (job == "eigenstates") {
 				auto ivar = new_ivar(node, state);
 				Eigenstates(ivar);
+			} else if (job == "scf") {
+				auto par = scf_parameters(node, state);
+				scf(par);
 			} else if (job == "cmf") {
 				auto ivar = new_ivar(node, state);
 				const Hamiltonian& H = *ivar.h;

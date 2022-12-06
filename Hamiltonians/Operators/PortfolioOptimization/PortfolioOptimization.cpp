@@ -4,6 +4,7 @@
 
 #include "PortfolioOptimization.h"
 #include "TreeOperators/SumOfProductsOperator.h"
+#include "Core/QuadraticHolePartitions.h"
 
 Tensord readAssets(const string& name, size_t n_assets, size_t n_time) {
 	TensorShape shape({n_time, n_assets});
@@ -252,6 +253,7 @@ void addReturns(SOPcd& H, const Tensord& mu, double alpha, size_t Nt, size_t Na,
 
 void addCovariance(SOPcd& H, const Tensord& cov, double gamma, size_t Nt, size_t Na, size_t Nq) {
 	TensorShape shape_q({Nq, Na, Nt});
+	Matrixcd mat(Na, Na);
 	for (size_t t = 0; t < Nt; ++t) { /// time
 		for (size_t i = 0; i < Na; ++i) { /// asset i
 			for (size_t j = 0; j < Na; ++j) { /// asset j
@@ -271,6 +273,7 @@ void addCovariance(SOPcd& H, const Tensord& cov, double gamma, size_t Nt, size_t
 						M.push_back(set1(), lidx);
 
 						H.push_back(M, c);
+						mat(i, j) = c;
 					}
 				}
 			}

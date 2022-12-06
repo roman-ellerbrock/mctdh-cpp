@@ -12,6 +12,7 @@ SOPcd CoupledHO(const Tree& tree) {
     LeafFuncd id = &LeafInterface::identity;
 
 	constexpr double cm = 219474.6313705;
+//	constexpr double lambda = 1000. / cm;
 	constexpr double lambda = 2000. / cm;
 	constexpr double omega = 4000. / cm;
 
