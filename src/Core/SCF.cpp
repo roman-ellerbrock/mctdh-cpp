@@ -43,7 +43,6 @@ Tensorcd apply(const Tensorcd& A,
 			if (hMats[l].isActive(node) && hCons[l].isActive(node)) {
 				const MLOcd& M = H[l];
 				const Leaf& leaf = node.getLeaf();
-
 				hA = M.apply(A, leaf);
 				hA = matrixTensor(hCons[l][node], hA, node.parentIdx());
 				HA += H.coeff(l) * hA;
@@ -72,7 +71,8 @@ Tensorcd apply(const Tensorcd& A,
 
 Tensorcd apply(const Tensorcd& A, const HamiltonianRepresentation& hrep,
 	const Hamiltonian& H, const Node& node) {
-	const MatrixTreecd *rho = &hrep.rho_;
+//	const MatrixTreecd *rho = &hrep.rho_;
+	const MatrixTreecd *rho = nullptr;
 	const SparseMatrixTreecd& hCorr = hrep.hCorr_;
 	const SparseMatrixTreecd& hConCorr = hrep.hConCorr_;
 	return apply(A, hrep.hMats_, hrep.hContractions_, hCorr, hConCorr, rho, H, node);
@@ -172,7 +172,7 @@ KrylovSpace solveKrylovSpace(Tensorcd Psi, const HamiltonianRepresentation& hrep
 
 	/// Diagonalize Hamiltonian matrix and save transformation matrix U and eigenvalues E.
 	auto spectrum = diagonalize(Hrep);
-	cout << "E_krylov: ";
+//	cout << "E_krylov: ";
 	(spectrum.second * QM::cm).print();
 	return KrylovSpace(krylovSpace, spectrum);
 }
@@ -250,35 +250,29 @@ void scf(SCF_parameters& par) {
 	TensorTreecd& Psi = *par.psi;
 
 	auto sweeper = scf_sweep(tree);
+	double eps = 1. / ((double) (sweeper.size() - 1)); /// just for printing output
 
 	HamiltonianRepresentation hrep(H, tree, tree, false);
 //	hrep.initializeDense(H, tree); /// create this time with dense matrices
 	hrep.build(H, Psi, tree, time);
+	cout << setprecision(12);
 
 	for (size_t it = 0; it < par.nIter; ++it) {
-		outputSCF(Psi[tree.topNode()], hrep, H, tree.topNode());
-		cout << "Iteration " << it << endl;
+//		cout << "Iteration " << it << endl;
+
 		for (size_t l = 0; l < sweeper.size() - 1; ++l) {
 			hrep.build(H, Psi, tree, time);
 			if (sweeper[l] == nullptr) { break; }
 			/// solve local Eigenvalue problem
 			const Node& node = *sweeper[l];
-//			node.info();
 
 			/// Build Krylov Space
 			size_t tot = node.shape().totalDimension();
 			size_t ksize = krylov_size > tot ? tot : krylov_size;
+			cout << it + l * eps << " ";
 			KrylovSpace krylov = solveKrylovSpace(Psi[node], hrep, H, node, ksize);
 //			testKrylovSpace(krylov, hrep, H, node);
-			/// build optimal Tensor
-			if (node.isToplayer()) {
-				diagonalizeKrylov(Psi[node], krylov);
-			} else {
-//				imaginaryTimePropagation(Psi[node], krylov, beta);
-				diagonalizeKrylov(Psi[node], krylov);
-//				cout << "|Psi|=" << normalize(Psi[node]) << endl;
-			}
-//			diagonalizeKrylov(Psi[node], krylov);
+			diagonalizeKrylov(Psi[node], krylov);
 
 			/// shift norm to next node
 			const Node *next_ptr = sweeper[l + 1];
@@ -286,7 +280,7 @@ void scf(SCF_parameters& par) {
 			size_t outIdx = adjacentIndex(node, next_ptr);
 			Tensorcd PsiW = Psi[node];
 			Psi[node] = qr(Psi[node], outIdx);
-			hrep.build(H, Psi, node, time);
+//			hrep.build(H, Psi, node, time);
 
 			/// overlap with <I | A> and multiply into adjacent node
 			if (next_ptr == nullptr) { break; }
@@ -296,11 +290,9 @@ void scf(SCF_parameters& par) {
 			Psi[next] = matrixTensor(r, Psi[next], inIdx);
 
 			/// *rebuild matrix elements pointing towards next node
-			hrep.build(H, Psi, next, time);
+//			hrep.build(H, Psi, next, time);
 		}
-		hrep.build(H, Psi, tree, time);
-		output(hrep, Psi, H, tree);
-//		outputSCF(Psi[tree.topNode()], hrep, H, tree.topNode());
-		getchar();
+//		hrep.build(H, Psi, tree, time);
+//		getchar();
 	}
-}
+}.

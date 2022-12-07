@@ -118,8 +118,8 @@ void output(const HamiltonianRepresentation& hrep,
 	}
 }
 
-size_t nActives(const SparseMatrixTreecd& hmat, const MLOcd& M, const SparseMatrixTreecd& hcon,
-	const Node& node) {
+size_t nActives(const SparseMatrixTreecd& hmat, const MLOcd& M,
+	const SparseMatrixTreecd& hcon, const Node& node) {
 
 	/// Count how many neighbors of node are active in hmat & hcon
 	size_t n{0};
@@ -141,15 +141,11 @@ void HamiltonianRepresentation::buildUpCorrection(
 	const Hamiltonian& H, const Wavefunction& Psi, const Node& node) {
 	/// assert that tail = false for hMats & hCons
 
-	if (node.isBottomlayer()) { return; }
 	/// reset hCorr matrices
-	for (size_t k = 0; k < node.nChildren(); ++k) {
-		const Node& child = node.child(k);
-		hCorr_[child].zero();
-	}
+	hCorr_[node].zero();
+	if (node.isBottomlayer()) { return; }
 
-	/// build upwards correction
-	/// Add hmats into a single hcorr
+	/// sum h-mats into a single correction matrix
 	for (size_t l = 0; l < H.size(); ++l) {
 		size_t n_active = nActives(hMats_[l], H[l], hContractions_[l], node);
 		if (n_active != 1) { continue; } /// only calculate corrections if only 1 neighbor is active
@@ -160,7 +156,6 @@ void HamiltonianRepresentation::buildUpCorrection(
 			}
 		}
 	}
-
 	/// Add underlying corrections
 	if (!node.isBottomlayer()) {
 		Tensorcd hA(node.shape());
@@ -187,7 +182,7 @@ void HamiltonianRepresentation::buildDownCorrection(
 		if (hMats_[l].isActive(hole)) { continue; }
 		auto tmp = TreeFunctions::applyHole(hMats_[l], Psi[node], hole);
 		if (!node.isToplayer() && hContractions_[l].isActive(node)) {
-			tmp = matrixTensor(hContractions_[l][node], Psi[node], node.parentIdx());
+			tmp = matrixTensor(hContractions_[l][node], tmp, node.parentIdx());
 		}
 		hA += H.coeff(l) * tmp;
 	}

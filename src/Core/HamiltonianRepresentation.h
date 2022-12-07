@@ -31,11 +31,11 @@ public:
 
 		hMats_.clear();
 		hContractions_.clear();
+		size_t l = 0;
 		for (const auto& M: H) {
 			hMats_.emplace_back(SparseMatrixTreecd(M, tree, tail));
 			hContractions_.emplace_back(SparseMatrixTreecd(M, tree, tail));
 		}
-
 	}
 
 	HamiltonianRepresentation(const Hamiltonian& H, const Tree& tree)
