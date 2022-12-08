@@ -248,7 +248,6 @@ void addReturns(SOPcd& H, const Tensord& mu, double alpha, size_t Nt, size_t Na,
 			}
 		}
 	}
-	getchar();
 }
 
 void addCovariance(SOPcd& H, const Tensord& cov, double gamma, size_t Nt, size_t Na, size_t Nq) {
@@ -353,7 +352,6 @@ SOPcd meanVarianceAnalysis(string tickers, size_t Na, size_t Nt, size_t NaTot, s
 	cout << rho << " * (u^T omega + 1)^2" << endl;
 	/// try NASDAQ in 25 steps
 	/// try S&P in 100 steps
-	getchar();
 
 	/// read
 	auto A = readAssets(tickers, NaTot, NtTot);

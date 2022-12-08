@@ -23,7 +23,7 @@ struct SCF_parameters {
 
 struct KrylovSpace {
 	KrylovSpace(vector<Tensorcd> space, SpectralDecompositioncd spectrum) :
-		space_(space), spectrum_(spectrum) {}
+		space_(move(space)), spectrum_(spectrum) {}
 	vector<Tensorcd> space_;
 	SpectralDecompositioncd spectrum_;
 };

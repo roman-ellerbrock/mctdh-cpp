@@ -5,6 +5,7 @@
 #include "SCF.h"
 #include "TreeClasses/SparseMatrixTreeFunctions.h"
 #include "Core/HamiltonianRepresentation.h"
+#include "TreeClasses/TreeIO.h"
 
 void addNodes(vector<const Node *>& sweep, const Node *p) {
 	sweep.push_back(p);
@@ -254,33 +255,34 @@ void scf(SCF_parameters& par) {
 
 	HamiltonianRepresentation hrep(H, tree, tree, false);
 //	hrep.initializeDense(H, tree); /// create this time with dense matrices
-	hrep.build(H, Psi, tree, time);
+//	hrep.build(H, Psi, tree, time);
 	cout << setprecision(12);
+	for (const Node& node : tree) {
+		if (!node.isToplayer()) {
+			const Node& next = node.parent();
+			hrep.buildSCF(H, Psi, node, next, time);
+		}
+	}
 
 	for (size_t it = 0; it < par.nIter; ++it) {
 //		cout << "Iteration " << it << endl;
 
 		for (size_t l = 0; l < sweeper.size() - 1; ++l) {
-			hrep.build(H, Psi, tree, time);
 			if (sweeper[l] == nullptr) { break; }
-			/// solve local Eigenvalue problem
-			const Node& node = *sweeper[l];
 
 			/// Build Krylov Space
+			const Node& node = *sweeper[l];
 			size_t tot = node.shape().totalDimension();
 			size_t ksize = krylov_size > tot ? tot : krylov_size;
 			cout << it + l * eps << " ";
 			KrylovSpace krylov = solveKrylovSpace(Psi[node], hrep, H, node, ksize);
-//			testKrylovSpace(krylov, hrep, H, node);
 			diagonalizeKrylov(Psi[node], krylov);
 
-			/// shift norm to next node
+			/// isometrize Psi towards next node
 			const Node *next_ptr = sweeper[l + 1];
-			/// *isometrize Psi towards next node
 			size_t outIdx = adjacentIndex(node, next_ptr);
 			Tensorcd PsiW = Psi[node];
 			Psi[node] = qr(Psi[node], outIdx);
-//			hrep.build(H, Psi, node, time);
 
 			/// overlap with <I | A> and multiply into adjacent node
 			if (next_ptr == nullptr) { break; }
@@ -289,10 +291,9 @@ void scf(SCF_parameters& par) {
 			size_t inIdx = adjacentIndex(next, &node);
 			Psi[next] = matrixTensor(r, Psi[next], inIdx);
 
-			/// *rebuild matrix elements pointing towards next node
-//			hrep.build(H, Psi, next, time);
+			/// rebuild matrix elements pointing towards next node
+			hrep.buildSCF(H, Psi, node, next, time);
 		}
-//		hrep.build(H, Psi, tree, time);
-//		getchar();
 	}
-}.
+//	TreeIO::output(Psi, tree);
+}

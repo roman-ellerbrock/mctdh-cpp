@@ -97,25 +97,39 @@ public:
 		}
 	}
 
-	void build(const Hamiltonian& H, const Wavefunction& Psi,
+	void buildUp(const Hamiltonian& H, const Wavefunction& Psi,
 		const Node& node, double time) {
 		for (size_t l = 0; l < hMats_.size(); ++l) {
 			TreeFunctions::representLayer(hMats_[l], Psi[node], Psi[node], H[l], node, &mem_);
 		}
+
+		/// build corrections
+		if (corrections_) {
+			buildUpCorrection(H, Psi, node);
+		}
+
+		if (H.hasV) {
+			cerr << "Add local building of CDVR matrices to HamiltonianRepresentation.\n";
+			exit(1);
+		}
+	}
+
+	void buildDown(const Hamiltonian& H, const Wavefunction& Psi,
+		const Node& node, double time) {
+		const MatrixTreecd* null = nullptr;
 
 		if (!node.isToplayer()) {
 			for (size_t l = 0; l < hContractions_.size(); ++l) {
 				const SparseTree& stree = hContractions_[l].sparseTree();
 				if (stree.isActive(node)) {
 					TreeFunctions::contractionLayer(hContractions_[l], Psi, Psi, hMats_[l],
-						&rho_, stree, node, &mem_);
+						null, stree, node, &mem_);
 				}
 			}
 		}
 
 		/// build corrections
 		if (corrections_) {
-			buildUpCorrection(H, Psi, node);
 			buildDownCorrection(H, Psi, node);
 		}
 
@@ -123,6 +137,54 @@ public:
 			cerr << "Add local building of CDVR matrices to HamiltonianRepresentation.\n";
 			exit(1);
 		}
+	}
+
+	void buildSCF(const Hamiltonian& H, const Wavefunction& Psi,
+		const Tree& tree, double time) {
+
+		/// Calculate h-matrix trees
+//		TreeFunctions::represent(hMats_, H, Psi, Psi, tree);
+		for (const Node& node : tree) {
+			buildUp(H, Psi, node, time);
+		}
+
+		/// Calculate h-matrix tree contractions
+//		TreeFunctions::contraction(hContractions_, hMats_, Psi, Psi, tree);
+		for (int n = tree.nNodes()- 1; n >= 0; --n) {
+			const Node& node = tree.getNode(n);
+			buildDown(H, Psi, node, time);
+		}
+
+		if (corrections_) { buildCorrection(H, Psi, tree); }
+	}
+
+	void buildSCF(const Hamiltonian& H, const Wavefunction& Psi,
+		const Node& node, const Node& next, double time) {
+
+		/// only works for sane node & next input!
+		bool up = true;
+		if (!node.isToplayer()) {
+			/// node.parent == next
+			if (node.parent().address() == next.address()) {
+				up = true;
+			} else {
+				up = false;
+			}
+		} else {
+			/// next.parent == next
+			if (next.parent().address() == node.address()) {
+				up = false;
+			} else {
+				up = true;
+			}
+		}
+
+		if (up) {
+			buildUp(H, Psi, node, time);
+		} else {
+			buildDown(H, Psi, next, time);
+		}
+
 	}
 
 	void buildUpCorrection(const Hamiltonian& H, const Wavefunction& Psi, const Node& node);

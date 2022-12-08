@@ -143,19 +143,7 @@ void HamiltonianRepresentation::buildUpCorrection(
 
 	/// reset hCorr matrices
 	hCorr_[node].zero();
-	if (node.isBottomlayer()) { return; }
 
-	/// sum h-mats into a single correction matrix
-	for (size_t l = 0; l < H.size(); ++l) {
-		size_t n_active = nActives(hMats_[l], H[l], hContractions_[l], node);
-		if (n_active != 1) { continue; } /// only calculate corrections if only 1 neighbor is active
-		for (size_t k = 0; k < node.nChildren(); ++k) {
-			const Node& child = node.child(k);
-			if (hMats_[l].isActive(child)) {
-				hCorr_[child] += H.coeff(l) * hMats_[l][child];
-			}
-		}
-	}
 	/// Add underlying corrections
 	if (!node.isBottomlayer()) {
 		Tensorcd hA(node.shape());
@@ -165,6 +153,29 @@ void HamiltonianRepresentation::buildUpCorrection(
 		}
 		hCorr_[node] = contraction(Psi[node], hA, node.parentIdx());
 	}
+
+	/// sum h-mats into a single correction matrix
+	if (!node.isToplayer()) {
+		const Node& parent = node.parent();
+		for (size_t l = 0; l < H.size(); ++l) {
+			size_t n_active = nActives(hMats_[l], H[l], hContractions_[l], parent);
+			if (n_active != 1) { continue; } /// only calculate corrections if only 1 neighbor is active
+			if (hMats_[l].isActive(node)) {
+				hCorr_[node] += H.coeff(l) * hMats_[l][node];
+			}
+		}
+	}
+	/// sum h-mats into a single correction matrix
+/*	for (size_t l = 0; l < H.size(); ++l) {
+		size_t n_active = nActives(hMats_[l], H[l], hContractions_[l], node);
+		if (n_active != 1) { continue; } /// only calculate corrections if only 1 neighbor is active
+		for (size_t k = 0; k < node.nChildren(); ++k) {
+			const Node& child = node.child(k);
+			if (hMats_[l].isActive(child)) {
+				hCorr_[child] += H.coeff(l) * hMats_[l][child];
+			}
+		}
+	}*/
 }
 
 void HamiltonianRepresentation::buildDownCorrection(
