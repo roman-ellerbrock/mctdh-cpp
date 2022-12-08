@@ -22,6 +22,8 @@
 #include "QuadraticSVD.h"
 #include "Operators/ElectronicStructure/JordanWigner.h"
 
+#include "ActiveCounter.h"
+
 class HamiltonianRepresentation {
 public:
 	HamiltonianRepresentation(const Hamiltonian& H, const Tree& tree,
@@ -36,6 +38,8 @@ public:
 			hMats_.emplace_back(SparseMatrixTreecd(M, tree, tail));
 			hContractions_.emplace_back(SparseMatrixTreecd(M, tree, tail));
 		}
+
+		nActives_.initialize(hMats_, hContractions_, H, tree);
 	}
 
 	HamiltonianRepresentation(const Hamiltonian& H, const Tree& tree)
@@ -216,6 +220,8 @@ public:
 	SparseMatrixTreecd hCorr_; /// correction term for hMats
 	SparseMatrixTreecd hConCorr_; /// correction term for hCon
 
+	ActiveCounter nActives_;
+
 	WorkMemorycd mem_;
 
 	CDVR cdvr_;
@@ -241,8 +247,5 @@ void symDerivative(MatrixTensorTree& dPsi, HamiltonianRepresentation& hRep,
 
 void output(const HamiltonianRepresentation& hrep,
 	const Wavefunction& Psi, const Hamiltonian& H, const Tree& tree);
-
-size_t nActives(const SparseMatrixTreecd& hmat, const MLOcd& M, const SparseMatrixTreecd& hcon,
-	const Node& node);
 
 #endif //HAMILTONIANREPRESENTATION_H

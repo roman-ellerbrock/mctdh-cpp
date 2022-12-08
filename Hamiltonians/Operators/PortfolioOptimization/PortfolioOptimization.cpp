@@ -153,12 +153,12 @@ Tensord covariance(const Tensord& mu, const Tensord& av) {
 		}
 	}
 	auto x = diagonalize(sig);
-	cout << "avg(cov):\n";
+/*	cout << "avg(cov):\n";
 	sig.print();
 	cout << "lambda:\n";
 	x.second.print();
 	cout << "U:\n";
-	x.first.print();
+	x.first.print();*/
 	return cov;
 }
 
@@ -188,8 +188,8 @@ Tensord selectAssets(const Tensord& A, size_t Na) {
 	TensorShape sh({M, Na});
 	Tensord B(sh);
 	cout << "filter Assets:\n";
-	shape.print();
-	sh.print();
+//	shape.print();
+//	sh.print();
 	for (size_t n = 0; n < Na; ++n) {
 		for (size_t i = 0; i < M; ++i) {
 			B(i, n) = A(i, n);
@@ -213,10 +213,10 @@ void diagonalizeCovariance(const Tensord& cov) {
 
 	sig_av /= (double) shape[0];
 	auto y = diagonalize(sig_av);
-	cout << "cov_av:\n";
+/*	cout << "cov_av:\n";
 	sig_av.print();
 	cout << "cov eigenvalues:\n";
-	y.second.print();
+	y.second.print();*/
 }
 
 Matrixcd set1() {
@@ -231,15 +231,15 @@ double weight(size_t k, size_t Nq) {
 
 void addReturns(SOPcd& H, const Tensord& mu, double alpha, size_t Nt, size_t Na, size_t Nq) {
 	TensorShape shape_q({Nq, Na, Nt});
-	cout << "Nt = " << Nt << endl;
+//	cout << "Nt = " << Nt << endl;
 	for (size_t t = 0; t < Nt; ++t) {
-		cout << "t = " << t << endl;
+//		cout << "t = " << t << endl;
 		for (size_t i = 0; i < Na; ++i) {
 			size_t muidx = indexMapping({t, i}, mu.shape_);
 			for (size_t k = 0; k < Nq; ++k) {
 				/// total weight including negative returns
 				double c = - alpha * mu(muidx) * weight(k, Nq);
-				cout << i << "\t" << c << endl;
+//				cout << i << "\t" << c << endl;
 
 				size_t qidx = indexMapping({k, i, t}, shape_q);
 				MLOcd M(set1(), qidx);
@@ -280,8 +280,10 @@ void addCovariance(SOPcd& H, const Tensord& cov, double gamma, size_t Nt, size_t
 	}
 }
 
-void addConstraint(SOPcd& H, const double rho, size_t Nt, size_t Na, size_t Nq) {
+void addConstraint(SOPcd& H, const double rho, size_t Nt, size_t Na, size_t Nq, double K) {
 	TensorShape shape_q({Nq, Na, Nt});
+
+	///
 	for (size_t t = 0; t < Nt; ++t) {
 		for (size_t i = 0; i < Na; ++i) {
 			for (size_t j = 0; j < Na; ++j) {
@@ -298,22 +300,24 @@ void addConstraint(SOPcd& H, const double rho, size_t Nt, size_t Na, size_t Nq) 
 		}
 	}
 
+	///
 	for (size_t t = 0; t < Nt; ++t) {
 		for (size_t i = 0; i < Na; ++i) {
 			for (size_t k = 0; k < Nq; ++k) {
 				size_t qkidx = indexMapping({k, i, t}, shape_q);
 				MLOcd M(set1(), qkidx);
-				H.push_back(M, -2. * rho * weight(k, Nq));
+				H.push_back(M, -2. * K * rho * weight(k, Nq));
 			}
 		}
 	}
 
+	///
 	for (size_t t = 0; t < Nt; ++t) {
 		for (size_t i = 0; i < Na; ++i) {
 			for (size_t k = 0; k < Nq; ++k) {
 				size_t kidx = indexMapping({k, i, t}, shape_q);
 				MLOcd M(identityMatrixcd(2), kidx);
-				H.push_back(M, 1. / ((double) (Na * Nt * Nq)));
+				H.push_back(M, K * K / ((double) (Na * Nt * Nq)));
 			}
 		}
 	}
@@ -337,9 +341,11 @@ SOPcd meanVarianceAnalysis(string tickers, size_t Na, size_t Nt, size_t NaTot, s
 //	vector<string> names = read_tickers("tickers.txt");
 
 	size_t Nq = 1; /// number of qubits per asset
-	double alpha = 21.;
-	double rho = 0.5;
-	double gamma = 1./ (double) Na;
+	double alpha = 25.;
+	double rho = 1.;
+//	double gamma = 1./ (double) Na;
+	double gamma = 1.;
+	double K = 10.;
 	tickers.erase(0, tickers.find_first_not_of("\n/ "));
 	cout << "Selected tickers in: " << tickers << endl;
 	cout << "number of Assets: " << Na << endl;
@@ -349,7 +355,7 @@ SOPcd meanVarianceAnalysis(string tickers, size_t Na, size_t Nt, size_t NaTot, s
 	cout << "number of qubits per asset: " << Nq << endl;
 	cout << "H = -" << alpha << " mu * omega + ";
 	cout << gamma << " / 2 * omega^T* sigma * omega + ";
-	cout << rho << " * (u^T omega + 1)^2" << endl;
+	cout << rho << " * (u^T omega - " << K << ")^2" << endl;
 	/// try NASDAQ in 25 steps
 	/// try S&P in 100 steps
 
@@ -362,10 +368,10 @@ SOPcd meanVarianceAnalysis(string tickers, size_t Na, size_t Nt, size_t NaTot, s
 
 	/// returns
 	auto mu = log_returns(A);
-	cout << "mu (columns: assets, rows: time):\n";
+/*	cout << "mu (columns: assets, rows: time):\n";
 	for (size_t i = 0; i < mu.shape_.totalDimension(); ++i) {
 		cout << i << "\t" << mu[i] << endl;
-	}
+	}*/
 /*	for (size_t o = 0; o < mu.shape_.lastBefore(); ++o) {
 		for (size_t n = 0; n < mu.shape_.lastDimension(); ++n) {
 			cout << mu(o, n) << " ";
@@ -391,8 +397,7 @@ SOPcd meanVarianceAnalysis(string tickers, size_t Na, size_t Nt, size_t NaTot, s
 			cout << endl;
 		}
 		cout << endl;
-	}
-*/
+	}*/
 
 	SOPcd H;
 	cout << "Nt = " << Nt << endl;
@@ -410,7 +415,7 @@ SOPcd meanVarianceAnalysis(string tickers, size_t Na, size_t Nt, size_t NaTot, s
 	cout << "Size of H after covariance: " << H.size() << " | expected: " << expect_sig << endl;
 
 	/// Add constraint
-	addConstraint(H, rho, Nt, Na, Nq);
+	addConstraint(H, rho, Nt, Na, Nq, K);
 	size_t expect_rho = 3 * Na * Nt * Nq + 2 * Na * Na * Nt * Nq * Nq;
 	cout << "Size of H after constraint: " << H.size() << " | expected: " << expect_rho << endl;
 
