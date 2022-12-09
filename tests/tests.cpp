@@ -4,12 +4,8 @@
 
 
 #include <iostream>
-#include <UnitTest++/UnitTest++.h>
+#include <gtest/gtest.h>
 
-
-int main(int argc, char* argv[]) {
-
-    return UnitTest::RunAllTests();
-
+TEST(Sanity, Sanity){
+    ASSERT_TRUE(true);
 }
-

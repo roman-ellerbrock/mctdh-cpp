@@ -9,6 +9,7 @@ SOPcd CoupledHO(const Tree& tree) {
 	LeafFuncd x2 = &LeafInterface::applyX2;
 	LeafFuncd kin = &LeafInterface::applyKin;
 	LeafFuncd p = &LeafInterface::applyP;
+    LeafFuncd id = &LeafInterface::identity;
 
 	constexpr double cm = 219474.6313705;
 	constexpr double lambda = 2000. / cm;
@@ -41,6 +42,20 @@ SOPcd CoupledHO(const Tree& tree) {
 		M.push_back(x, kn);
 		H.push_back(M, lambda * lambda);
 	}
+
+// normalize ground state to zero
+    {
+        MLOcd M;
+        M.push_back(id,0);
+        // determine ground state energy
+        double gse = 0.;
+        for(int i = 0; i < f; ++i){
+            gse += sqrt(omega * omega + 2. * lambda * lambda * cos(2. * M_PI * (1.*i)/(1.*f)));
+        }
+        gse /= (-2.);
+        H.push_back(M,gse);
+    }
+
 
 	return H;
 
