@@ -12,9 +12,11 @@
 vector<const Node*> scf_sweep(const Tree& tree);
 
 struct SCF_parameters {
-	size_t nIter{20};
-	size_t nKrylov{5};
-	double beta{1.};
+	size_t nIter{20};  /// how many iterations
+	size_t nKrylov{5}; /// how large is the krylov space
+	size_t nITP{0};    /// how many steps of imaginary time propagation
+	double beta{1.};   /// how large should beta be?
+	size_t output{0};/// output wavefunction every iteration
 
 	Wavefunction* psi{nullptr};
 	const Hamiltonian* h{nullptr};

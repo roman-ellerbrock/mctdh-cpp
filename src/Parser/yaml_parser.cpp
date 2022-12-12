@@ -11,6 +11,7 @@
 #include "Utility/Overlaps.h"
 #include "Utility/normal_modes.h"
 #include "Core/SCF.h"
+#include <algorithm>
 
 namespace parser {
 
@@ -93,24 +94,38 @@ namespace parser {
 		auto type = evaluate<string>(node, "type");
 		if (type == "balanced") {
 			auto num_leaves = evaluate<size_t>(node, "number_leaves");
-			auto dim_leaves = evaluate<size_t>(node, "dimension_leaves");
-			auto dim_nodes = evaluate<size_t>(node, "dimension_nodes");
-			return TreeFactory::balancedTree(num_leaves, dim_leaves, dim_nodes);
+			auto dim_leaves = evaluate<size_t>(node, "dimension_leaves", 2);
+			auto dim_nodes = evaluate<size_t>(node, "dimension_nodes", 2);
+			auto dim_inc = evaluate<size_t>(node, "dimension_increment", 0);
+			auto leaf_type = evaluate<size_t>(node, "leaf_type", 0);
+			auto shuffle = evaluate<size_t>(node, "shuffle_indices", 0);
+			Tree tree = TreeFactory::balancedTree(num_leaves, dim_leaves, dim_nodes, dim_inc, leaf_type);
+			if (shuffle) {
+				/// shuffle leaf modes
+				std::vector<size_t> v(tree.nLeaves());
+				std::generate(v.begin(), v.end(), [n = 0]() mutable { return n++; });
+				std::shuffle(v.begin(), v.end(), mt19937(time(nullptr)+23498));
+				map<size_t, size_t> m;
+				size_t i = 0;
+				for (auto x : v) {
+					m[i] = x;
+					i++;
+				}
+				tree.reindexLeafModes(m);
+			}
+			return tree;
 		} else if (type == "manual") {
 			return create_tree(node);
 		} else if (type == "compact") {
 			auto tree_str = evaluate<string>(node, "tree");
 			stringstream ss(tree_str);
 			Tree tree(ss);
-			tree.info();
-			cout << "checking tree.." << endl;
 			if (!tree.isWorking()) {
 				cerr << "Failed to read tree with .yaml parser in compact format.\n";
 				cerr << "Error caused by tree input string reading:\n";
 				cerr << tree_str << endl;
 				exit(2);
 			}
-			cout << "tree checked." << endl;
 			return tree;
 		} else {
 			cerr << "No valid tree type." << endl;
@@ -120,7 +135,9 @@ namespace parser {
 		return Tree();
 	}
 
-	shared_ptr<Hamiltonian> read_hamiltonian(const YAML::Node& node, const Tree& tree) {
+	shared_ptr<Hamiltonian> read_hamiltonian(const YAML::Node& node,
+		const Tree& tree) {
+
 		auto name = evaluate<string>(node, "name");
 		shared_ptr<Hamiltonian> H_ptr(new Hamiltonian);
 		Hamiltonian& H = *H_ptr;
@@ -177,8 +194,14 @@ namespace parser {
 			auto NaTot = evaluate<size_t>(node, "nAssetsTotal", 99);
 			auto Nt = evaluate<size_t>(node, "nTime", 1);
 			auto NtTot = evaluate<size_t>(node, "nTimeTotal", 180);
+			auto Nq = evaluate<size_t>(node, "nQubitsPerAsset", 1);
+			auto alpha = evaluate<double>(node, "alpha", 1.);
+			auto gamma = evaluate<double>(node, "gamma", 1.);
+			auto rho  = evaluate<double>(node, "rho", 1.);
+			auto K  = evaluate<double>(node, "investment", 1.);
 			auto tickers = evaluate<string>(node, "tickers", "merged.csv");
-			H = meanVarianceAnalysis(tickers, Na, Nt, NaTot, NtTot);
+			H = meanVarianceAnalysis(tickers, Na, Nt, NaTot, NtTot, Nq,
+				alpha, gamma, rho, K);
 		} else {
 			cout << "No valid Hamiltonian name." << endl;
 			cout << "Chosen name: " << name << endl;
@@ -315,8 +338,8 @@ namespace parser {
 
 	SCF_parameters scf_parameters(const YAML::Node& node, mctdh_state& state) {
 		SCF_parameters par;
-		par.nIter = evaluate<size_t>(node, "niter", 20);
-		par.nKrylov = evaluate<size_t>(node, "nkrylov", 20);
+		par.nIter = evaluate<size_t>(node, "nIter", 20);
+		par.nKrylov = evaluate<size_t>(node, "nKrylov", 20);
 		par.beta = evaluate<double>(node, "beta", 1);
 		par.psi = &state.wavefunctions_["Psi"];
 		par.h = state.hamiltonian_.get();

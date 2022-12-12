@@ -187,9 +187,6 @@ Tensord selectAssets(const Tensord& A, size_t Na) {
 	size_t N = shape.lastDimension();
 	TensorShape sh({M, Na});
 	Tensord B(sh);
-	cout << "filter Assets:\n";
-//	shape.print();
-//	sh.print();
 	for (size_t n = 0; n < Na; ++n) {
 		for (size_t i = 0; i < M; ++i) {
 			B(i, n) = A(i, n);
@@ -333,94 +330,68 @@ vector<string> read_tickers(const string& filename) {
 	return names;
 }
 
-SOPcd meanVarianceAnalysis(string tickers, size_t Na, size_t Nt, size_t NaTot, size_t NtTot) {
-
-	cout << "Mean Variance Analysis\n";
-//	vector<string> names = {"BTC-USD.csv", "ETH-USD.csv", "SOL-USD.csv"};
-//	vector<string> names = {"BTC-USD.csv", "ETH-USD.csv"};
-//	vector<string> names = read_tickers("tickers.txt");
-
-	size_t Nq = 1; /// number of qubits per asset
-	double alpha = 25.;
-	double rho = 1.;
-//	double gamma = 1./ (double) Na;
-	double gamma = 1.;
-	double K = 10.;
-	tickers.erase(0, tickers.find_first_not_of("\n/ "));
-	cout << "Selected tickers in: " << tickers << endl;
-	cout << "number of Assets: " << Na << endl;
-	cout << "number of Assets(total): " << NaTot << endl;
-	cout << "number of Time steps: " << Nt << endl;
-	cout << "number of Time steps(total): " << NtTot << endl;
-	cout << "number of qubits per asset: " << Nq << endl;
-	cout << "H = -" << alpha << " mu * omega + ";
-	cout << gamma << " / 2 * omega^T* sigma * omega + ";
-	cout << rho << " * (u^T omega - " << K << ")^2" << endl;
-	/// try NASDAQ in 25 steps
-	/// try S&P in 100 steps
-
-	/// read
-	auto A = readAssets(tickers, NaTot, NtTot);
-
-	/// filter for monthly data
-//	A = filter(A, Delta);
-	A = selectAssets(A, Na);
-
-	/// returns
-	auto mu = log_returns(A);
-/*	cout << "mu (columns: assets, rows: time):\n";
-	for (size_t i = 0; i < mu.shape_.totalDimension(); ++i) {
-		cout << i << "\t" << mu[i] << endl;
-	}*/
-/*	for (size_t o = 0; o < mu.shape_.lastBefore(); ++o) {
-		for (size_t n = 0; n < mu.shape_.lastDimension(); ++n) {
-			cout << mu(o, n) << " ";
-		}
-		cout << endl;
-	}
-	getchar();*/
-
-	/// average returns
-	Tensord mu_avg = avg(mu);
-
-//	cout << "avg(mu):\n";
-//	mu_avg.print();
-//	getchar();
-
-	auto cov = covariance(mu, mu_avg);
-/*	cout << "cov:\n";
-	for (size_t o = 0; o < cov.shape_[0]; ++o) {
-		for (size_t n = 0; n < cov.shape_[1]; ++n) {
-			for (size_t l = 0; l < cov.shape_[2]; ++l) {
-				cout << cov({o, n, l}) << " ";
-			}
-			cout << endl;
-		}
-		cout << endl;
-	}*/
+SOPcd meanVarianceAnalysis(const Tensord& mu, const Tensord& cov,
+	size_t Na, size_t Nt, size_t Nq,
+	double alpha, double gamma, double rho, double K) {
 
 	SOPcd H;
-	cout << "Nt = " << Nt << endl;
-	cout << "Na = " << Na << endl;
-	cout << "Nq = " << Nq << endl;
-
 	/// Add mu
 	addReturns(H, mu, alpha, Nt, Na, Nq);
-	cout << "Size of H after returns: " << H.size() << " | expected: " << Na * Nt * Nq << endl;
+	cout << "# |H| after returns: " << H.size() << " | expected: " << Na * Nt * Nq << endl;
 
 	/// Add sigma
 	addCovariance(H, cov, gamma, Nt, Na, Nq);
 
 	size_t expect_sig = Na * Nt * Nq + Na * Na * Nt * Nq * Nq;
-	cout << "Size of H after covariance: " << H.size() << " | expected: " << expect_sig << endl;
+	cout << "# |H| after covariance: " << H.size() << " | expected: " << expect_sig << endl;
 
 	/// Add constraint
 	addConstraint(H, rho, Nt, Na, Nq, K);
 	size_t expect_rho = 3 * Na * Nt * Nq + 2 * Na * Na * Nt * Nq * Nq;
-	cout << "Size of H after constraint: " << H.size() << " | expected: " << expect_rho << endl;
+	cout << "# |H| after constraint: " << H.size() << " | expected: " << expect_rho << endl;
 
-	/// How do you obtain mu, and sigma? (forecast return and covariance)
-	/// For proof of concepts: 3 month until now on a daily basis
+	return H;
+}
+
+SOPcd meanVarianceAnalysis(string tickers,
+	size_t Na, size_t Nt, size_t NaTot, size_t NtTot, size_t Nq,
+	double alpha, double gamma, double rho, double K) {
+
+	tickers.erase(0, tickers.find_first_not_of("\n/ "));
+	cout << "# Assets: " << Na << " / " << NaTot << endl;
+	cout << "# Time steps: " << Nt << " / " << NtTot << endl;
+	cout << "# Qubits per asset: " << Nq << endl;
+	cout << "# H = -" << alpha << " mu * omega + ";
+	cout << gamma << " / 2 * omega^T* sigma * omega + ";
+	cout << rho << " * (u^T omega - " << K << ")^2" << endl;
+
+	/// read & select assets
+	auto A = readAssets(tickers, NaTot, NtTot);
+	A = selectAssets(A, Na);
+
+	/// returns
+	auto mu = log_returns(A);
+
+	/// average returns
+	Tensord mu_avg = avg(mu);
+
+	auto cov = covariance(mu, mu_avg);
+
+	SOPcd H;
+	/// Add mu
+	addReturns(H, mu, alpha, Nt, Na, Nq);
+	cout << "# |H| after returns: " << H.size() << " | expected: " << Na * Nt * Nq << endl;
+
+	/// Add sigma
+	addCovariance(H, cov, gamma, Nt, Na, Nq);
+
+	size_t expect_sig = Na * Nt * Nq + Na * Na * Nt * Nq * Nq;
+	cout << "# |H| after covariance: " << H.size() << " | expected: " << expect_sig << endl;
+
+	/// Add constraint
+	addConstraint(H, rho, Nt, Na, Nq, K);
+	size_t expect_rho = 3 * Na * Nt * Nq + 2 * Na * Na * Nt * Nq * Nq;
+	cout << "# |H| after constraint: " << H.size() << " | expected: " << expect_rho << endl;
 
 	return H;
 }

@@ -6,6 +6,7 @@
 #include "TreeClasses/SparseMatrixTreeFunctions.h"
 #include "Core/HamiltonianRepresentation.h"
 #include "TreeClasses/TreeIO.h"
+#include "Core/TensorBLAS.h"
 
 void addNodes(vector<const Node *>& sweep, const Node *p) {
 	sweep.push_back(p);
@@ -29,15 +30,17 @@ vector<const Node *> scf_sweep(const Tree& tree) {
 	return sweep;
 }
 
-Tensorcd apply(const Tensorcd& A,
+void apply(Tensorcd& HA, const Tensorcd& A,
 	const SparseMatrixTreescd& hMats, const SparseMatrixTreescd& hCons,
 	const SparseMatrixTreecd& hCorr, const SparseMatrixTreecd& hConCorr,
 	const MatrixTreecd *rho, const Hamiltonian& H, const Node& node,
-	const vector<size_t>& n_actives) {
+	const vector<size_t>& n_actives, Tensorcd* work) {
 
-	Tensorcd HA(A.shape());
-
-	Tensorcd hA(A.shape(), false);
+	HA.zero();
+	static Tensorcd hA;
+	if (hA.shape() != A.shape()) {
+		hA = Tensorcd(A.shape());
+	}
 	for (size_t l = 0; l < hMats.size(); ++l) {
 		hA.zero();
 
@@ -46,15 +49,15 @@ Tensorcd apply(const Tensorcd& A,
 			if (hMats[l].isActive(node) && hCons[l].isActive(node)) {
 				const MLOcd& M = H[l];
 				const Leaf& leaf = node.getLeaf();
-				hA = M.apply(A, leaf);
-				hA = matrixTensor(hCons[l][node], hA, node.parentIdx());
+				Tensorcd MA = M.apply(A, leaf);
+				matrixTensorBLAS(hA, hCons[l][node], MA, node.parentIdx(), false);
 				HA += H.coeff(l) * hA;
 			}
 		} else {
 //			if (nActives(hMats[l], H[l], hCons[l], node) > 1) {
 			if (n_actives[l] > 1) {
 				TreeFunctions::apply(hA, hMats[l], &hCons[l], rho, A,
-					hCons[l].sparseTree(), node, -1);
+					hCons[l].sparseTree(), node, -1, work);
 				HA += H.coeff(l) * hA;
 			}
 		}
@@ -64,26 +67,29 @@ Tensorcd apply(const Tensorcd& A,
 		/// add correction
 		for (size_t k = 0; k < node.nChildren(); ++k) {
 			const Node& child = node.child(k);
-			hA.zero();
-			matrixTensor(hA, hCorr[child], A, child.childIdx());
-			HA += hA;
+			matrixTensorBLAS(HA, hCorr[child], A, child.childIdx(), false);
 		}
 	}
 	if (!node.isToplayer()) {
-		hA.zero();
-		matrixTensor(hA, hConCorr[node], A, node.parentIdx());
-		HA += hA;
+		matrixTensorBLAS(HA, hConCorr[node], A, node.parentIdx(), false);
 	}
-	return HA;
 }
 
-Tensorcd apply(const Tensorcd& A, const HamiltonianRepresentation& hrep,
+void apply(Tensorcd& HA, const Tensorcd& A, const HamiltonianRepresentation& hrep,
 	const Hamiltonian& H, const Node& node) {
 	const MatrixTreecd *rho = nullptr;
 	const SparseMatrixTreecd& hCorr = hrep.hCorr_;
 	const SparseMatrixTreecd& hConCorr = hrep.hConCorr_;
 	const vector<size_t>& n_actives = hrep.nActives_[node];
-	return apply(A, hrep.hMats_, hrep.hContractions_, hCorr, hConCorr, rho, H, node, n_actives);
+	apply(HA, A, hrep.hMats_, hrep.hContractions_,
+		hCorr, hConCorr, rho, H, node, n_actives, &(hrep.mem_.work2_));
+}
+
+Tensorcd apply(const Tensorcd& A, const HamiltonianRepresentation& hrep,
+	const Hamiltonian& H, const Node& node) {
+	Tensorcd HA(A.shape());
+	apply(HA, A, hrep, H, node);
+	return HA;
 }
 
 complex<double> fullContraction(const Tensorcd& A, const Tensorcd& B) {
@@ -158,7 +164,7 @@ void solveKrylovSpace(KrylovSpace& krylov, Tensorcd Psi, const HamiltonianRepres
 		beta.push_back(normalize(Psi));
 		krylovSpace[l] = Psi;
 
-		HPsi = apply(Psi, hrep, H, node);
+		apply(HPsi, Psi, hrep, H, node);
 		alphamat = fullContraction(Psi, HPsi);
 		alpha.push_back(real(alphamat));
 
@@ -180,8 +186,10 @@ void solveKrylovSpace(KrylovSpace& krylov, Tensorcd Psi, const HamiltonianRepres
 
 	/// Diagonalize Hamiltonian matrix and save transformation matrix U and eigenvalues E.
 	krylov.spectrum_ = diagonalize(Hrep);
-//	cout << "E_krylov: ";
-	(krylov.spectrum_.second * QM::cm).print();
+
+	/// output
+	auto x = krylov.spectrum_.second * QM::cm;
+	cout << x(0) << endl;
 }
 
 void imaginaryTimePropagation(Tensorcd& Psi, const KrylovSpace& kry, double beta) {
@@ -246,18 +254,17 @@ void outputSCF(Tensorcd Psi, const HamiltonianRepresentation& hrep,
 }
 
 void scf(SCF_parameters& par) {
-	cout << "=====    SCF    =====\n";
-	cout << "nIter = " << par.nIter << endl;
-	cout << "beta = " << par.beta << endl;
-	cout << "nKrylov = " << par.nKrylov << endl;
+	cout << "# ===============    SCF    ===============\n";
+	cout << "# nIter = " << par.nIter << endl;
+	cout << "# nKrylov = " << par.nKrylov << endl;
+	cout << "# nITP = " << par.nITP << endl;
+	cout << "# beta = " << par.beta << endl;
 	double time = 0;
 	size_t krylov_size = par.nKrylov;
 	double beta = par.beta;
 	const Tree& tree = *par.tree;
 	const Hamiltonian& H = *par.h;
 	TensorTreecd& Psi = *par.psi;
-
-	/// allocate Krylov spaces
 
 	auto sweeper = scf_sweep(tree);
 	double eps = 1. / ((double) (sweeper.size() - 1)); /// just for printing output
@@ -275,11 +282,9 @@ void scf(SCF_parameters& par) {
 			hrep.buildSCF(H, Psi, node, next, time);
 		}
 	}
+	mt19937 gen(192931923);
 
-	TreeIO::output(Psi, tree);
 	for (size_t it = 0; it < par.nIter; ++it) {
-//		cout << "Iteration " << it << endl;
-
 		for (size_t l = 0; l < sweeper.size() - 1; ++l) {
 			if (sweeper[l] == nullptr) { break; }
 
@@ -291,7 +296,7 @@ void scf(SCF_parameters& par) {
 
 			KrylovSpace& krylov = spaces[node.address()];
 			solveKrylovSpace(krylov, Psi[node], hrep, H, node, ksize);
-			if (it < 0) {
+			if (it < par.nITP) {
 				imaginaryTimePropagation(Psi[node], krylov, beta);
 			} else {
 				diagonalizeKrylov(Psi[node], krylov);
@@ -313,6 +318,7 @@ void scf(SCF_parameters& par) {
 			/// rebuild matrix elements pointing towards next node
 			hrep.buildSCF(H, Psi, node, next, time);
 		}
-		TreeIO::output(Psi, tree);
+		if (par.output) { TreeIO::output(Psi, tree); }
+//		if (krylov_size < par.nKrylov) { krylov_size++; }
 	}
 }

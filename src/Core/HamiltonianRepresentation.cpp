@@ -28,15 +28,15 @@ Tensorcd Apply(const Hamiltonian& H, const Tensorcd& Phi,
 	}
 
 	if (H.hasV) {
-//		dPhi += hRep.cdvr_.apply(Phi, hRep.rho_decomposition_[node], node);
-		node.info();
-		cout << "x:\n";
-		auto x = hRep.cdvr_.apply(Phi, hRep.rho_decomposition_[node], node);
+		dPhi += hRep.cdvr_.apply(Phi, hRep.rho_decomposition_[node], node);
+//		node.info();
+//		cout << "x:\n";
+//		auto x = hRep.cdvr_.apply(Phi, hRep.rho_decomposition_[node], node);
 //		x.print();
-		cout << "y:\n";
-		auto y = hRep.cdvr_.applySym(Phi, hRep.rho_decomposition_[node], node);
+//		cout << "y:\n";
+//		auto y = hRep.cdvr_.applySym(Phi, hRep.rho_decomposition_[node], node);
 //		y.print();
-		getchar();
+//		getchar();
 	}
 
 	return dPhi;
@@ -158,24 +158,14 @@ void HamiltonianRepresentation::buildUpCorrection(
 	if (!node.isToplayer()) {
 		const Node& parent = node.parent();
 		for (size_t l = 0; l < H.size(); ++l) {
-			size_t n_active = nActives(hMats_[l], H[l], hContractions_[l], parent);
+//			size_t n_active = nActives(hMats_[l], H[l], hContractions_[l], parent);
+			size_t n_active = nActives_[parent][l];
 			if (n_active != 1) { continue; } /// only calculate corrections if only 1 neighbor is active
 			if (hMats_[l].isActive(node)) {
 				hCorr_[node] += H.coeff(l) * hMats_[l][node];
 			}
 		}
 	}
-	/// sum h-mats into a single correction matrix
-/*	for (size_t l = 0; l < H.size(); ++l) {
-		size_t n_active = nActives(hMats_[l], H[l], hContractions_[l], node);
-		if (n_active != 1) { continue; } /// only calculate corrections if only 1 neighbor is active
-		for (size_t k = 0; k < node.nChildren(); ++k) {
-			const Node& child = node.child(k);
-			if (hMats_[l].isActive(child)) {
-				hCorr_[child] += H.coeff(l) * hMats_[l][child];
-			}
-		}
-	}*/
 }
 
 void HamiltonianRepresentation::buildDownCorrection(
@@ -188,7 +178,8 @@ void HamiltonianRepresentation::buildDownCorrection(
 	/// build upwards correction
 	Tensorcd hA(node.shape());
 	for (size_t l = 0; l < H.size(); ++l) {
-		size_t n_active = nActives(hMats_[l], H[l], hContractions_[l], node);
+//		size_t n_active = nActives(hMats_[l], H[l], hContractions_[l], node);
+		size_t n_active = nActives_[node][l];
 		if (n_active < 2) { continue; }
 		if (hMats_[l].isActive(hole)) { continue; }
 		auto tmp = TreeFunctions::applyHole(hMats_[l], Psi[node], hole);
