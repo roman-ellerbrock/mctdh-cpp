@@ -377,21 +377,5 @@ SOPcd meanVarianceAnalysis(string tickers,
 
 	auto cov = covariance(mu, mu_avg);
 
-	SOPcd H;
-	/// Add mu
-	addReturns(H, mu, alpha, Nt, Na, Nq);
-	cout << "# |H| after returns: " << H.size() << " | expected: " << Na * Nt * Nq << endl;
-
-	/// Add sigma
-	addCovariance(H, cov, gamma, Nt, Na, Nq);
-
-	size_t expect_sig = Na * Nt * Nq + Na * Na * Nt * Nq * Nq;
-	cout << "# |H| after covariance: " << H.size() << " | expected: " << expect_sig << endl;
-
-	/// Add constraint
-	addConstraint(H, rho, Nt, Na, Nq, K);
-	size_t expect_rho = 3 * Na * Nt * Nq + 2 * Na * Na * Nt * Nq * Nq;
-	cout << "# |H| after constraint: " << H.size() << " | expected: " << expect_rho << endl;
-
-	return H;
+	return meanVarianceAnalysis(mu, cov, Na, Nt, Nq, alpha, gamma, rho, K);
 }
