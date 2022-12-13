@@ -29,14 +29,14 @@ Tensorcd Apply(const Hamiltonian& H, const Tensorcd& Phi,
 
 	if (H.hasV) {
 		dPhi += hRep.cdvr_.apply(Phi, hRep.rho_decomposition_[node], node);
-//		node.info();
-//		cout << "x:\n";
-//		auto x = hRep.cdvr_.apply(Phi, hRep.rho_decomposition_[node], node);
-//		x.print();
-//		cout << "y:\n";
-//		auto y = hRep.cdvr_.applySym(Phi, hRep.rho_decomposition_[node], node);
-//		y.print();
-//		getchar();
+/*		node.info();
+		cout << "x:\n";
+		auto x = hRep.cdvr_.apply(Phi, hRep.rho_decomposition_[node], node);
+		x.print();
+		cout << "y:\n";
+		auto y = hRep.cdvr_.applySym(Phi, hRep.rho_decomposition_[node], node);
+		y.print();
+		getchar();*/
 	}
 
 	return dPhi;
