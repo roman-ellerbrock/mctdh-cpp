@@ -30,25 +30,25 @@ target_sources(mctdh_lib PUBLIC
         Core/SCF.cpp
         Core/SCF.h
 
-        DVR/MatrixTensorTree.cpp
-        DVR/MatrixTensorTree.h
-        DVR/MatrixTensorTreeFunctions.h
-        DVR/MatrixTensorTreeFunctions.cpp
-        DVR/SymXMatrixTrees.cpp
-        DVR/SymXMatrixTrees.h
-        DVR/TreeGrids.h
-        DVR/TDDVR.cpp
-        DVR/TDDVR.h
-        DVR/CDVR.cpp
-        DVR/CDVR.h
-        DVR/DeltaVTree.h
-        DVR/DeltaVTree.cpp
-        DVR/cdvr_functions.h
-        DVR/cdvr_functions.cpp
+        ../../QuTree/src/DVR/MatrixTensorTree.cpp
+        ../../QuTree/include/DVR/MatrixTensorTree.h
+        ../../QuTree/include/DVR/MatrixTensorTreeFunctions.h
+        ../../QuTree/src/DVR/MatrixTensorTreeFunctions.cpp
+        ../../QuTree/src/DVR/SymXMatrixTrees.cpp
+        ../../QuTree/include/DVR/SymXMatrixTrees.h
+        ../../QuTree/include/DVR/TreeGrids.h
+        ../../QuTree/src/DVR/TDDVR.cpp
+        ../../QuTree/include/DVR/TDDVR.h
+        ../../QuTree/src/DVR/CDVR.cpp
+        ../../QuTree/include/DVR/CDVR.h
+        ../../QuTree/include/DVR/DeltaVTree.h
+        ../../QuTree/src/DVR/DeltaVTree.cpp
+        ../../QuTree/include/DVR/cdvr_functions.h
+        ../../QuTree/src/DVR/cdvr_functions.cpp
 #        DVR/GridRepresentation.cpp
 #        DVR/GridRepresentation.h
-        DVR/XMatrixTrees.cpp
-        DVR/XMatrixTrees.h
+        ../../QuTree/src/DVR/XMatrixTrees.cpp
+        ../../QuTree/include/DVR/XMatrixTrees.h
 
         Parser/yaml_parser.cpp
         Parser/yaml_parser.h

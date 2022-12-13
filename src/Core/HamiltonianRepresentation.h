@@ -94,11 +94,6 @@ public:
 		/// Calculate CDVR
 //		ofstream os("points.dat");
 		if (H.hasV) { cdvr_.Update(Psi, H.V_, tree, 0, false); }
-//		if (H.hasV) { cdvr_.Update2(Psi, H.V_, tree); }
-		if (H.hasV) {
-			SymTensorTree Chi(Psi, tree);
-			cdvr_.update(Chi, H.V_, tree, 0, false);
-		}
 	}
 
 	void buildUp(const Hamiltonian& H, const Wavefunction& Psi,
